@@ -1,0 +1,25 @@
+<div class="team-box">
+    {% if class == 1 or class == 5%}
+    <img class="team-image" src="data:image/png;base64,{{ imagen }}" alt="{{ equipo.team_name }}">
+    <h6 class="team-name" name="equipo{{orientacion}}" value="{{ equipo.team_name }}">{{ equipo.team_name }}</h6>
+    <input type="hidden" id="equipo{{orientacion}}" name="equipo{{orientacion}}" value="{{ equipo.team_name }}">{{ equipo.team_name }}
+    {% endif %}
+
+    {% if class == 2 %}
+    <img class="team-image" src="data:image/png;base64,{{ imagen }}" alt="{{ equipo.ol_player_name }}">
+    <h6 class="team-name" name="equipo{{orientacion}}" value="{{ equipo.ol_player_name }}">{{ equipo.ol_player_name }}</h6>
+    <input type="hidden" id="equipo{{orientacion}}" name="equipo{{orientacion}}" value="{{ equipo.ol_player_name }}">{{ equipo.ol_player_name }}
+    {% endif %}
+
+    {% if class == 3 %}
+    <img class="team-image" src="data:image/png;base64,{{ imagen }}" alt="{{ equipo.club_name }}">
+    <h6 class="team-name" name="equipo{{orientacion}}" value="{{ equipo.club_name }}">{{ equipo.club_name }}</h6>
+    <input type="hidden" id="equipo{{orientacion}}" name="equipo{{orientacion}}" value="{{ equipo.club_name }}">{{ equipo.club_name }}
+    {% endif %}
+
+    {% if class == 4 %}
+    <img class="team-image" src="data:image/png;base64,{{ imagen }}" alt="{{ equipo.ol_player_name }}">
+    <h6 class="team-name" name="equipo{{orientacion}}" value="{{ equipo.ol_player_name }}">{{ equipo.ol_player_name }}</h6>
+    <input type="hidden" id="equipo{{orientacion}}" name="equipo{{orientacion}}" value="{{ equipo.ol_player_name }}">{{ equipo.ol_player_name }}
+    {% endif %}
+</div>

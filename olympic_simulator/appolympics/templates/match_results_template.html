@@ -1,0 +1,55 @@
+<!-- LOCAL (PRINCIPAL) -->
+<div class="score-box main-score">
+    <span class="score-label">Resultado</span>
+    <div class="score-container">
+        <div class="score-part" id="localA">{{ resultado.0 }}</div>
+        <div class="score-separator">-</div>
+        <div class="score-part" id="localB">{{ resultado.1 }}</div>
+    </div>
+</div>
+
+<!-- PENALES/CAJA DE SETS -->
+{% if clase_deporte == 'tiempo' %}
+<div class="score-box secondary-score">
+
+    <span class="score-label">Penales</span>
+    <div class="score-container">
+        <div class="score-part" id="penA">{{ resultado.2 }}</div>
+        <div class="score-separator">-</div>
+        <div class="score-part" id="penB">{{ resultado.3 }}</div>
+    </div>
+</div>
+{% endif %}
+
+{% if clase_deporte == 'tiempo' %}
+<!-- CAJA PENALES -->
+<div class="score-box secondary-score">
+    <span class="score-label">Penales</span>
+    <div class="score-container">
+        <div class="score-part" id="penA">{{ resultado.4 }}</div>
+        <div class="score-separator">-</div>
+        <div class="score-part" id="penB">{{ resultado.5 }}</div>
+    </div>
+</div>
+{% elif clase_deporte == 'sets' %}
+<!-- SETS -->
+<div class="score-box secondary-score">
+    <span class="score-label">Caja de Sets</span>
+    <div class="score-container">
+        <div class="score-part" id="penA">{{ resultado.2 }}</div>
+        <div class="score-separator">-</div>
+        <div class="score-part" id="penB">{{ resultado.3 }}</div>
+    </div>
+</div>
+{% elif clase_deporte == 'ends' %}
+<!-- SETS -->
+<div class="score-box secondary-score">
+    <span class="score-label">Caja de Entradas</span>
+    <div class="score-container">
+        <div class="score-part" id="penA">{{ resultado.2 }}</div>
+        <div class="score-separator">-</div>
+        <div class="score-part" id="penB">{{ resultado.3 }}</div>
+    </div>
+</div>
+
+{% endif %}

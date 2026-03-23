@@ -1,0 +1,64 @@
+<div class="esports-card">
+    <div class="card-title">
+        <i class="bi bi-table"></i> Tabla
+    </div>
+
+    <div class="table-responsive">
+        <table class="table esports-table text-center" id="leagueTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th onclick="sortTable(0)">País</th>
+                    <th onclick="sortTable(1)">Pts</th>
+                    <th onclick="sortTable(2)">V</th>
+                    <th onclick="sortTable(3)">D</th>
+                    <th onclick="sortTable(4)">E</th>
+                    <th onclick="sortTable(5)">Gf</th>
+                    <th onclick="sortTable(6)">Gc</th>
+                    <th onclick="sortTable(7)">Dif</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pais, stats in table %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ pais }}</td>
+                    <td>{{ stats.pts }}</td>
+                    <td>{{ stats.w }}</td>
+                    <td>{{ stats.l }}</td>
+                    <td>{{ stats.d }}</td>
+                    <td>{{ stats.gf }}</td>
+                    <td>{{ stats.gc }}</td>
+                    <td>{{ stats.gd }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="card-title">
+        <i class="bi bi-trophy-fill"></i> Partidos
+    </div>
+
+    <div id="matchesContainer" class="matches-grid mb-3">
+        <div class="match-card">
+            <input class="form-control esports-input" placeholder="Local" readonly>
+            <input class="form-control esports-input" placeholder="G" readonly>
+            <input class="form-control esports-input" placeholder="G" readonly>
+            <input class="form-control esports-input" placeholder="Visitante" readonly>
+            {% for mat in matches %}
+                {% for k in mat%}
+                <input class="form-control esports-input" placeholder="{{ k.0 }}" readonly>
+                <input class="form-control esports-input" placeholder="{{ k.1 }}" readonly>
+                <input class="form-control esports-input" placeholder="{{ k.3 }}" readonly>
+                <input class="form-control esports-input" placeholder="{{ k.2 }}" readonly>
+                {%endfor %}
+            {% endfor %}
+
+        </div>
+    </div>
+
+
+
+</div>

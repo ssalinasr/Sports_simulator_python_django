@@ -1,0 +1,92 @@
+       /* Shameimaru Sans */
+        @font-face {
+            font-family: 'Shameimaru Sans';
+            src: url('/fonts/ShameimaruSansAlternatives.ttf') format('truetype'),
+                 url('/fonts/ShameimaruSans.ttf') format('truetype');
+        }
+
+        :root {
+            --neon-blue: #00b7ff;
+            --dark-bg: #070b14;
+            --dark-panel: #0c1222;
+            --text-main: #e5e7eb;
+            --text-muted: #9ca3af;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+        }
+
+        .navbar-esports {
+            background: linear-gradient(180deg, #0c1222 0%, #070b14 100%);
+            border-bottom: 2px solid var(--neon-blue);
+            box-shadow: 0 0 25px rgba(0, 183, 255, 0.25);
+            font-family: 'Shameimaru Sans', sans-serif;
+        }
+
+        .navbar-brand {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .navbar-brand span {
+            color: var(--neon-blue);
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-left: 1.2rem;
+            position: relative;
+            padding-bottom: 0.45rem;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        /* Subrayado HUD */
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--neon-blue);
+            transition: width 0.25s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-main);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* SECCIÓN ACTIVA */
+        .nav-link.active {
+            color: var(--text-main);
+        }
+
+        .nav-link.active::after {
+            width: 100%;
+            box-shadow: 0 0 8px var(--neon-blue);
+        }
+
+        .nav-link.active i {
+            color: var(--neon-blue);
+        }
+
+        .navbar-toggler {
+            border-color: rgba(0, 183, 255, 0.6);
+        }
+
+        .navbar-toggler-icon {
+            filter: invert(1);
+        }

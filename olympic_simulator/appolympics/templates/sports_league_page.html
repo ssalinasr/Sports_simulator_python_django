@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>Liga</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/league_page.css' %}">
+	
+</head>
+
+
+<body>
+{% include "navbar_template.html" %}
+<div class="container mt-4">
+    <div class="row g-4">
+
+        <!-- ================= EQUIPOS ================= -->
+        <div class="col-12 dashboard-item">
+            <div class="esports-card">
+                <div class="card-title">
+                    <i class="bi bi-people-fill"></i> Equipos
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="score-label">Deporte</label>
+                    <select class="form-select esports-select" name="deporte" id="deporteSelect">
+                        <option value="">Seleccionar Deporte</option>
+                            {% for dep in deportes %}
+                                {% if clase == 1 or clase == 5 %}
+                                <option value="{{ dep.team_sport_name }}">{{ dep.team_sport_name }}</option>
+                                {% endif %}
+                                {% if clase == 2 %}
+                                <option value="{{ dep.player_trn_sport_name }}">{{ dep.player_trn_sport_name }}</option>
+                                {% endif %}
+                                {% if clase == 3 %}
+                                <option value="{{ dep }}">{{ dep }}</option>
+                                {% endif %}
+                                {% if clase == 4 %}
+                                <option value="{{ dep.player_trn_sport_name }}">{{ dep.player_trn_sport_name }}</option>
+                                {% endif %}
+                            {% endfor %}
+                    </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="score-label">Agrupación</label>
+						<select 
+                        class="form-select esports-select"
+                        name = "agrupacion"
+                        id ="agrupacionSelect"
+                        hx-get="{% url 'cargar_equipos' clase %}"
+                        hx-target="#equipoSelect"
+                        hx-trigger="change">
+						<option value="">Seleccionar agrupación</option>
+                            {% for agr in agrupaciones %}
+                                {% if clase == 1 or clase == 5 %}
+                                <option value="{{ agr.team_region_id }}">{{ agr.team_region_name }}</option>
+                                {% endif %}
+                                {% if clase == 2 %}
+                                <option value="{{ agr.team_sport_id }}">{{ agr.team_sport_name }}</option>
+                                {% endif %}
+                                {% if clase == 3 %}
+                                <option value="{{ agr.club_league_id }}">{{ agr.club_league_name }}</option>
+                                {% endif %}
+                                {% if clase == 4 %}
+                                <option value="{{ agr.ol_country_id }}">{{ agr.ol_country_name }}</option>
+                                {% endif %}
+                            {% endfor %}
+						</select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="score-label">Equipos</label>
+                        <select 
+                        class="form-select esports-select"
+                        id="equipoSelect" name="equipo_id"
+                        hx-get="{% url 'insertar_equipo' clase %}"
+                        hx-target="#teamTags"
+                        hx-swap="beforeend"
+                        hx-trigger="change"
+                        >
+                    </select>
+                    </div>
+
+                </div>
+                
+                <!--<input id="teamTags" 
+                       class="form-control esports-input"
+                       placeholder="Los equipos se ubican aquí..." readonly>-->
+        
+                <div id="teamTags" class="tag-container mt-3"></div>
+
+                <div class="text-center mt-3">
+                    <button class="esports-btn"
+                    hx-get="{% url 'generar_liga' clase %}"
+                    hx-target="#resultsLeague"
+                    hx-include="#teamTags, #deporteSelect, #selectLegs">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        Generar Liga
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= TABLA ================= -->
+        <div class="col-12 dashboard-item" id="resultsLeague">
+
+        </div>
+
+        <!-- ================= OPCIONES ================= -->
+        <div class="col-12 dashboard-item">
+            <div class="esports-card">
+                <div class="card-title">
+                    <i class="bi bi-sliders"></i> Opciones
+                </div>
+                <div class="d-flex flex-column gap-2 align-items-center">
+
+                    <div class="form-check form-switch hud-check w-100">
+                        <input class="form-check-input" type="checkbox" id="selectLegs" name="idayvuelta">
+                        <label class="form-check-label">
+                            Ronda de ida y vuelta
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= BOTONES ================= -->
+        <div class="col-12 dashboard-item">
+            <div class="esports-card text-center">
+                <div class="card-title">
+                    <i class="bi bi-power"></i> Botones
+                </div>
+
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <form method="POST" action="{% url 'pagina_partidos_liga' clase %}">
+                        {% csrf_token %}
+                    <button class="btn-reset-match">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        Reiniciar Liga
+                    </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+<script>
+const input = document.getElementById("teamInput");
+const tags = document.getElementById("teamTags");
+
+input.addEventListener("keydown", e => {
+    if (e.key === "Enter" && input.value.trim()) {
+        const tag = document.createElement("div");
+        tag.className = "tag";
+        tag.textContent = input.value;
+        tag.onclick = () => tag.remove();
+        tags.appendChild(tag);
+        input.value = "";
+    }
+});
+
+function addMatch() {
+    const match = document.createElement("div");
+    match.className = "match-card";
+    match.innerHTML = `
+        <input class="form-control esports-input" placeholder="Local">
+        <input class="form-control esports-input" placeholder="G">
+        <input class="form-control esports-input" placeholder="G">
+        <input class="form-control esports-input" placeholder="Visitante">
+    `;
+    document.getElementById("matchesContainer").appendChild(match);
+}
+
+function sortTable(col) {
+    const table = document.getElementById("leagueTable");
+    const rows = Array.from(table.tBodies[0].rows);
+    rows.sort((a, b) => a.cells[col].innerText.localeCompare(b.cells[col].innerText, undefined, {numeric:true}));
+    rows.forEach(r => table.tBodies[0].appendChild(r));
+}
+</script>
+
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</body>
+</html>
+

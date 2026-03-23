@@ -1,0 +1,226 @@
+<div class="esports-card">
+
+    <div class="card-title">
+        <i class="bi bi-diagram-3-fill"></i> Brackets del Torneo
+    </div>
+
+    <div class="bracket-section">
+
+        <svg id="bracket-lines"></svg>
+        <div class="bracket-wrapper">
+
+            {% for round, matches in bracket.items %}
+
+            <div class="bracket-round">
+
+                <div class="round-title">
+                    {{ round }}
+                </div>
+
+                <div class="round-matches">
+
+                    {% for match in matches %}
+
+                    <div class="bracket-match">
+
+                        <div class="bracket-team">
+
+                            <span class="team-name">
+                                {{ match.team1 }}
+                            </span>
+
+                            <div class="bracket-score">
+                                {% if match.score1 != None %}
+                                <input value="{{ match.score1 }}" readonly>
+                                {% else %}
+                                <input value="-" readonly>
+                                {% endif %}
+                                {% if match.pen1 != -1 %}
+                                <input value="{{ match.pen1 }}" readonly>
+                                {% else %}
+                                <input value="-" readonly>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+
+                        <div class="bracket-team">
+
+                            <span class="team-name">
+                                {{ match.team2 }}
+                            </span>
+
+                            <div class="bracket-score">
+                                {% if match.score2 != None %}
+                                <input value="{{ match.score2 }}" readonly>
+                                {% else %}
+                                <input value="-" readonly>
+                                {% endif %}
+                                {% if match.pen2 != -1 %}
+                                <input value="{{ match.pen2 }}" readonly>
+                                {% else %}
+                                <input value="-" readonly>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    <div class="card-title mt-4">
+        <i class="bi bi-award"></i> Tercer Lugar
+    </div>
+    <div class="bracket-section dashboard-item">
+        <div class="bracket-match">
+            <div class="bracket-team">
+
+                <span class="team-name">
+                    {{ third_match.0.team1 }}
+                </span>
+
+                <div class="bracket-score">
+                    {% if third_match.0.score1 != None %}
+                    <input value="{{ third_match.0.score1 }}" readonly>
+                    {% else %}
+                    <input value="-" readonly>
+                    {% endif %}
+                    {% if third_match.0.pen1 != -1 %}
+                    <input value="{{ third_match.0.pen1 }}" readonly>
+                    {% else %}
+                    <input value="-" readonly>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <div class="bracket-team">
+
+                <span class="team-name">
+                    {{ third_match.0.team2 }}
+                </span>
+
+                <div class="bracket-score">
+                    {% if third_match.0.score2 != None %}
+                    <input value="{{ third_match.0.score2 }}" readonly>
+                    {% else %}
+                    <input value="-" readonly>
+                    {% endif %}
+                    {% if third_match.0.pen2 != -1 %}
+                    <input value="{{ third_match.0.pen2 }}" readonly>
+                    {% else %}
+                    <input value="-" readonly>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="card-title">
+        <i class="bi bi-table"></i> Tabla
+    </div>
+
+    <div class="table-responsive">
+        <table class="table esports-table text-center" id="leagueTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th onclick="sortTable(0)">País</th>
+                    <th onclick="sortTable(1)">Pts</th>
+                    <th onclick="sortTable(2)">V</th>
+                    <th onclick="sortTable(3)">D</th>
+                    <th onclick="sortTable(4)">E</th>
+                    <th onclick="sortTable(5)">Gf</th>
+                    <th onclick="sortTable(6)">Gc</th>
+                    <th onclick="sortTable(7)">Dif</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pais, stats in table %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ pais }}</td>
+                    <td>{{ stats.pts }}</td>
+                    <td>{{ stats.w }}</td>
+                    <td>{{ stats.l }}</td>
+                    <td>{{ stats.d }}</td>
+                    <td>{{ stats.gf }}</td>
+                    <td>{{ stats.gc }}</td>
+                    <td>{{ stats.gd }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="card-title">
+        <i class="bi bi-trophy-fill"></i> Partidos
+    </div>
+
+    <div id="matchesContainer" class="matches-grid mb-3">
+        <div class="match-card">
+            <input class="form-control esports-input" placeholder="Local" readonly>
+            <input class="form-control esports-input" placeholder="G" readonly>
+            <input class="form-control esports-input" placeholder="G" readonly>
+            <input class="form-control esports-input" placeholder="Visitante" readonly>
+            {% for mat in matches %}
+            {% for k in mat%}
+            <input class="form-control esports-input" placeholder="{{ k.0 }}" readonly>
+            <input class="form-control esports-input" placeholder="{{ k.1 }}" readonly>
+            <input class="form-control esports-input" placeholder="{{ k.3 }}" readonly>
+            <input class="form-control esports-input" placeholder="{{ k.2 }}" readonly>
+            {%endfor %}
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <div class="card-title">
+        <i class="bi bi-diagram-3-fill"></i> Resultados Finales
+    </div>
+
+    <div class="bracket-section dashboard-item">
+
+        <div class="matches-grid">
+
+            <div class="match-card">
+                <div class="team-name">🥇 Campeón</div>
+                <div></div>
+                <div></div>
+                <div class="team-name">{{ champion }}</div>
+            </div>
+
+            <div class="match-card">
+                <div class="team-name">🥈 Subcampeón</div>
+                <div></div>
+                <div></div>
+                <div class="team-name">{{ runner_up }}</div>
+            </div>
+
+            <div class="match-card">
+                <div class="team-name">🥉 Tercer Lugar</div>
+                <div></div>
+                <div></div>
+                <div class="team-name">{{ third_place }}</div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>

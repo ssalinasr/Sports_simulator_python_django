@@ -1,0 +1,89 @@
+      /* Shameimaru Sans */
+        @font-face {
+            font-family: 'Shameimaru Sans';
+            src: url('/fonts/ShameimaruSansAlternatives.ttf') format('truetype'),
+                 url('/fonts/ShameimaruSans.ttf') format('truetype');
+        }
+
+        :root {
+            --neon-blue: #00b7ff;
+            --dark-bg: #070b14;
+            --dark-panel: #0c1222;
+            --text-main: #e5e7eb;
+            --text-muted: #9ca3af;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+        }
+
+  /* Animación dashboard */
+.dashboard-item {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeSlideUp 0.7s ease forwards;
+}
+
+.dashboard-item:nth-child(1) { animation-delay: 0.1s; }
+.dashboard-item:nth-child(2) { animation-delay: 0.25s; }
+.dashboard-item:nth-child(3) { animation-delay: 0.4s; }
+.dashboard-item:nth-child(4) { animation-delay: 0.55s; }
+
+@keyframes fadeSlideUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Cards */
+.esports-card {
+    background: linear-gradient(180deg, #0c1222 0%, #070b14 100%);
+    border: 1px solid rgba(0, 183, 255, 0.35);
+    border-radius: 14px;
+    padding: 1.5rem;
+    box-shadow: 0 0 20px rgba(0, 183, 255, 0.15);
+    height: 100%;
+    font-family: 'Shameimaru Sans', sans-serif;
+}
+
+/* Títulos */
+.card-title {
+    color: #00b7ff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    margin-bottom: 1.3rem;
+    text-align: center;
+}
+
+/* Botones */
+.esports-btn {
+    width: 100%;
+    background: transparent;
+    color: #e5e7eb;
+    border: 1px solid rgba(0, 183, 255, 0.45);
+    border-radius: 10px;
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.65rem;
+    text-transform: uppercase;
+    font-size: 0.82rem;
+    letter-spacing: 0.9px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: all 0.25s ease;
+}
+
+.esports-btn i {
+    color: #00b7ff;
+    font-size: 1rem;
+}
+
+/* Hover esports */
+.esports-btn:hover {
+    background: rgba(0, 183, 255, 0.15);
+    box-shadow: 0 0 12px rgba(0, 183, 255, 0.7);
+    transform: translateY(-2px);
+    color: #ffffff;
+}

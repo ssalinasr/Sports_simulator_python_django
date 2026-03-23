@@ -1,0 +1,16 @@
+<option value="">Seleccionar equipo</option>
+    {% for equipo in equipos %}
+        {% if clase == 1 or clase == 5 %}
+        <option value="{{ equipo.team_id }}">{{ equipo.team_name }}</option>
+        {% endif %}
+        {% if clase == 2 %}
+        <option value="{{ equipo.ol_player_id }}">{{ equipo.ol_player_name }}</option>
+        {% endif %}
+        {% if clase == 3 %}
+        <option value="{{ equipo.club_id }}">{{ equipo.club_name }}</option>
+        {% endif %}
+        {% if clase == 4 %}
+        <option value="{{ equipo.ol_player_id }}">{{ equipo.ol_player_name }}</option>
+        {% endif %}
+    {% endfor %}
+
