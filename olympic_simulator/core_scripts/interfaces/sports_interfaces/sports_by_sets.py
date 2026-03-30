@@ -13,7 +13,7 @@ class SetsSport(SportsInterface):
         self.has_double_round = double_round
 
     def get_probability_list(self):
-        self.probs = [1/585, 1/475, 1/255, 1/184, 1/90, 1/60, 1/69, 1/50, 1/45, 1/34, 1/22, 1/9, 1/4]
+        self.probs = [1/585, 1/475, 1/255, 1/184, 1/90, 1/60, 1/59, 1/50, 1/45, 1/34, 1/22, 1/9, 1/4]
 
     def get_team_probability(self, rank1, rank2, probs):
         return super().get_team_probability(rank1, rank2, probs)

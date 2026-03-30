@@ -12,7 +12,7 @@ class TimedPointsSport(SportsInterface):
         self.has_double_round = double_round
 
     def get_probability_list(self):
-        self.probs = [1/292, 1/237, 1/123, 1/92, 1/46, 1/35, 1/35, 1/25, 1/23, 1/17, 1/11, 1/5, 1/2]
+        self.probs = [1/292, 1/237, 1/123, 1/92, 1/46, 1/35, 1/30, 1/25, 1/23, 1/17, 1/11, 1/5, 1/2]
 
     def get_team_probability(self, rank1, rank2, probs):
         return super().get_team_probability(rank1, rank2, probs)

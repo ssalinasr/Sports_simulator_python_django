@@ -615,6 +615,7 @@ def generar_simulacion_completa(request, match_class):
     teams_by_cn = []
     full_trn = None
     valor_año = request.GET.get('valoryear')
+    hay_guardado = request.GET.get('registrarres')
     file_name = ''
 
     if match_class == 1:
@@ -636,7 +637,7 @@ def generar_simulacion_completa(request, match_class):
                     print('', end='')
 
             teams_by_cn.append(temp_team_list)
-        full_trn = full_tournament.FullTournament(teams_by_cn, [cn.team_region_name for cn in continentes], ranks, deporte.team_sport_name, 8, match_class, valor_año)
+        full_trn = full_tournament.FullTournament(teams_by_cn, [cn.team_region_name for cn in continentes], ranks, deporte.team_sport_name, 8, match_class, valor_año, hay_guardado)
         file_name = f"simluacion_{deporte.team_sport_name}_{valor_año}.xlsx"
     elif match_class == 5:
         equipos = Nationalteams.objects.filter(team_name__icontains='Fem')
@@ -660,7 +661,7 @@ def generar_simulacion_completa(request, match_class):
 
             teams_by_cn.append(temp_team_list)
 
-        full_trn = full_tournament.FullTournament(teams_by_cn, [cn.team_region_name for cn in continentes], ranks, deporte.team_sport_name, 8, match_class,valor_año)
+        full_trn = full_tournament.FullTournament(teams_by_cn, [cn.team_region_name for cn in continentes], ranks, deporte.team_sport_name, 8, match_class,valor_año,hay_guardado)
         file_name = f"simluacion_{deporte.team_sport_name}_{valor_año}.xlsx"
     elif match_class == 2 or match_class == 4:      
         deporte = Playertournamentsports.objects.get(player_trn_sport_name = request.GET.get('deporte'))
@@ -706,7 +707,7 @@ def generar_simulacion_completa(request, match_class):
             rank_tuple = (eq.ol_player_name, rank)
             ranks.append(rank_tuple)
 
-        full_trn = full_tournament.FullTournament(teams, deporte.player_trn_sport_name, ranks, deporte.player_trn_sport_name, num_groups, match_class, valor_año)
+        full_trn = full_tournament.FullTournament(teams, deporte.player_trn_sport_name, ranks, deporte.player_trn_sport_name, num_groups, match_class, valor_año, hay_guardado)
         file_name = f"simluacion_{deporte.player_trn_sport_name}_{valor_año}.xlsx"
     else:
         equipos = Nationalteams.objects.all()

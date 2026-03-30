@@ -24,7 +24,7 @@ class Clubmatchesregister(models.Model):
     club_away = models.ForeignKey('Clubs', models.DO_NOTHING, related_name='clubmatchesregister_club_away_set')
     club_away_score = models.IntegerField()
     result_label = models.CharField(max_length=30)
-
+    match_year = models.CharField(max_length=4)
     class Meta:
         managed = False
         db_table = 'ClubMatchesRegister'
@@ -38,7 +38,6 @@ class Clubtournamentregister(models.Model):
     club_loses = models.IntegerField()
     club_sc_points = models.IntegerField()
     club_ag_points = models.IntegerField()
-    club_stage = models.ForeignKey('Tournamentstage', models.DO_NOTHING)
     club_position = models.IntegerField()
     club_year = models.CharField(max_length=4)
 
@@ -116,7 +115,6 @@ class Playertournamentregister(models.Model):
     ol_player_loses = models.IntegerField()
     ol_player_sc_points = models.IntegerField()
     ol_player_ag_points = models.IntegerField()
-    tourn_stage = models.ForeignKey('Tournamentstage', models.DO_NOTHING)
     ol_player_position = models.IntegerField()
     ol_player_year = models.CharField(max_length=4)
     player_trn_sport = models.ForeignKey('Playertournamentsports', models.DO_NOTHING)
@@ -177,7 +175,8 @@ class Teammatchesregister(models.Model):
     team_local_score = models.IntegerField()
     team_away = models.ForeignKey(Nationalteams, models.DO_NOTHING, related_name='teammatchesregister_team_away_set')
     team_away_score = models.IntegerField()
-    result_label = models.CharField(max_length=30)
+    result_label = models.CharField(max_length=300)
+    match_year = models.CharField(max_length=4)
     team_sport = models.ForeignKey('Teamsports', models.DO_NOTHING)
 
     class Meta:
@@ -235,7 +234,6 @@ class Teamtournamentregister(models.Model):
     team_loses = models.IntegerField()
     team_sc_points = models.IntegerField()
     team_ag_points = models.IntegerField()
-    tourn_stage = models.ForeignKey('Tournamentstage', models.DO_NOTHING)
     team_position = models.IntegerField()
     team_year = models.CharField(max_length=4)
     team_sport = models.ForeignKey(Teamsports, models.DO_NOTHING)
