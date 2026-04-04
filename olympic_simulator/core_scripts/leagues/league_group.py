@@ -201,18 +201,18 @@ class Group():
         return self.table
     
     def get_league_matches(self):
-
         if isinstance(self.matches[0], list):
             matches = list(itertools.chain.from_iterable(self.matches))
-        else:
-            matches = self.matches
-
-        matches_dict = [
+            matches_dict = [
             dict(zip(["team1","score1","team2","score2"], m))
             for m in matches
-        ]
+            ]
+            return matches_dict
+        else:
+            matches = self.matches
+            return matches
 
-        return matches_dict
+
     
     def get_group_name(self):
         return self.group_name

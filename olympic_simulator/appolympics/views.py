@@ -390,7 +390,6 @@ def insertar_equipo(request, match_class):
 
 def generar_liga(request, match_class):
     equipos_seleccionados = request.GET.getlist("equipos")
-    print(equipos_seleccionados)
     valor_ida_vuelta = request.GET.get('idayvuelta')
     ranks = []
     teams = []
@@ -440,7 +439,6 @@ def generar_liga(request, match_class):
         groups = league_group.Group('Grupo Liga '+deporte.player_trn_sport_name, teams, valor_ida_vuelta, deporte.player_trn_sport_name, 
                                     match_class, ranks)
     
-    print(groups)
     groups.generate_calendar()
     groups.simulate_league()
     table = groups.get_league_table()
@@ -454,7 +452,6 @@ def generar_liga(request, match_class):
         table_values.append(k[1])
 
     table_dict = dict(zip(table_names, table_values))
-    print(table_dict)
     sorted_table = sorted(
         table_dict.items(),
         key= lambda item:(

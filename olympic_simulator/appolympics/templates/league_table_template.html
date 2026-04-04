@@ -48,12 +48,10 @@
             <input class="form-control esports-input" placeholder="G" readonly>
             <input class="form-control esports-input" placeholder="Visitante" readonly>
             {% for mat in matches %}
-                {% for k in mat%}
-                <input class="form-control esports-input" placeholder="{{ k.0 }}" readonly>
-                <input class="form-control esports-input" placeholder="{{ k.1 }}" readonly>
-                <input class="form-control esports-input" placeholder="{{ k.3 }}" readonly>
-                <input class="form-control esports-input" placeholder="{{ k.2 }}" readonly>
-                {%endfor %}
+                <input class="form-control esports-input" placeholder="{{ mat.team1 }}" readonly>
+                <input class="form-control esports-input" placeholder="{{ mat.score1 }}" readonly>
+                <input class="form-control esports-input" placeholder="{{ mat.score2 }}" readonly>
+                <input class="form-control esports-input" placeholder="{{ mat.team2 }}" readonly>
             {% endfor %}
 
         </div>
