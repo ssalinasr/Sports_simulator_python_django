@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -9,471 +10,12 @@
 
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/simulation_page.css' %}">
 	
-<style>
-        /* Shameimaru Sans */
-        @font-face {
-            font-family: 'Shameimaru Sans';
-            src: url('fonts/ShameimaruSansAlternatives.ttf') format('truetype'),
-                 url('fonts/ShameimaruSans.ttf') format('truetype');
-        }
-
-        :root {
-            --neon-blue: #00b7ff;
-            --dark-bg: #070b14;
-            --dark-panel: #0c1222;
-            --text-main: #e5e7eb;
-            --text-muted: #9ca3af;
-        }
-
-        body {
-            background-color: var(--dark-bg);
-        }
-		
-		
-		  /* Animación dashboard */
-.dashboard-item {
-    opacity: 0;
-    transform: translateY(30px);
-    animation: fadeSlideUp 0.7s ease forwards;
-}
-
-.dashboard-item:nth-child(1) { animation-delay: 0.1s; }
-.dashboard-item:nth-child(2) { animation-delay: 0.25s; }
-.dashboard-item:nth-child(3) { animation-delay: 0.4s; }
-.dashboard-item:nth-child(4) { animation-delay: 0.55s; }
-
-@keyframes fadeSlideUp {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Cards */
-.esports-card {
-    background: linear-gradient(180deg, #0c1222 0%, #070b14 100%);
-    border: 1px solid rgba(0, 183, 255, 0.35);
-    border-radius: 14px;
-    padding: 1.5rem;
-    box-shadow: 0 0 20px rgba(0, 183, 255, 0.15);
-    height: 100%;
-    font-family: 'Shameimaru Sans', sans-serif;
-}
-
-/* Títulos */
-.card-title {
-    color: #00b7ff;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 700;
-    margin-bottom: 1.3rem;
-    text-align: center;
-}
-
-/* Botones */
-.esports-btn {
-    width: 100%;
-    background: transparent;
-    color: #e5e7eb;
-    border: 1px solid rgba(0, 183, 255, 0.45);
-    border-radius: 10px;
-    padding: 0.6rem 0.75rem;
-    margin-bottom: 0.65rem;
-    text-transform: uppercase;
-    font-size: 0.82rem;
-    letter-spacing: 0.9px;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    transition: all 0.25s ease;
-}
-
-.esports-btn i {
-    color: #00b7ff;
-    font-size: 1rem;
-}
-
-/* Hover esports */
-.esports-btn:hover {
-    background: rgba(0, 183, 255, 0.15);
-    box-shadow: 0 0 12px rgba(0, 183, 255, 0.7);
-    transform: translateY(-2px);
-    color: #ffffff;
-}
-
-
-
-/* Equipo */
-.team-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.6rem;
-}
-
-.team-image {
-    width: 90px;
-    height: 90px;
-    border: 2px dashed rgba(0, 183, 255, 0.5);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #9ca3af;
-    font-size: 0.75rem;
-}
-
-.team-name {
-    color: #e5e7eb;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.8px;
-}
-
-/* Marcadores */
-
-.score-label {
-    color: #9ca3af;
-    font-size: 0.7rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-/* CONTENEDOR INDIVIDUAL DEL SCORE */
-/* CONTENEDOR DEL MARCADOR */
-.score-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.6rem;
-    background: rgba(0, 183, 255, 0.1);
-    border: 1px solid rgba(0, 183, 255, 0.45);
-    border-radius: 12px;
-    padding: 0.45rem 0.8rem;
-    margin-top: 0.25rem;
-}
-
-/* ESPACIOS NUMÉRICOS */
-.score-part {
-    min-width: 32px;
-    text-align: center;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #ffffff;
-    background: rgba(0, 183, 255, 0.18);
-    border-radius: 8px;
-    padding: 0.2rem 0.4rem;
-}
-
-/* SEPARADOR */
-.score-separator {
-    font-size: 1.3rem;
-    color: #9ca3af;
-    font-weight: 600;
-}
-
-/* AJUSTES PARA MARCADOR PRINCIPAL */
-.main-score .score-part {
-    font-size: 1.9rem;
-    background: rgba(0, 183, 255, 0.28);
-    box-shadow: 0 0 12px rgba(0, 183, 255, 0.6);
-}
-
-/* SECUNDARIOS */
-.secondary-score .score-part {
-    font-size: 1.2rem;
-    opacity: 0.9;
-}
-
-/* CONTENEDOR DE MARCADOR */
-.score-box {
-    margin-bottom: 0.8rem;
-    transition: all 0.3s ease;
-}
-
-/* MARCADOR PRINCIPAL (LOCAL) */
-.score-box.main-score .score-value {
-    font-size: 1.8rem;
-    padding: 0.7rem 0;
-    background: rgba(0, 183, 255, 0.22);
-    border: 2px solid #00b7ff;
-    box-shadow: 0 0 18px rgba(0, 183, 255, 0.7);
-}
-
-/* MARCADORES SECUNDARIOS */
-.score-box.secondary-score .score-value {
-    font-size: 1.1rem;
-    padding: 0.4rem 0;
-    opacity: 0.9;
-}
-
-/* ANIMACIÓN DE CAMBIO */
-.score-value.score-animate {
-    animation: scorePulse 0.6s ease;
-}
-
-@keyframes scorePulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 rgba(0, 183, 255, 0);
-    }
-    50% {
-        transform: scale(1.15);
-        box-shadow: 0 0 25px rgba(0, 183, 255, 1);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 18px rgba(0, 183, 255, 0.7);
-    }
-}
-
-
-/* CONTENEDOR CHECK SIN BORDES */
-.hud-check {
-    background: rgba(0, 183, 255, 0.08);
-    border: none;
-    border-radius: 10px;
-    padding: 0.6rem 1rem;
-    transition: background 0.25s ease, box-shadow 0.25s ease;
-}
-
-/* INPUT */
-.hud-check .form-check-input {
-    background-color: #070b14;
-    border: 1px solid rgba(0, 183, 255, 0.4);
-    cursor: pointer;
-}
-
-/* ACTIVO */
-.hud-check .form-check-input:checked {
-    background-color: #00b7ff;
-    border-color: #00b7ff;
-    box-shadow: 0 0 10px rgba(0, 183, 255, 0.8);
-}
-
-/* TEXTO */
-.hud-check label {
-    color: #e5e7eb;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.8px;
-    cursor: pointer;
-}
-
-/* HOVER SUAVE */
-.hud-check:hover {
-    background: rgba(0, 183, 255, 0.15);
-}
-
-.btn-reset-match {
-    background: linear-gradient(135deg, #ff4d4d, #b31217);
-    color: #fff;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    border: none;
-    padding: 0.75rem 2rem;
-    border-radius: 12px;
-    text-transform: uppercase;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    box-shadow: 0 0 15px rgba(255, 77, 77, 0.35);
-    transition: all 0.3s ease;
-}
-
-.btn-reset-match:hover {
-    transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 0 25px rgba(255, 77, 77, 0.6);
-    background: linear-gradient(135deg, #ff6a6a, #d61c1c);
-}
-
-.btn-reset-match:active {
-    transform: scale(0.96);
-    box-shadow: 0 0 10px rgba(255, 77, 77, 0.4);
-}
-
-.league-row {
-    margin-bottom: 2.5rem;
-}
-
-.esports-select,
-.esports-input {
-    background: rgba(255,255,255,0.08);
-    border: none;
-    color: #fff;
-}
-
-.esports-input::placeholder {
-    color: rgba(255,255,255,0.5);
-}
-
-.tag-container {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.tag {
-    background: linear-gradient(135deg, #4f46e5, #9333ea);
-    padding: 0.4rem 0.8rem;
-    border-radius: 10px;
-    cursor: pointer;
-    animation: popIn 0.3s ease;
-}
-
-.esports-table th {
-    cursor: pointer;
-    user-select: none;
-}
-
-.esports-table th:hover {
-    color: #7dd3fc;
-}
-
-.matches-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-}
-
-
-.match-card {
-    width: 100%;
-    background: rgba(0, 183, 255, 0.08);
-    border: 1px solid rgba(0, 183, 255, 0.45);
-    border-radius: 14px;
-    padding: 0.8rem 1rem;
-    display: grid;
-    grid-template-columns: 2fr 80px 80px 2fr;
-    align-items: center;
-    gap: 0.7rem;
-    animation: fadeSlideUp 0.4s ease;
-}
-
-
-.btn-reset-soft {
-    background: rgba(255,255,255,0.15);
-    border: none;
-    padding: 0.7rem 1.5rem;
-    border-radius: 12px;
-    color: #fff;
-    transition: 0.3s;
-}
-
-.btn-reset-soft:hover {
-    background: rgba(255,255,255,0.3);
-}
-
-@keyframes popIn {
-    from { transform: scale(0.7); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.bracket-container {
-    display: flex;
-    gap: 2rem;
-    overflow-x: auto;
-    padding-bottom: 1rem;
-}
-
-.bracket-round {
-    display: flex;
-    flex-direction: column;
-    gap: 1.4rem;
-    min-width: 220px;
-}
-
-.round-title {
-    text-align: center;
-    font-size: 0.75rem;
-    letter-spacing: 1px;
-    color: var(--neon-blue);
-    text-transform: uppercase;
-    opacity: 0.9;
-}
-
-.bracket-team {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-
-.bracket-round {
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-    position: relative;
-}
-
-.bracket-match {
-    position: relative;
-    background: rgba(0,183,255,0.08);
-    border: 1px solid rgba(0,183,255,0.45);
-    border-radius: 12px;
-    padding: 0.7rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-}
-
-/* Línea que conecta con siguiente ronda */
-.bracket-match::after {
-    content: '';
-    position: absolute;
-    right: -1.5rem;
-    top: 50%;
-    width: 1.5rem;
-    height: 2px;
-    background: rgba(0,183,255,0.5);
-}
-
-.bracket-round:not(:last-child) .bracket-match {
-    margin-bottom: 0.6rem;
-}
-
-
-.bracket-team .team-name {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.7px;
-    color: var(--text-main);
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.bracket-score {
-    display: flex;
-    gap: 0.3rem;
-}
-
-.bracket-score input {
-    width: 34px;
-    height: 28px;
-    background: rgba(0, 183, 255, 0.15);
-    border: 1px solid rgba(0, 183, 255, 0.5);
-    border-radius: 6px;
-    text-align: center;
-    color: #fff;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-
-
-</style>
 	
 </head>
 <body>
+{% include "navbar_template.html" %}
 <div class="container-fluid py-4">
 
     <!-- 🔵 FILA 1 — OPCIONES -->
@@ -485,49 +27,39 @@
 
                 <!-- Selectores -->
                 <div class="row g-3 mb-4">
-                    <div class="col-md-4 col-12">
-                        <label class="score-label mb-2">Juego</label>
-                        <select class="form-select esports-select">
-                            <option>Juego Olímpico</option>
-                            <option>Juego Continental</option>
-                        </select>
-                    </div>
 
-                    <div class="col-md-4 col-12">
+                    <div class="col-md-6 col-12">
                         <label class="score-label mb-2">Categoría</label>
-                        <select class="form-select esports-select">
-                            <option>Masculino</option>
-                            <option>Femenino</option>
-                            <option>Mixto</option>
+                        <select class="form-select esports-select"
+                        name="categoria"
+                        id="categoriasSelect"
+                        hx-get="{% url 'cargar_pruebas' clase %}"
+                        hx-target="#pruebasSelect"
+                        hx-trigger="change">
+                            <option value="">Seleccionar categoría</option>
+                            {% for cat in categorias %}
+                            <option value="{{ cat.team_sport_name }}">{{ cat.team_sport_name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
 
-                    <div class="col-md-4 col-12">
+                    <div class="col-md-6 col-12">
                         <label class="score-label mb-2">Prueba</label>
-                        <select class="form-select esports-select">
-                            <option>100m</option>
-                            <option>200m</option>
-                            <option>400m</option>
+                        <select class="form-select esports-select" id="pruebasSelect" name="prueba">
                         </select>
                     </div>
                 </div>
 
                 <!-- Botones -->
                 <div class="row align-items-center">
-                    <div class="col-md-6 col-12 mb-3 mb-md-0 text-center text-md-start">
-                        <button class="esports-btn">
+                    <div class="col-md-12 col-12 mb-3 mb-md-0 text-center text-md-start">
+                        <button class="esports-btn"
+                        hx-get="{% url 'generar_simulacion' clase %}"
+                        hx-target="#resultsSimulation"
+                        hx-include="#pruebasSelect, #categoriasSelect">
                             <i class="bi bi-play-fill"></i>
                             Simular
                         </button>
-                    </div>
-
-                    <div class="col-md-6 col-12 text-center text-md-end">
-                        <div class="form-check form-switch d-inline-block hud-check">
-                            <input class="form-check-input" type="checkbox" id="incluirTodos">
-                            <label class="form-check-label" for="incluirTodos">
-                                Incluir todos
-                            </label>
-                        </div>
                     </div>
                 </div>
 
@@ -543,7 +75,7 @@
 
                 <h5 class="card-title">Simulación</h5>
 
-                <div class="table-responsive">
+                <div class="table-responsive" id="resultsSimulation">
                     <table class="table table-dark table-hover align-middle esports-table sortable-table">
                         <thead>
                             <tr>
@@ -610,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 </script>
-
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
 
 </body>

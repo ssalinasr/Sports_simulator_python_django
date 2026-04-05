@@ -7,7 +7,6 @@
         <table class="table esports-table text-center" id="leagueTable">
             <thead>
                 <tr>
-                    <th>#</th>
                     <th onclick="sortTable(0)">País</th>
                     <th onclick="sortTable(1)">Pts</th>
                     <th onclick="sortTable(2)">V</th>
@@ -21,7 +20,6 @@
             <tbody>
                 {% for pais, stats in table %}
                 <tr>
-                    <td>{{ forloop.counter }}</td>
                     <td>{{ pais }}</td>
                     <td>{{ stats.pts }}</td>
                     <td>{{ stats.w }}</td>

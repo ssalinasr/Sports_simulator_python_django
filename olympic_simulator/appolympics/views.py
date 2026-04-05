@@ -1,13 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.db.models import Q
-from .models import Teamregion, Nationalteams, Olympicplayers, Teamsports, Clubleague, Clubs, Playercountry, Playertournamentsports, Teamranks
+from .models import Teamregion, Nationalteams, Olympicplayers, Teamsports, Clubleague, Clubs, Playercountry, Playertournamentsports, Teamranks, Sportsrecords
 import base64
 from core_scripts.interfaces.sports_interfaces import sports_by_time, sports_by_sets, sports_by_ends, sports_by_special_sets, sports_by_timed_points
 from core_scripts.interfaces.games_interfaces import goldeneye_interface, mariokart_interface, supersmash_interface, muns_interface
 from core_scripts.leagues import league_group
 from core_scripts.tournaments import tournament_group
 from core_scripts.tournaments import full_tournament
+from core_scripts.interfaces.olympic_sports_interfaces import sports_by_heats, sports_by_individual, sports_by_rounds
 import itertools
 from openpyxl import Workbook
 import os
@@ -93,6 +94,7 @@ def pagina_partidos_liga(request, match_class):
     return render(request, 'sports_league_page.html', 
                   {'equipos': page_teams, 'agrupaciones': page_groups, 'deportes': page_sports, 'clase': match_class, 'genero': 'M'})
 
+
 def pagina_partidos_torneo(request, match_class):
     request.session.flush()
     page_groups = []
@@ -133,6 +135,35 @@ def pagina_partidos_torneo(request, match_class):
 
     return render(request, 'sports_tournament_page.html', 
                   {'equipos': page_teams, 'agrupaciones': page_groups, 'deportes': page_sports, 'clase': match_class, 'genero': 'M'})
+
+
+def pagina_competencia(request, match_class):
+    sports_categories = []
+    sports = []
+    list_of_ex = list(range(39,47))
+    list_of_ids = list(range(39,46))
+    if match_class == 1:
+        sports_categories = Teamsports.objects.filter(~Q(team_sport_id__in = list_of_ex ), team_sport_class = 'L')
+    elif match_class == 2:
+        sports_categories = Teamsports.objects.filter(team_sport_id__in = list_of_ids)
+    elif match_class == 4:
+        sports_categories = Teamsports.objects.filter(team_sport_id = 46)
+    else:
+        sports_categories = Teamsports.objects.filter(~Q(team_sport_id__in = list_of_ex ), team_sport_class = 'L')
+    
+    sports_elements = Sportsrecords.objects.all()
+    for sp in sports_elements:
+        sports.append(sp.sp_record_name)
+
+    print(sports_categories)
+
+    return render(request, 'sports_simulation_page.html', {'categorias': sports_categories, 'deportes': sports, 'clase': match_class})
+
+def cargar_pruebas(request, match_class):
+    categoria = request.GET.get('categoria')
+    sport = Teamsports.objects.get(team_sport_name = categoria)
+    page_sports = Sportsrecords.objects.filter(team_sport_id = sport.team_sport_id)
+    return render(request, 'change_sports_template.html', {'deportes': page_sports})
 
 
 def cargar_equipos(request, match_class):
@@ -748,8 +779,69 @@ def pagina_simulacion_completa_clubes(request, match_class):
 def generar_simulacion_completa_clubes(request, match_class):
     pass
 
+def generar_simulacion(request, match_class):
+    ranks = []
+    teams = []
+    groups = None
+    sport = Teamsports.objects.get(team_sport_name = request.GET.get('categoria'))
+    contest = request.GET.get('prueba')
+    print(sport.team_sport_name)
 
-##  TO DO ##
-##  Baloncesto no funciona Torneos ##
-## Agregar Squash xdxdxd          ##
-## Error en torneo completo de Volleyball ##
+    if match_class == 1 or match_class == 5:
+        equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
+        deporte = Sportsrecords.objects.get(sp_record_name = contest)
+        for eq in equipos:
+            rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = sport.team_sport_id)
+            teams.append(eq.team_name)
+            rank_tuple = (eq.team_name, rank.team_rank)
+            ranks.append(rank_tuple)
+
+    elif match_class in [2,4]:
+        if sport.team_sport_name != 'Goldeneye':
+            equipos = Olympicplayers.objects.filter(~Q(ol_player_name__contains='/'), team_sport_id = sport.team_sport_id)
+        else:
+            equipos = Olympicplayers.objects.filter(ol_player_name__contains='_GE')
+
+        deporte = Sportsrecords.objects.get(sp_record_name = contest)
+        for eq in equipos:
+            rank = eq.ol_player_value
+            teams.append(eq.ol_player_name)
+            rank_tuple = (eq.ol_player_name, rank)
+            ranks.append(rank_tuple)
+    else:
+        equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
+        deporte = Sportsrecords.objects.get(sp_record_name = contest)
+        for eq in equipos:
+            rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = sport.team_sport_id)
+            teams.append(eq.team_name)
+            rank_tuple = (eq.team_name, rank.team_rank)
+            ranks.append(rank_tuple)
+
+    table_results = []
+    if deporte.sport_class == 'H':    
+        olympic_sim = sports_by_heats.SportsByHeats(deporte.sp_record_name, float(deporte.sp_record_best), float(deporte.sp_record_last), deporte.sport_class)
+        for r in ranks:
+            results = (r[0] ,r[1] ,olympic_sim.select_type_game(r[1], 4, 0))
+            table_results.append(results)
+    elif deporte.sport_class == 'I':
+        olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(deporte.sp_record_best), float(deporte.sp_record_last), deporte.sport_class)
+        for r in ranks:
+            results = (r[0] ,r[1] ,olympic_sim.select_type_game(r[1], 1, 0))
+            table_results.append(results)
+    elif deporte.sport_class == 'R':
+        olympic_sim = sports_by_rounds.SportsByRounds(deporte.sp_record_name, float(deporte.sp_record_best), float(deporte.sp_record_last), deporte.sport_class)
+        for r in ranks:
+            results = (r[0] ,r[1] ,olympic_sim.select_type_game(r[1], 4, 7))
+            table_results.append(results)
+    else:
+        olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(deporte.sp_record_best), float(deporte.sp_record_last), deporte.sport_class)
+        for r in ranks:
+            results = (r[0] ,r[1] ,olympic_sim.select_type_game(r[1], 1, 0))
+            table_results.append(results)
+
+    if float(deporte.sp_record_best) < float(deporte.sp_record_last):
+        table_results = sorted(table_results, key=lambda x: x[2])
+    else:
+        table_results = sorted(table_results, key=lambda x: x[2], reverse=True)
+
+    return render(request, 'simulation_table_template.html',{'resultados': table_results, 'clase': match_class})

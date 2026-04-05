@@ -162,6 +162,7 @@ class Sportsrecords(models.Model):
     sp_record_name = models.CharField(max_length=100)
     sp_record_best = models.DecimalField(max_digits=50, decimal_places=3)
     sp_record_last = models.DecimalField(max_digits=50, decimal_places=3)
+    sport_class = models.CharField(max_length=2)
     team_sport = models.ForeignKey('Teamsports', models.DO_NOTHING)
 
     class Meta:
