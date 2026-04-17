@@ -11,7 +11,14 @@ from django.db import models
 class Clubleague(models.Model):
     club_league_id = models.BigAutoField(primary_key=True)
     club_league_name = models.CharField(max_length=150)
-
+    club_country = models.ForeignKey('Nationalteams', models.DO_NOTHING, db_column='club_country')
+    club_division = models.CharField(max_length=2)
+    club_prom_reg = models.IntegerField()
+    club_first_qual = models.IntegerField()
+    club_second_qual = models.IntegerField()
+    club_third_qual = models.IntegerField()
+    clas_direct = models.CharField(max_length=2)
+    team_region = models.ForeignKey('Teamregion', models.DO_NOTHING)
     class Meta:
         managed = False
         db_table = 'ClubLeague'

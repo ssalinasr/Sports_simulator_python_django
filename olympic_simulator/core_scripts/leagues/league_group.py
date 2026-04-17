@@ -197,6 +197,30 @@ class Group():
         )
         return ordered[:quantity]
     
+    def get_qualified_specified_teams(self, begin, end):
+        ordered = sorted(
+            self.teams,
+            key=lambda e:(
+                self.table[e]["pts"],
+                self.table[e]["gd"],
+                self.table[e]["gf"]
+            ),
+            reverse=True
+        )
+        return ordered[begin:end]
+    
+    def get_qualified_reversed_teams(self, quantity):
+        ordered = sorted(
+            self.teams,
+            key=lambda e:(
+                self.table[e]["pts"],
+                self.table[e]["gd"],
+                self.table[e]["gf"]
+            ),
+            reverse=True
+        )
+        return ordered[-quantity:]
+    
     def get_league_table(self):
         return self.table
     

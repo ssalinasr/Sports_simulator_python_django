@@ -9,6 +9,7 @@ from core_scripts.leagues import league_group
 from core_scripts.tournaments import tournament_group
 from core_scripts.tournaments import full_tournament
 from core_scripts.interfaces.olympic_sports_interfaces import sports_by_heats, sports_by_individual, sports_by_rounds
+from core_scripts.clubs_leagues import club_league_season
 import itertools
 from openpyxl import Workbook
 import os
@@ -777,7 +778,76 @@ def pagina_simulacion_completa_clubes(request, match_class):
                   {'equipos': page_teams, 'agrupaciones': page_groups, 'deportes': page_sports, 'clase': match_class, 'years': years})
 
 def generar_simulacion_completa_clubes(request, match_class):
-    pass
+    ranks = []
+    teams = []
+    teams_by_lg = []
+    full_trn = None
+    valor_año = request.GET.get('valoryear')
+    hay_guardado = request.GET.get('registrarres')
+    file_name = ''
+
+    equipos = Clubs.objects.all()
+    ligas = Clubleague.objects.all()
+    deporte = Teamsports.objects.get(team_sport_name = 'Futbol Masculino')
+    continentes = Teamregion.objects.all()
+    lista_continentes = [cont.team_region_name for cont in continentes]
+
+    for eq in equipos:
+        rank = eq.club_value
+        teams.append(eq.club_name)
+        rank_tuple = (eq.club_name, rank)
+        ranks.append(rank_tuple)
+    
+    for lg in ligas:
+        temp_team_list = []
+        lg_country = Nationalteams.objects.get(team_id = lg.club_country.team_id)
+        lg_region = Teamregion.objects.get(team_region_id = lg.team_region_id)
+        lg_teams = Clubs.objects.filter(club_league = lg)
+        for eq in lg_teams:
+            temp_team_list.append(eq.club_name)
+        new_tuple = (temp_team_list, lg_country.team_name, lg.club_league_name, lg.club_division,
+                      lg.club_first_qual, lg.club_second_qual, lg.club_third_qual, lg.clas_direct, lg_region.team_region_name)  
+        print(new_tuple[1], new_tuple[2])
+        teams_by_lg.append(new_tuple)
+    
+    from collections import defaultdict
+
+    agrupado = defaultdict(list)
+
+    for t in teams_by_lg:
+        agrupado[t[1]].append(t)
+
+    resultado = dict(agrupado)
+    total_results = []
+    
+    for pais,tuplas in resultado.items():
+        print(pais)    
+        for tp in tuplas:
+            qualifier_list = [tp[4], tp[5], tp[6]]  
+            if tp[1] == 'Inglaterra':
+                print('Este es Inglaterra')
+            has_promotion = False
+            promotions = 0
+            if len(tuplas) >= 2:
+                has_promotion = True
+                promotions = 2
+            else:
+                has_promotion = False
+                promotions = 0
+            season = club_league_season.ClubLeagueSeason(tp, tp[1], has_promotion, valor_año, promotions, qualifier_list, tp[8], hay_guardado, ranks)
+            season.simulate_league()
+            if tp[3] == '1D': 
+                results = season.get_full_results()
+                total_results.append(results)
+
+
+
+    return HttpResponse("")
+    
+
+
+
+    
 
 def generar_simulacion(request, match_class):
     ranks = []

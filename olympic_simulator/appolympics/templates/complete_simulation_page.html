@@ -64,11 +64,19 @@
 
                         <!-- Botón -->
                         <div class="col-12 text-center mt-3">
+                            {% if clase != 3 %}
                             <button class="esports-btn justify-content-center"
                                 hx-get="{% url 'generar_simulacion_completa' clase %}" hx-target="#resultsTournament"
                                 hx-include="#deporteSelect, #tournamentYear, #selectSave">>
                                 Generar competencia
                             </button>
+                            {% else %}
+                            <button class="esports-btn justify-content-center"
+                                hx-get="{% url 'generar_simulacion_completa_clubes' clase %}" hx-target="#resultsTournament"
+                                hx-include="#deporteSelect, #tournamentYear, #selectSave">>
+                                Generar competencia
+                            </button>
+                            {% endif %}
                         </div>
 
                     </div>
