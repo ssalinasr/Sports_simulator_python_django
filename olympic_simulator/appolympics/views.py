@@ -840,6 +840,24 @@ def generar_simulacion_completa_clubes(request, match_class):
                 results = season.get_full_results()
                 total_results.append(results)
 
+    # inicializar 6 listas por continente
+    agrupado = {
+        c: [[] for _ in range(6)]
+        for c in lista_continentes
+    }
+
+    for t in total_results:
+        continente = t[1]
+
+        if continente in agrupado:
+            for i, bloque in enumerate(t[0]):   # i = posición (0 a 5)
+                for sub in bloque:
+                    agrupado[continente][i].extend(sub)
+
+    for c, l in agrupado.items():
+        print(c)
+        for element in l:
+            print(len(element))
 
 
     return HttpResponse("")
