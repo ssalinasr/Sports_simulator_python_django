@@ -1,0 +1,23 @@
+                <div class="esports-card text-center">
+
+                    <div class="card-title">Estado</div>
+
+                    <div style="padding: 2rem 0;">
+                        <h3 style="
+                        color: var(--neon-blue);
+                        text-transform: uppercase;
+                        letter-spacing: 2px;
+                        font-weight: 700;
+                        animation: fadeUp 0.6s ease;
+                    ">
+                            Generación completada
+                            {% for link in download_links %}
+                            <div>
+                            <a href="{{ link }}" download>
+                                Descargar archivo Excel: {{ link }} 
+                            </a>    
+                            </div>
+                            {% endfor %}
+                        </h3>
+                    </div>
+                </div>

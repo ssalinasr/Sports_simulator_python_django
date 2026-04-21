@@ -14,7 +14,7 @@ class TimeSport(SportsInterface):
     def get_probability_list(self):
         self.sport_name = self.sport_name.replace(" Masculino","").replace(" Femenino","")  
         if self.sport_name == 'Futbol':
-            self.probs = [1/585, 1/475, 1/255, 1/184, 1/90, 1/60, 1/59, 1/50, 1/45, 1/34, 1/22, 1/9, 1/4]
+            self.probs = [1/585, 1/475, 1/255, 1/184, 1/135, 1/80, 1/59, 1/50, 1/45, 1/34, 1/22, 1/9, 1/4]
         elif self.sport_name in ['Futsal','Hockey']:
             self.probs = [1/292, 1/237, 1/123, 1/92, 1/46, 1/35, 1/30, 1/25, 1/23, 1/17, 1/11, 1/5, 1/2]
         elif self.sport_name in ['Rugby', 'Balonmano']:
