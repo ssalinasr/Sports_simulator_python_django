@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.db.models import Q
-from .models import Teamregion, Nationalteams, Olympicplayers, Teamsports, Clubleague, Clubs, Playercountry, Playertournamentsports, Teamranks, Sportsrecords
+from .models import Teamregion, Nationalteams, Olympicplayers, Teamsports, Clubleague, Clubs, Playercountry, Playertournamentsports, Teamranks, Sportsrecords, Clubmatchesregister
 import base64
 from core_scripts.interfaces.sports_interfaces import sports_by_time, sports_by_sets, sports_by_ends, sports_by_special_sets, sports_by_timed_points
 from core_scripts.interfaces.games_interfaces import goldeneye_interface, mariokart_interface, supersmash_interface, muns_interface
@@ -789,6 +789,8 @@ def generar_simulacion_completa_clubes(request, match_class):
     file_name = ''
     download_links = []
 
+
+    Clubmatchesregister.objects.filter(match_year = str(valor_año)).delete()
     equipos = Clubs.objects.all()
     ligas = Clubleague.objects.all()
     deporte = Teamsports.objects.get(team_sport_name = 'Futbol Masculino')

@@ -30,7 +30,7 @@ class Clubmatchesregister(models.Model):
     club_local_score = models.IntegerField()
     club_away = models.ForeignKey('Clubs', models.DO_NOTHING, related_name='clubmatchesregister_club_away_set')
     club_away_score = models.IntegerField()
-    result_label = models.CharField(max_length=30)
+    result_label = models.CharField(max_length=300)
     match_year = models.CharField(max_length=4)
     class Meta:
         managed = False
@@ -47,6 +47,7 @@ class Clubtournamentregister(models.Model):
     club_ag_points = models.IntegerField()
     club_position = models.IntegerField()
     club_year = models.CharField(max_length=4)
+    club_trn = models.CharField(max_length=100)
 
     class Meta:
         managed = False

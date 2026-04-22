@@ -3,6 +3,7 @@ from core_scripts.leagues import league_group
 from collections import defaultdict
 from openpyxl import Workbook
 from openpyxl.styles import Font
+from appolympics.models import Clubs, Clubmatchesregister, Teamsports, Clubtournamentregister
 
 class ClubLeagueSeason:
     def __init__(self, teams_tuple, country, has_promotion, year, promotions, qualifiers, region, has_save, ranks):
@@ -15,6 +16,7 @@ class ClubLeagueSeason:
         self.promotions = promotions
         self.qualifiers = qualifiers
         self.region = region
+        self.league = ""
         self.first_cup_qualified = []
         self.first_cup_prev_qualified = []
         self.second_cup_qualified = []
@@ -29,6 +31,7 @@ class ClubLeagueSeason:
 
 
     def simulate_league(self):
+        self.league = self.teams_tuple[2]
         groups = league_group.Group(self.teams_tuple[2], self.teams_tuple[0], True, 'Futbol Masculino', 3, self.ranks)  
         groups.generate_calendar()
         groups.simulate_league()
@@ -56,6 +59,9 @@ class ClubLeagueSeason:
 
         self.general_matches.append(matches)
         self.general_tables.append(sorted_table)
+
+        if self.has_save:
+            self.save_results()
 
         if self.teams_tuple[3] == '1D':
             if self.has_promotion:
@@ -103,6 +109,64 @@ class ClubLeagueSeason:
     
     def get_third_cup_prev_qualified_teams(self):
         return self.third_cup_prev_qualified
+    
+    def save_results(self):
+        merged_table = self.merge_tables(self.general_tables)
+        index = 1
+        for eq in merged_table:
+            club_obj = Clubs.objects.get(club_name = eq[0])
+            try:
+                existing_log = Clubtournamentregister.objects.get(club_id = club_obj.club_id, club_year = str(self.year), club_trn = 'Liga_'+self.country)
+                existing_log.club_id = club_obj.club_id
+                existing_log.club_wins = eq[1]['w']
+                existing_log.club_draws = eq[1]['d']
+                existing_log.club_loses = eq[1]['l']
+                existing_log.club_sc_points = eq[1]['gf']
+                existing_log.club_ag_points = eq[1]['gc']
+                existing_log.club_position = index
+                existing_log.club_year = str(self.year)
+                existing_log.club_trn = 'Liga_'+self.country
+                existing_log.save()
+
+            except Clubtournamentregister.DoesNotExist:
+                tournament_element = Clubtournamentregister(
+                    club_id = club_obj.club_id,
+                    club_wins = eq[1]['w'],
+                    club_draws = eq[1]['d'],
+                    club_loses = eq[1]['l'],
+                    club_sc_points = eq[1]['gf'],
+                    club_ag_points = eq[1]['gc'],
+                    club_position = index,
+                    club_year = str(self.year),
+                    club_trn = 'Liga_'+self.country
+                )
+                tournament_element.save()
+            index += 1
+
+        for cont in self.general_matches:
+            for m in cont:
+                #print(m['team1'], m['team2'])
+                club1_obj = Clubs.objects.get(club_name = m['team1'])
+                club2_obj = Clubs.objects.get(club_name = m['team2'])
+                result_label = ''
+
+                if int(m['score1']) > int(m['score2']):
+                    result_label = m['team1'] + ' W.'
+                elif int(m['score2']) > int(m['score1']):
+                    result_label = m['team2'] + ' W.'
+                else:
+                    result_label = 'D.'
+            
+
+                match_element = Clubmatchesregister(
+                    club_local_id = club1_obj.club_id,
+                    club_local_score = m['score1'],
+                    club_away_id = club2_obj.club_id,
+                    club_away_score = m['score2'],
+                    result_label = result_label,
+                    match_year = str(self.year)
+                )
+                match_element.save()
     
     def merge_tables(self, tables):
         merged = defaultdict(lambda: {

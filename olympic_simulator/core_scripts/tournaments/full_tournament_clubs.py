@@ -8,7 +8,7 @@ from collections import defaultdict
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from django.http import HttpResponse
-from appolympics.models import Nationalteams, Olympicplayers, Teammatchesregister, Teamsports, Playertournamentsports, Teamtournamentregister, Playertournamentregister
+from appolympics.models import Clubs, Clubmatchesregister, Teamsports, Clubtournamentregister
 
 class FullTournamentClubs():
 
@@ -139,110 +139,63 @@ class FullTournamentClubs():
         return self.world_qualified
 
     def save_results(self):
-        if self.match_class in [1,5]:
-            merged_table = self.merge_tables(self.general_tables)
-            print(merged_table)
-            print(len(merged_table))
-            index = 1
-            for eq in merged_table:
-                team_obj = Nationalteams.objects.get(team_name = eq[0])
-                sport = Teamsports.objects.get(team_sport_name = self.sport)
-                try:
-                    existing_log = Teamtournamentregister.objects.get(team_id = team_obj.team_id, team_year = str(self.year), team_sport_id = sport.team_sport_id)
-                    existing_log.team_id = team_obj.team_id
-                    existing_log.team_wins = eq[1]['w']
-                    existing_log.team_draws = eq[1]['d']
-                    existing_log.team_loses = eq[1]['l']
-                    existing_log.team_sc_points = eq[1]['gf']
-                    existing_log.team_ag_points = eq[1]['gc']
-                    existing_log.team_position = index
-                    existing_log.team_year = str(self.year)
-                    existing_log.team_sport_id = sport.team_sport_id
-                    existing_log.save()
+        merged_table = self.merge_tables(self.general_tables)
+        index = 1
+        for eq in merged_table:
+            club_obj = Clubs.objects.get(club_name = eq[0])
+            try:
+                existing_log = Clubtournamentregister.objects.get(club_id = club_obj.club_id, club_year = str(self.year), club_trn = self.league_name)
+                existing_log.club_id = club_obj.club_id
+                existing_log.club_wins = eq[1]['w']
+                existing_log.club_draws = eq[1]['d']
+                existing_log.club_loses = eq[1]['l']
+                existing_log.club_sc_points = eq[1]['gf']
+                existing_log.club_ag_points = eq[1]['gc']
+                existing_log.club_position = index
+                existing_log.club_year = str(self.year)
+                existing_log.club_trn = self.league_name
+                existing_log.save()
 
-                except Teamtournamentregister.DoesNotExist:
-                    tournament_element = Teamtournamentregister(
-                        team_id = team_obj.team_id,
-                        team_wins = eq[1]['w'],
-                        team_draws = eq[1]['d'],
-                        team_loses = eq[1]['l'],
-                        team_sc_points = eq[1]['gf'],
-                        team_ag_points = eq[1]['gc'],
-                        team_position = index,
-                        team_year = str(self.year),
-                        team_sport_id = sport.team_sport_id
-                    )
-                    tournament_element.save()
-                index += 1
+            except Clubtournamentregister.DoesNotExist:
+                tournament_element = Clubtournamentregister(
+                    club_id = club_obj.club_id,
+                    club_wins = eq[1]['w'],
+                    club_draws = eq[1]['d'],
+                    club_loses = eq[1]['l'],
+                    club_sc_points = eq[1]['gf'],
+                    club_ag_points = eq[1]['gc'],
+                    club_position = index,
+                    club_year = str(self.year),
+                    club_trn = self.league_name
+                )
+                tournament_element.save()
+            index += 1
 
-            sport = Teamsports.objects.get(team_sport_name = self.sport)
-            Teammatchesregister.objects.filter(match_year = str(self.year), team_sport_id = sport.team_sport_id).delete()
+        for cont in self.general_matches:
+            for m in cont:
+                #print(m['team1'], m['team2'])
+                club1_obj = Clubs.objects.get(club_name = m['team1'])
+                club2_obj = Clubs.objects.get(club_name = m['team2'])
+                result_label = ''
 
-            for cont in self.general_matches:
-                for m in cont:
-                    #print(m['team1'], m['team2'])
-                    team1_obj = Nationalteams.objects.get(team_name = m['team1'])
-                    team2_obj = Nationalteams.objects.get(team_name = m['team2'])
-                    sport = Teamsports.objects.get(team_sport_name = self.sport)
-                    result_label = ''
+                if int(m['score1']) > int(m['score2']):
+                    result_label = m['team1'] + ' W.'
+                elif int(m['score2']) > int(m['score1']):
+                    result_label = m['team2'] + ' W.'
+                else:
+                    result_label = 'D.'
+            
 
-                    if int(m['score1']) > int(m['score2']):
-                        result_label = m['team1'] + ' W.'
-                    elif int(m['score2']) > int(m['score1']):
-                        result_label = m['team2'] + ' W.'
-                    else:
-                        result_label = 'D.'
-                
+                match_element = Clubmatchesregister(
+                    club_local_id = club1_obj.club_id,
+                    club_local_score = m['score1'],
+                    club_away_id = club2_obj.club_id,
+                    club_away_score = m['score2'],
+                    result_label = result_label,
+                    match_year = str(self.year)
+                )
+                match_element.save()
 
-                    match_element = Teammatchesregister(
-                        team_local_id = team1_obj.team_id,
-                        team_local_score = m['score1'],
-                        team_away_id = team2_obj.team_id,
-                        team_away_score = m['score2'],
-                        result_label = result_label,
-                        team_sport_id = sport.team_sport_id,
-                        match_year = str(self.year)
-                    )
-                    match_element.save()
-                
-
-            pass
-        elif self.match_class in [2,4]:
-            merged_table = self.merge_tables(self.general_tables)
-            print(merged_table)
-            print(len(merged_table))
-            index = 1
-            for eq in merged_table:
-                player_obj = Olympicplayers.objects.get(ol_player_name = eq[0])
-                sport = Playertournamentsports.objects.get(player_trn_sport_name = self.sport)
-                try:
-                    existing_log = Playertournamentregister.objects.get(ol_player_id = player_obj.ol_player_id, ol_player_year = str(self.year), player_trn_sport_id = sport.player_trn_sport_id)
-                    existing_log.ol_player_id = player_obj.ol_player_id
-                    existing_log.ol_player_wins = eq[1]['w']
-                    existing_log.ol_player_draws = eq[1]['d']
-                    existing_log.ol_player_loses = eq[1]['l']
-                    existing_log.ol_player_sc_points = eq[1]['gf']
-                    existing_log.ol_player_ag_points = eq[1]['gc']
-                    existing_log.ol_player_position = index
-                    existing_log.ol_player_year = str(self.year)
-                    existing_log.player_trn_sport_id = sport.player_trn_sport_id
-                    existing_log.save()
-
-                except Playertournamentregister.DoesNotExist:
-                    tournament_element = Playertournamentregister(
-                        ol_player_id = player_obj.ol_player_id,
-                        ol_player_wins = eq[1]['w'],
-                        ol_player_draws = eq[1]['d'],
-                        ol_player_loses = eq[1]['l'],
-                        ol_player_sc_points = eq[1]['gf'],
-                        ol_player_ag_points = eq[1]['gc'],
-                        ol_player_position = index,
-                        ol_player_year = str(self.year),
-                        player_trn_sport_id = sport.player_trn_sport_id
-                    )
-                    tournament_element.save()
-                index += 1
-        pass
 
 
 
