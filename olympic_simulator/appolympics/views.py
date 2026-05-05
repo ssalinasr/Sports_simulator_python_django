@@ -1167,12 +1167,18 @@ def consultar_por_pais(request):
             When(team_away_id=country.team_id, then=F('team_local_score')),
             output_field=IntegerField()
         ),
+        rival=Case(
+        When(team_local_id=country.team_id, then=F('team_away')),
+        When(team_away_id=country.team_id, then=F('team_local')),
+        ),
         diferencia=F('goles_favor') - F('goles_contra')
     )
 
     mejor = qs.order_by('-diferencia').first()
+    rival_mejor = Nationalteams.objects.get(team_id = mejor.rival)
     peor = qs.order_by('diferencia').first()
+    rival_peor = Nationalteams.objects.get(team_id = peor.rival)
 
     return render(request, 'logs/country_search_results.html', {'pais_mayor': major_country, 'continente': major_region, 
                                                                 'valores_historicos': historic_values, 'mejor_partido': mejor,
-                                                                'peor_partido': peor})
+                                                                'peor_partido': peor, 'rival_mejor': rival_mejor, 'rival_peor': rival_peor})
