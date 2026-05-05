@@ -289,6 +289,45 @@
         })
 
         window.addEventListener("resize", buildBracket)
+
+
+        function eliminarEquipo(elemento) {
+    const teamId = elemento.dataset.id; // ya es string
+
+    fetch('delete_team/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({ team_id: teamId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'ok') {
+            elemento.remove();
+        }
+
+        // eliminar input hidden asociado
+            const input = document.getElementById(`item-${teamId}`);
+            if (input) {
+                input.remove();
+            }
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie) {
+        document.cookie.split(';').forEach(cookie => {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            }
+        });
+    }
+    return cookieValue;
+}
     </script>
 
 

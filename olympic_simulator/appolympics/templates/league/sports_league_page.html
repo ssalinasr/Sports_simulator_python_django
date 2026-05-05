@@ -188,7 +188,48 @@ function sortTable(col) {
     rows.sort((a, b) => a.cells[col].innerText.localeCompare(b.cells[col].innerText, undefined, {numeric:true}));
     rows.forEach(r => table.tBodies[0].appendChild(r));
 }
+
+function eliminarEquipo(elemento) {
+    const teamId = elemento.dataset.id; // ya es string
+
+    fetch('delete_team/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({ team_id: teamId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'ok') {
+            elemento.remove();
+        }
+
+        // eliminar input hidden asociado
+            const input = document.getElementById(`item-${teamId}`);
+            if (input) {
+                input.remove();
+            }
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie) {
+        document.cookie.split(';').forEach(cookie => {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            }
+        });
+    }
+    return cookieValue;
+}
+
 </script>
+
+
 
 <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </body>

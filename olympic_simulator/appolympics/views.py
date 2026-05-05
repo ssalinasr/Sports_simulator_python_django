@@ -1,7 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.db.models import Q
-from .models import Teamregion, Nationalteams, Olympicplayers, Teamsports, Clubleague, Clubs, Playercountry, Playertournamentsports, Teamranks, Sportsrecords, Clubmatchesregister
+from django.http import JsonResponse
+from django.db.models import Q, Sum, F, Case, When, IntegerField, Max, Min
+from django.db.models.functions import Coalesce
+from .models import Teamregion, Nationalteams, Olympicplayers, Teamsports, Clubleague, Clubs, Playercountry, Playertournamentsports, Teamranks, Sportsrecords, Clubmatchesregister, Teamtournamentregister
+from .models import Teammatchesregister
 import base64
 from core_scripts.interfaces.sports_interfaces import sports_by_time, sports_by_sets, sports_by_ends, sports_by_special_sets, sports_by_timed_points
 from core_scripts.interfaces.games_interfaces import goldeneye_interface, mariokart_interface, supersmash_interface, muns_interface
@@ -17,10 +20,10 @@ from django.conf import settings
 import random
 import pandas as pd
 import re
+import json
 
-# Create your views here.
 def pagina_principal(request):
-    return render(request, 'simulator_page.html')
+    return render(request, 'main/simulator_page.html')
 
 def pagina_partido_individual(request, match_class):
     page_groups = []
@@ -59,7 +62,7 @@ def pagina_partido_individual(request, match_class):
         page_teams = Nationalteams.objects.all()
         page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino') | Q(team_sport_name__icontains='Femenino'))
 
-    return render(request, 'sports_match_page.html', 
+    return render(request, 'match/sports_match_page.html', 
                   {'equipos': page_teams, 'agrupaciones': page_groups, 'deportes': page_sports, 'clase': match_class, 'genero': 'M'})
 
 def pagina_partidos_liga(request, match_class):
@@ -94,9 +97,8 @@ def pagina_partidos_liga(request, match_class):
         page_teams = Nationalteams.objects.all()
         page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino') | Q(team_sport_name__icontains='Femenino'))
 
-    return render(request, 'sports_league_page.html', 
+    return render(request, 'league/sports_league_page.html', 
                   {'equipos': page_teams, 'agrupaciones': page_groups, 'deportes': page_sports, 'clase': match_class, 'genero': 'M'})
-
 
 def pagina_partidos_torneo(request, match_class):
     request.session.flush()
@@ -136,9 +138,8 @@ def pagina_partidos_torneo(request, match_class):
         page_teams = Nationalteams.objects.all()
         page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino') | Q(team_sport_name__icontains='Femenino'))
 
-    return render(request, 'sports_tournament_page.html', 
+    return render(request, 'tournament/sports_tournament_page.html', 
                   {'equipos': page_teams, 'agrupaciones': page_groups, 'deportes': page_sports, 'clase': match_class, 'genero': 'M'})
-
 
 def pagina_competencia(request, match_class):
     sports_categories = []
@@ -160,14 +161,13 @@ def pagina_competencia(request, match_class):
 
     print(sports_categories)
 
-    return render(request, 'sports_simulation_page.html', {'categorias': sports_categories, 'deportes': sports, 'clase': match_class})
+    return render(request, 'olympic/sports_simulation_page.html', {'categorias': sports_categories, 'deportes': sports, 'clase': match_class})
 
 def cargar_pruebas(request, match_class):
     categoria = request.GET.get('categoria')
     sport = Teamsports.objects.get(team_sport_name = categoria)
     page_sports = Sportsrecords.objects.filter(team_sport_id = sport.team_sport_id)
-    return render(request, 'change_sports_template.html', {'deportes': page_sports})
-
+    return render(request, 'general/change_sports_template.html', {'deportes': page_sports})
 
 def cargar_equipos(request, match_class):
     agrupacion = request.GET.get('agrupacion')
@@ -189,8 +189,7 @@ def cargar_equipos(request, match_class):
 
     print(page_teams.count())
 
-    return render(request, 'change_teams_template.html', {'equipos': page_teams, 'clase': match_class})
-
+    return render(request, 'general/change_teams_template.html', {'equipos': page_teams, 'clase': match_class})
 
 def mostrar_equipo(request, match_class):
     equipo_id = request.GET.get('equipo_id')
@@ -218,7 +217,7 @@ def mostrar_equipo(request, match_class):
     
     img_base64 = base64.b64encode(bytes(img)).decode('utf-8')
     
-    return render(request, 'insert_team_template.html',{'equipo': page_team, 'imagen': img_base64, 'class': match_class, 'orientacion': orientacion})
+    return render(request, 'general/insert_team_template.html',{'equipo': page_team, 'imagen': img_base64, 'class': match_class, 'orientacion': orientacion})
 
 def generar_partido(request, match_class):
     valor_local = request.GET.get('equipolocal')
@@ -387,12 +386,10 @@ def generar_partido(request, match_class):
         results = sport_object.simulate_game(sport_object.game_type)
         print(results)
     
-    return render(request, 'match_results_template.html',{'resultado': results, 'clase_deporte': sport_class})
+    return render(request, 'match/match_results_template.html',{'resultado': results, 'clase_deporte': sport_class})
 
 def insertar_equipo(request, match_class):
     equipo_id = request.GET.get('equipo_id')
-
-
     print('este es el equipo_id: ' + equipo_id)
     if "equipos_actuales" not in request.session:
         print('sesion vacia')
@@ -404,6 +401,8 @@ def insertar_equipo(request, match_class):
 
     request.session["equipos_actuales"].append(equipo_id)
     request.session.modified = True
+
+    print(request.session["equipos_actuales"])
 
     if equipo_id == '':
         return HttpResponse("")
@@ -420,7 +419,24 @@ def insertar_equipo(request, match_class):
         page_team = Nationalteams.objects.get(team_id = equipo_id)
     else:
         page_team = Nationalteams.objects.get(team_id = equipo_id)
-    return render(request, 'insert_league_team_template.html',{'equipo': page_team, 'clase': match_class})
+    return render(request, 'general/insert_league_team_template.html',{'equipo': page_team, 'clase': match_class})
+
+def eliminar_equipo(request, match_class):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        team_id = data.get('team_id')  # ⚠️ string
+
+        equipos = request.session.get("equipos_actuales", [])
+
+        if team_id in equipos:
+            equipos.remove(team_id)
+            request.session["equipos_actuales"] = equipos
+            request.session.modified = True
+
+            return JsonResponse({'status': 'ok'})
+
+        return JsonResponse({'status': 'error', 'mensaje': 'No estaba en sesión'})
+    return HttpResponse("")
 
 def generar_liga(request, match_class):
     equipos_seleccionados = request.GET.getlist("equipos")
@@ -504,7 +520,7 @@ def generar_liga(request, match_class):
         for k in m:
             print(k)
 
-    return render(request, 'league_table_template.html',{'table': sorted_table, 'clase': match_class, 'matches': matches})
+    return render(request, 'league/league_table_template.html',{'table': sorted_table, 'clase': match_class, 'matches': matches})
     
 def generar_torneo(request, match_class):
     equipos_seleccionados = request.GET.getlist("equipos")
@@ -593,13 +609,12 @@ def generar_torneo(request, match_class):
         for k in m:
             print(k)
 
-    return render(request, 'tournament_results_template.html',{'table': sorted_table, 'clase': match_class, 'matches': matches,
+    return render(request, 'tournament/tournament_results_template.html',{'table': sorted_table, 'clase': match_class, 'matches': matches,
                                                         "bracket": trn_result["bracket"],
                                                         "champion": trn_result["champion"],
                                                         "runner_up": trn_result["runner_up"],
                                                         "third_place": trn_result["third_place"],
                                                         "third_match": info_trn})
-
 
 def pagina_simulacion_completa(request, match_class):
     request.session.flush()
@@ -636,9 +651,8 @@ def pagina_simulacion_completa(request, match_class):
         page_teams = Nationalteams.objects.all()
         page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino') | Q(team_sport_name__icontains='Femenino'))
 
-    return render(request, 'complete_simulation_page.html', 
+    return render(request, 'full_simulation/complete_simulation_page.html', 
                   {'equipos': page_teams, 'agrupaciones': page_groups, 'deportes': page_sports, 'clase': match_class, 'years': years})
-
 
 def generar_simulacion_completa(request, match_class):
     ranks = []
@@ -760,10 +774,9 @@ def generar_simulacion_completa(request, match_class):
 
     download_url = settings.MEDIA_URL + file_name
 
-    return render(request, "generate_download_excel.html", {
+    return render(request, "general/generate_download_excel.html", {
         "download_url": download_url
     })
-
 
 def pagina_simulacion_completa_clubes(request, match_class):
     request.session.flush()
@@ -776,7 +789,7 @@ def pagina_simulacion_completa_clubes(request, match_class):
     page_teams = Clubs.objects.all()
     page_sports.append('Clubes')
 
-    return render(request, 'complete_simulation_page.html', 
+    return render(request, 'full_simulation/complete_simulation_page.html', 
                   {'equipos': page_teams, 'agrupaciones': page_groups, 'deportes': page_sports, 'clase': match_class, 'years': years})
 
 def generar_simulacion_completa_clubes(request, match_class):
@@ -1016,15 +1029,12 @@ def generar_simulacion_completa_clubes(request, match_class):
 
     download_links = [s.replace("/media/","") for s in download_links]
 
-    return render(request, "generate_download_excel_clubs.html", {
+    return render(request, "general/generate_download_excel_clubs.html", {
         "download_links": download_links
     })
     
-
 def limpiar_nombre(nombre):
-    return re.sub(r'[:\\/*?\[\]]', '', nombre)
-
-    
+    return re.sub(r'[:\\/*?\[\]]', '', nombre)    
 
 def generar_simulacion(request, match_class):
     ranks = []
@@ -1091,4 +1101,78 @@ def generar_simulacion(request, match_class):
     else:
         table_results = sorted(table_results, key=lambda x: x[2], reverse=True)
 
-    return render(request, 'simulation_table_template.html',{'resultados': table_results, 'clase': match_class})
+    return render(request, 'olympic/simulation_table_template.html',{'resultados': table_results, 'clase': match_class})
+
+def pagina_registro_por_pais(request):
+    sports = Teamsports.objects.filter(~Q(team_sport_name__icontains = 'Mario'), team_sport_class = 'T')
+    countries = Nationalteams.objects.all()
+    return render(request, 'logs/country_register_page.html', {'deportes': sports, 'paises': countries})
+
+def pagina_registro_por_pais_olimpico(request):
+    return render(request, 'logs/country_register_page_olympic.html')
+
+def pagina_registro_por_jugador_individual(request):
+    return render(request, 'logs/player_register_page.html')
+
+def pagina_registro_por_jugador_individual_olimpico(request):
+    return render(request, 'logs/player_register_page_olympic.html')
+
+def pagina_registro_por_pais_mayor(request):
+    return render(request, 'logs/major_country_register_page.html')
+
+def pagina_registro_por_pais_mayor_olimpico(request):
+    return render(request, 'logs/major_country_register_page_olympic.html')
+
+def pagina_registro_por_club(request):
+    return render(request, 'logs/club_register_page.html')
+
+def consultar_por_pais(request):
+    deporte = request.GET.get('deporte')
+    pais = request.GET.get('pais')
+
+    print(deporte, pais)
+
+    sport = Teamsports.objects.get(team_sport_name = deporte)
+    country = Nationalteams.objects.get(team_name = pais)
+
+    #Busqueda del pais Mayor
+    major_country = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+
+    #Busqueda del continente
+    major_region = Teamregion.objects.get(team_region_id = country.team_region.team_region_id)
+
+    #Victorias, derrotas y empates históricos
+    historic_values = Teamtournamentregister.objects.filter(
+        team_id=country.team_id,
+        team_sport_id=sport.team_sport_id
+    ).aggregate(
+        total_wins=Coalesce(Sum('team_wins'), 0),
+        total_draws=Coalesce(Sum('team_draws'), 0),
+        total_loses=Coalesce(Sum('team_loses'), 0),
+        total_scored=Coalesce(Sum('team_sc_points'), 0),
+        total_against=Coalesce(Sum('team_ag_points'), 0)
+    )
+
+    qs = Teammatchesregister.objects.filter(
+        Q(team_local_id=country.team_id) | Q(team_away_id=country.team_id),
+        team_sport_id=sport.team_sport_id
+    ).annotate(
+        goles_favor=Case(
+            When(team_local_id=country.team_id, then=F('team_local_score')),
+            When(team_away_id=country.team_id, then=F('team_away_score')),
+            output_field=IntegerField()
+        ),
+        goles_contra=Case(
+            When(team_local_id=country.team_id, then=F('team_away_score')),
+            When(team_away_id=country.team_id, then=F('team_local_score')),
+            output_field=IntegerField()
+        ),
+        diferencia=F('goles_favor') - F('goles_contra')
+    )
+
+    mejor = qs.order_by('-diferencia').first()
+    peor = qs.order_by('diferencia').first()
+
+    return render(request, 'logs/country_search_results.html', {'pais_mayor': major_country, 'continente': major_region, 
+                                                                'valores_historicos': historic_values, 'mejor_partido': mejor,
+                                                                'peor_partido': peor})

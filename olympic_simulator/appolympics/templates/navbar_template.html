@@ -26,23 +26,30 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="#">
+                    <a class="nav-link {% if request.path == '' %}active{% endif %}" href="{% url 'pagina_registro_por_jugador_individual' %}">
                         <i class="bi bi-people-fill"></i>
-                        Equipo
+                        Jugador Individual
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="#">
+                    <a class="nav-link {% if request.path == '' %}active{% endif %}" href="{% url 'pagina_registro_por_pais' %}">
                         <i class="bi bi-flag-fill"></i>
                         País
                     </a>
                 </li>
 				
 				<li class="nav-item">
-                    <a class="nav-link" href="#">
+                    <a class="nav-link {% if request.path == '' %}active{% endif %}" href="{% url 'pagina_registro_por_pais_mayor' %}">
                         <i class="bi bi-star-fill"></i>
                         País Mayor
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '' %}active{% endif %}" href="{% url 'pagina_registro_por_club' %}">
+                        <i class="bi bi-trophy"></i>
+                        Club
                     </a>
                 </li>
 

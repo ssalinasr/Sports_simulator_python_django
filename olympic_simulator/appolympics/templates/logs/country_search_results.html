@@ -1,0 +1,106 @@
+            <!-- 3️⃣ ORIGEN -->
+            <div class="row league-row">
+                <div class="col-12 dashboard-item">
+                    <div class="esports-card text-center">
+                        <h5 class="card-title">Origen</h5>
+                        <div class="row">
+                            <div class="col-md-6 col-12">
+                                <div class="score-label">Continente</div>
+                                <div class="score-part mt-2">{{ continente.team_region_name }}</div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <div class="score-label">País Mayor</div>
+                                <div class="score-part mt-2">{{ pais_mayor.ol_country_name }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4️⃣ RESULTADOS -->
+            <div class="row league-row">
+                <div class="col-12 dashboard-item">
+                    <div class="esports-card text-center">
+                        <h5 class="card-title">Resultados</h5>
+                        <div class="row">
+                            <div class="col-md-2 col-12">
+                                <div class="score-label"><i class="bi bi-emoji-smile"></i>Victorias</div>
+                                <div class="score-part mt-2">{{ valores_historicos.total_wins }}</div>
+                            </div>
+                            <div class="col-md-2 col-12">
+                                <div class="score-label"><i class="bi bi-emoji-frown"></i>Derrotas</div>
+                                <div class="score-part mt-2">{{ valores_historicos.total_loses }}</div>
+                            </div>
+                            <div class="col-md-2 col-12">
+                                <div class="score-label"><i class="bi bi-emoji-neutral"></i>Empates</div>
+                                <div class="score-part mt-2">{{ valores_historicos.total_draws }}</div>
+                            </div>
+                            <div class="col-md-3 col-12">
+                                <div class="score-label"><i class="bi bi-arrow-up-circle"></i>Goles a favor</div>
+                                <div class="score-part mt-2">{{ valores_historicos.total_scored }}</div>
+                            </div>
+
+                            <div class="col-md-3 col-12">
+                                <div class="score-label"><i class="bi bi-arrow-down-circle"></i>Goles en contra</div>
+                                <div class="score-part mt-2">{{ valores_historicos.total_against }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5️⃣ RESULTADOS HISTÓRICOS -->
+            <div class="row league-row">
+                <div class="col-12 dashboard-item">
+                    <div class="esports-card text-center">
+                        <h5 class="card-title">Resultados Históricos</h5>
+                        <div class="row">
+                            <div class="col-md-6 col-12">
+                                <div class="score-label">
+                                    <i class="bi bi-arrow-up-circle"></i> Mejor Resultado
+                                </div>
+                                <div class="score-part mt-2">{{ mejor_partido.goles_favor }} - {{ mejor_partido.goles_contra }}</div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <div class="score-label">
+                                    <i class="bi bi-arrow-down-circle"></i> Peor Resultado
+                                </div>
+                                <div class="score-part mt-2">{{ peor_partido.goles_favor }} - {{ peor_partido.goles_contra }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 9️⃣ TÍTULOS POR DEPORTE -->
+            <div class="row league-row">
+                <div class="col-12 dashboard-item">
+                    <div class="esports-card">
+                        <h5 class="card-title">Títulos por Deporte</h5>
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle esports-table sortable">
+                                <thead>
+                                    <tr>
+                                        <th>Deporte</th>
+                                        <th>Títulos Continentales</th>
+                                        <th>Títulos Mundiales</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Fútbol</td>
+                                        <td>5</td>
+                                        <td>2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Baloncesto</td>
+                                        <td>3</td>
+                                        <td>1</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
