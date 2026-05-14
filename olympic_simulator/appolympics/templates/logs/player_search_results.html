@@ -1,0 +1,80 @@
+            <!-- 3️⃣ ORIGEN -->
+            <div class="row league-row">
+                <div class="col-12 dashboard-item">
+                    <div class="esports-card text-center">
+                        <h5 class="card-title">Origen</h5>
+                        <div class="row">
+                            <div class="col-md-12 col-12">
+                                <div class="score-label">País Mayor</div>
+                                <div class="score-part mt-2">{{ pais_mayor.ol_country_name }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4️⃣ RESULTADOS -->
+            <div class="row league-row">
+                <div class="col-12 dashboard-item">
+                    <div class="esports-card text-center">
+                        <h5 class="card-title">Resultados</h5>
+                        <div class="row">
+                            <div class="col-md-2 col-12">
+                                <div class="score-label"><i class="bi bi-emoji-smile"></i>Victorias</div>
+                                <div class="score-part mt-2">{{ valores_historicos.total_wins }}</div>
+                            </div>
+                            <div class="col-md-2 col-12">
+                                <div class="score-label"><i class="bi bi-emoji-frown"></i>Derrotas</div>
+                                <div class="score-part mt-2">{{ valores_historicos.total_loses }}</div>
+                            </div>
+                            <div class="col-md-2 col-12">
+                                <div class="score-label"><i class="bi bi-emoji-neutral"></i>Empates</div>
+                                <div class="score-part mt-2">{{ valores_historicos.total_draws }}</div>
+                            </div>
+                            <div class="col-md-3 col-12">
+                                <div class="score-label"><i class="bi bi-arrow-up-circle"></i>Puntos a favor</div>
+                                <div class="score-part mt-2">{{ valores_historicos.total_scored }}</div>
+                            </div>
+
+                            <div class="col-md-3 col-12">
+                                <div class="score-label"><i class="bi bi-arrow-down-circle"></i>Puntos en contra</div>
+                                <div class="score-part mt-2">{{ valores_historicos.total_against }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9️⃣ TÍTULOS POR DEPORTE -->
+            <div class="row league-row">
+                <div class="col-12 dashboard-item">
+                    <div class="esports-card text-center">
+                        <h5 class="card-title">Títulos</h5>
+                        <div class="row">
+                            <div class="col-md-6 col-12">
+                                <div class="score-label">
+                                    <i class="bi bi-trophy-fill"></i> Título
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <div class="score-label">
+                                    <i class="bi bi-calendar-check"></i> Año
+                                </div>
+                            </div>
+                            {% for tit in titulos%}
+                            <div class="col-md-6 col-12">
+                                <div class="score-part mt-2">{{ tit.title_label }}</div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <div class="score-part mt-2">{{ tit.title_year }}</div>
+                            </div>
+                            {% empty %}
+                            <div class="col-md-12 col-12">
+                                <div class="score-part mt-2">Este jugador no tiene títulos</div>
+                            </div>
+                            {% endfor %}
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>

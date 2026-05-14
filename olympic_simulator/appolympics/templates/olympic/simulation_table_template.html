@@ -1,0 +1,31 @@
+<div class="esports-card">
+    <div class="card-title">
+        <i class="bi bi-table"></i> Tabla
+    </div>
+
+    <div class="table-responsive">
+        <table class="table esports-table text-center" id="leagueTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">País</th>
+                    <th onclick="sortTable(1)">Ranking</th>
+                    <th onclick="sortTable(1)">Resultados</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in resultados %}
+                <tr>
+                    <td>{{ r.0 }}</td>
+                    <td>{{ r.1 }}</td>
+                    {% for val in r.2 %}
+                        <td>{{ val }}</td>
+                    {% endfor %}
+                    
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>

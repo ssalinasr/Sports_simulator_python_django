@@ -1,0 +1,327 @@
+<<<<<<< HEAD
+from appolympics.models import Clubs, Clubleague, Nationalteams
+=======
+from appolympics.models import Clubs, Clubleague
+>>>>>>> cbb3fcc64d501702e72cc1b74cb854126a66434c
+from core_scripts.leagues import league_group
+from collections import defaultdict
+from openpyxl import Workbook
+from openpyxl.styles import Font
+from appolympics.models import Clubs, Clubmatchesregister, Teamsports, Clubtournamentregister, Clubtitleregister
+
+class ClubLeagueSeason:
+    def __init__(self, teams_tuple, country, has_promotion, year, promotions, qualifiers, region, has_save, ranks):
+        self.teams_tuple = teams_tuple
+        self.country = country
+        self.has_promotion = has_promotion
+        self.year = year
+        self.has_save = has_save
+        self.ranks = ranks
+        self.promotions = promotions
+        self.qualifiers = qualifiers
+        self.region = region
+        self.league = ""
+        self.first_cup_qualified = []
+        self.first_cup_prev_qualified = []
+        self.second_cup_qualified = []
+        self.second_cup_prev_qualified = []
+        self.third_cup_qualified = []
+        self.third_cup_prev_qualified = []
+        self.promoted_teams = []
+        self.relegated_teams = []
+        self.general_matches = []
+        self.general_tables = []
+        self.element_names = []
+        self.champions = []
+
+
+    def simulate_league(self):
+        self.league = self.teams_tuple[2]
+        groups = league_group.Group(self.teams_tuple[2], self.teams_tuple[0], True, 'Futbol Masculino', 3, self.ranks)  
+        groups.generate_calendar()
+        groups.simulate_league()
+        self.element_names.append(groups.get_group_name())
+        table = groups.get_league_table()
+        matches = groups.get_league_matches()
+        
+        table_names = []
+        table_values = []
+
+        for k in table.items():
+            table_names.append(k[0])
+            table_values.append(k[1])
+
+        table_dict = dict(zip(table_names, table_values))
+        sorted_table = sorted(
+            table_dict.items(),
+            key= lambda item:(
+                item[1]['pts'],
+                item[1]['gd'],
+                item[1]['gf']
+            ),
+            reverse=True
+        )
+
+        primer_nombre = next(iter(sorted_table), None)
+        self.general_matches.append(matches)
+        self.general_tables.append(sorted_table)
+        print(primer_nombre)
+        self.champions.append((primer_nombre[0], groups.get_group_name()))
+
+<<<<<<< HEAD
+=======
+        if self.has_save:
+            self.save_results()
+
+>>>>>>> cbb3fcc64d501702e72cc1b74cb854126a66434c
+        if self.teams_tuple[3] == '1D':
+            if self.has_promotion:
+                self.relegated_teams.append(groups.get_qualified_reversed_teams(self.promotions))
+            else:
+                pass
+
+            if self.teams_tuple[7] == 'Y':
+                self.first_cup_qualified.append(groups.get_qualified_specified_teams(0, self.qualifiers[0]))
+                self.second_cup_qualified.append(groups.get_qualified_specified_teams(self.qualifiers[0], self.qualifiers[0]+self.qualifiers[1]))
+                self.third_cup_qualified.append(groups.get_qualified_specified_teams(self.qualifiers[0]+self.qualifiers[1], self.qualifiers[0]+self.qualifiers[1]+self.qualifiers[2]))
+            else:
+                self.first_cup_prev_qualified.append(groups.get_qualified_specified_teams(0, self.qualifiers[0]))
+                self.second_cup_prev_qualified.append(groups.get_qualified_specified_teams(self.qualifiers[0], self.qualifiers[0]+self.qualifiers[1]))
+                self.third_cup_prev_qualified.append(groups.get_qualified_specified_teams(self.qualifiers[0]+self.qualifiers[1], self.qualifiers[0]+self.qualifiers[1]+self.qualifiers[2]))
+        elif self.teams_tuple[3] == '2D':
+            self.promoted_teams.append(groups.get_qualified_specified_teams(0, self.promotions))
+
+<<<<<<< HEAD
+        if self.has_save:
+            self.save_results()
+            self.update_promotions_relegations()
+
+    def update_promotions_relegations(self):
+        print(self.promoted_teams, self.relegated_teams)
+        if len(self.promoted_teams) > 0 or len(self.relegated_teams) > 0:
+            country = Nationalteams.objects.get(team_name = self.country)
+            if self.teams_tuple[3] == '1D': #Descensos
+                liga_descenso = None
+                try:
+                    liga_descenso = Clubleague.objects.get(club_division = '2D', club_country = country.team_id)
+                    for clubs in self.relegated_teams:
+                        for cl in clubs:
+                            bd_club = Clubs.objects.get(club_name = cl)
+                            bd_club.club_league = liga_descenso
+                            bd_club.save()
+
+                except Clubleague.DoesNotExist:
+                    print('La liga no tiene descensos')
+            elif self.teams_tuple[3] == '2D':
+                liga_ascenso = None
+                try:
+                    liga_ascenso = Clubleague.objects.get(club_division = '1D', club_country = country.team_id)
+                    for clubs in self.promoted_teams:
+                        for cl in clubs:
+                            bd_club = Clubs.objects.get(club_name = cl)
+                            bd_club.club_league = liga_ascenso
+                            bd_club.save()
+                except Clubleague.DoesNotExist:
+                    print('La liga no tiene ascensos')
+        else:
+            print('No hay cambios (?)')
+
+        
+=======
+    def update_promotions_relegations(self):
+>>>>>>> cbb3fcc64d501702e72cc1b74cb854126a66434c
+        pass
+
+    def get_full_results(self):
+        first_cup = self.get_first_cup_qualified_teams()
+        first_cup_prev = self.get_first_cup_prev_qualified_teams()
+        second_cup = self.get_second_cup_qualified_teams()
+        second_cup_prev = self.get_second_cup_prev_qualified_teams()
+        third_cup = self.get_third_cup_qualified_teams()
+        third_cup_prev = self.get_third_cup_prev_qualified_teams()
+        return ([first_cup, second_cup, third_cup, first_cup_prev, second_cup_prev, third_cup_prev], self.region)
+
+    def get_first_cup_qualified_teams(self):
+        return self.first_cup_qualified
+    
+    def get_second_cup_qualified_teams(self):
+        return self.second_cup_qualified
+    
+    def get_third_cup_qualified_teams(self):
+        return self.third_cup_qualified
+    
+    def get_first_cup_prev_qualified_teams(self):
+        return self.first_cup_prev_qualified
+    
+    def get_second_cup_prev_qualified_teams(self):
+        return self.second_cup_prev_qualified
+    
+    def get_third_cup_prev_qualified_teams(self):
+        return self.third_cup_prev_qualified
+    
+    def save_results(self):
+        merged_table = self.merge_tables(self.general_tables)
+        index = 1
+        for eq in merged_table:
+            club_obj = Clubs.objects.get(club_name = eq[0])
+            try:
+                existing_log = Clubtournamentregister.objects.get(club_id = club_obj.club_id, club_year = str(self.year), club_trn = 'Liga_'+self.country)
+                existing_log.club_id = club_obj.club_id
+                existing_log.club_wins = eq[1]['w']
+                existing_log.club_draws = eq[1]['d']
+                existing_log.club_loses = eq[1]['l']
+                existing_log.club_sc_points = eq[1]['gf']
+                existing_log.club_ag_points = eq[1]['gc']
+                existing_log.club_position = index
+                existing_log.club_year = str(self.year)
+                existing_log.club_trn = 'Liga_'+self.country
+                existing_log.save()
+
+            except Clubtournamentregister.DoesNotExist:
+                tournament_element = Clubtournamentregister(
+                    club_id = club_obj.club_id,
+                    club_wins = eq[1]['w'],
+                    club_draws = eq[1]['d'],
+                    club_loses = eq[1]['l'],
+                    club_sc_points = eq[1]['gf'],
+                    club_ag_points = eq[1]['gc'],
+                    club_position = index,
+                    club_year = str(self.year),
+                    club_trn = 'Liga_'+self.country
+                )
+                tournament_element.save()
+            index += 1
+
+        for title in self.champions:
+            club_obj = Clubs.objects.get(club_name = title[0])
+            try:
+                existing_log = Clubtitleregister.objects.get(club_id = club_obj.club_id, title_year = str(self.year))
+                existing_log.club_id = club_obj.club_id
+                existing_log.title_label = title[1]
+                existing_log.title_year = str(self.year)
+                existing_log.save()
+
+            except Clubtitleregister.DoesNotExist:
+                title_element = Clubtitleregister(
+                    club_id = club_obj.club_id,
+                    title_label = title[1],
+                    title_year = str(self.year)
+                )
+                title_element.save()
+
+        for cont in self.general_matches:
+            for m in cont:
+                #print(m['team1'], m['team2'])
+                club1_obj = Clubs.objects.get(club_name = m['team1'])
+                club2_obj = Clubs.objects.get(club_name = m['team2'])
+                result_label = ''
+
+                if int(m['score1']) > int(m['score2']):
+                    result_label = m['team1'] + ' W.'
+                elif int(m['score2']) > int(m['score1']):
+                    result_label = m['team2'] + ' W.'
+                else:
+                    result_label = 'D.'
+            
+
+                match_element = Clubmatchesregister(
+                    club_local_id = club1_obj.club_id,
+                    club_local_score = m['score1'],
+                    club_away_id = club2_obj.club_id,
+                    club_away_score = m['score2'],
+                    result_label = result_label,
+                    match_year = str(self.year)
+                )
+                match_element.save()
+    
+    def merge_tables(self, tables):
+        merged = defaultdict(lambda: {
+            "pts": 0,
+            "w": 0,
+            "l": 0,
+            "d": 0,
+            "gf": 0,
+            "gc": 0,
+            "gd": 0
+        })
+
+        for table in tables:              # cada "tabla"
+            for team, stats in table:     # cada tupla ("team", {...})
+                for key, value in stats.items():
+                    merged[team][key] += value
+
+        # Convertir al formato original: lista de tuplas
+        result = [(team, stats) for team, stats in merged.items()]
+        result.sort(key=lambda x: (x[1]["pts"], x[1]["gd"], x[1]["gf"]), reverse=True)
+        return result
+
+    def generate_tournament_excel(self, file_path="tournament_simulation.xlsx"):
+        '''
+        merged_tables = self.merge_tables(self.general_tables)
+        self.general_tables.append(merged_tables)
+        self.element_names.append('Tabla General')
+        self.general_matches.append([])
+        '''
+        wb = Workbook()
+        wb.remove(wb.active)
+
+        for i in range(len(self.element_names)):
+
+            sheet_name = self.element_names[i][:31]  # Excel limite nombre hoja
+            ws = wb.create_sheet(title=sheet_name)
+
+            table = self.general_tables[i]
+            matches = self.general_matches[i]
+
+            # -------- TABLA --------
+            ws["A1"] = "Tabla"
+            ws["A1"].font = Font(bold=True)
+
+            headers = ["Pos", "Team", "Pts", "W", "D", "L", "GF", "GC", "GD"]
+
+            for col, header in enumerate(headers, start=1):
+                ws.cell(row=2, column=col, value=header).font = Font(bold=True)
+
+            row = 3
+            pos = 1
+
+            for team, stats in table:
+
+                ws.cell(row=row, column=1, value=pos)
+                ws.cell(row=row, column=2, value=team)
+                ws.cell(row=row, column=3, value=stats["pts"])
+                ws.cell(row=row, column=4, value=stats["w"])
+                ws.cell(row=row, column=5, value=stats["d"])
+                ws.cell(row=row, column=6, value=stats["l"])
+                ws.cell(row=row, column=7, value=stats["gf"])
+                ws.cell(row=row, column=8, value=stats["gc"])
+                ws.cell(row=row, column=9, value=stats["gd"])
+
+                row += 1
+                pos += 1
+
+            # -------- PARTIDOS --------
+            start_row = row + 2
+
+            ws.cell(row=start_row, column=1, value="Partidos").font = Font(bold=True)
+
+            match_headers = ["Team 1", "Team 2", "Score 1", "Score 2"]
+
+            for col, header in enumerate(match_headers, start=1):
+                ws.cell(row=start_row + 1, column=col, value=header).font = Font(bold=True)
+
+            r = start_row + 2
+            if isinstance(matches, dict):
+                matches = [matches]
+            for match in matches:
+
+                for col, key in enumerate(["team1","team2","score1","score2"], start=1):
+                    ws.cell(row=r, column=col, value=match[key])
+
+                r += 1
+
+        wb.save(file_path)
+
+        return file_path
+    
+

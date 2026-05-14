@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulacion de Deportes</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/simulation_page.css' %}">
+	
+	
+</head>
+<body>
+{% include "navbar_template.html" %}
+<div class="container-fluid py-4">
+
+    <!-- 🔵 FILA 1 — OPCIONES -->
+    <div class="row league-row">
+        <div class="col-12 dashboard-item">
+            <div class="esports-card">
+
+                <h5 class="card-title">Opciones</h5>
+
+                <!-- Selectores -->
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-6 col-12">
+                        <label class="score-label mb-2">Categoría</label>
+                        <select class="form-select esports-select"
+                        name="categoria"
+                        id="categoriasSelect"
+                        hx-get="{% url 'cargar_pruebas' clase %}"
+                        hx-target="#pruebasSelect"
+                        hx-trigger="change">
+                            <option value="">Seleccionar categoría</option>
+                            {% for cat in categorias %}
+                            <option value="{{ cat.team_sport_name }}">{{ cat.team_sport_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 col-12">
+                        <label class="score-label mb-2">Prueba</label>
+                        <select class="form-select esports-select" id="pruebasSelect" name="prueba">
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="row align-items-center">
+                    <div class="col-md-12 col-12 mb-3 mb-md-0 text-center text-md-start">
+                        <button class="esports-btn"
+                        hx-get="{% url 'generar_simulacion' clase %}"
+                        hx-target="#resultsSimulation"
+                        hx-include="#pruebasSelect, #categoriasSelect">
+                            <i class="bi bi-play-fill"></i>
+                            Simular
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 🟣 FILA 2 — SIMULACION -->
+    <div class="row league-row">
+        <div class="col-12 dashboard-item">
+            <div class="esports-card">
+
+                <h5 class="card-title">Simulación</h5>
+
+                <div class="table-responsive" id="resultsSimulation">
+                    <table class="table table-dark table-hover align-middle esports-table sortable-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable">País</th>
+                                <th class="sortable">Puntaje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Estados Unidos</td>
+                                <td>98.45</td>
+                            </tr>
+                            <tr>
+                                <td>Japón</td>
+                                <td>95.21</td>
+                            </tr>
+                            <tr>
+                                <td>Brasil</td>
+                                <td>93.88</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    document.querySelectorAll(".sortable-table th").forEach((header, index) => {
+
+        header.addEventListener("click", () => {
+
+            const table = header.closest("table");
+            const tbody = table.querySelector("tbody");
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+
+            const isNumeric = index === 1;
+            const asc = header.classList.toggle("asc");
+            header.classList.toggle("desc", !asc);
+
+            rows.sort((a, b) => {
+                let valA = a.children[index].innerText.trim();
+                let valB = b.children[index].innerText.trim();
+
+                if (isNumeric) {
+                    return asc 
+                        ? parseFloat(valA) - parseFloat(valB)
+                        : parseFloat(valB) - parseFloat(valA);
+                } else {
+                    return asc 
+                        ? valA.localeCompare(valB)
+                        : valB.localeCompare(valA);
+                }
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        });
+
+    });
+
+});
+</script>
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+
+</body>
+</html>

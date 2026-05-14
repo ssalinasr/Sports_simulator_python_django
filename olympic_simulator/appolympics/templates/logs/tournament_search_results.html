@@ -1,0 +1,93 @@
+{% for elemento in campeones_torneo %}
+
+<div class="card-title">
+    <i class="bi bi-diagram-3-fill"></i> Resultados Finales {{ elemento.0 }}
+</div>
+
+<div class="bracket-section dashboard-item">
+
+    <div class="matches-grid">
+
+        <div class="match-card">
+            <div class="team-name">🥇 Campeón</div>
+            <div></div>
+            <div></div>
+            <div class="team-name">{{ elemento.1 }}</div>
+        </div>
+
+        <div class="match-card">
+            <div class="team-name">🥈 Subcampeón</div>
+            <div></div>
+            <div></div>
+            <div class="team-name">{{ elemento.2 }}</div>
+        </div>
+
+        <div class="match-card">
+            <div class="team-name">🥉 Tercer Lugar</div>
+            <div></div>
+            <div></div>
+            <div class="team-name">{{ elemento.3 }}</div>
+        </div>
+
+    </div>
+
+</div>
+{% endfor %}
+
+{% for elemento in resultados_torneo %}
+<div class="card-title">
+    <i class="bi bi-table"></i> Tabla {{ elemento.0 }}
+</div>
+
+<div class="table-responsive">
+    <table class="table esports-table text-center" id="leagueTable">
+        <thead>
+            <tr>
+                {% for columna in elemento.1 %}
+                <th>{{ columna }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for fila in elemento.2 %}
+            <tr>
+                {% for valor in fila.values %}
+                <td>{{ valor }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+
+{% for images in campeones_torneo %}
+{% if images.0 == elemento.0 %}
+<div class="card-title">
+    <i class="bi bi-table"></i> Bracket {{ elemento.0 }}
+</div>
+<img class="team-image" src="/{{ images.4 }}" alt="{{ images.0 }}">
+{% endif %}
+{% endfor %}
+
+
+<div class="card-title">
+    <i class="bi bi-trophy-fill"></i> Partidos {{ elemento.0 }}
+</div>
+
+<div id="matchesContainer" class="matches-grid mb-3">
+    <div class="match-card">
+        <input class="form-control esports-input" placeholder="Local" readonly>
+        <input class="form-control esports-input" placeholder="G" readonly>
+        <input class="form-control esports-input" placeholder="G" readonly>
+        <input class="form-control esports-input" placeholder="Visitante" readonly>
+        {% for fila in elemento.4 %}
+        <input class="form-control esports-input" placeholder="{{ fila.team1 }}" readonly>
+        <input class="form-control esports-input" placeholder="{{ fila.score1 }}" readonly>
+        <input class="form-control esports-input" placeholder="{{ fila.score2 }}" readonly>
+        <input class="form-control esports-input" placeholder="{{ fila.team2 }}" readonly>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
