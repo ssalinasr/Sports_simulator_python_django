@@ -21,10 +21,7 @@ import random
 import pandas as pd
 import re
 import json
-<<<<<<< HEAD
 from django.core.exceptions import ObjectDoesNotExist
-=======
->>>>>>> cbb3fcc64d501702e72cc1b74cb854126a66434c
 
 def pagina_principal(request):
     return render(request, 'main/simulator_page.html')
@@ -1453,11 +1450,8 @@ def consultar_por_torneo(request):
     deporte = request.GET.get('deporte')
     año = request.GET.get('valoryear')
     print(deporte, año)
-<<<<<<< HEAD
     tournament_data = []
     tournament_teams = []
-=======
->>>>>>> cbb3fcc64d501702e72cc1b74cb854126a66434c
 
     if deporte != 'Clubes':
         #Archivo Excel con el torneo
@@ -1469,7 +1463,6 @@ def consultar_por_torneo(request):
 
             for elementos, df in hojas.items():
                 print("Hoja: ", elementos)
-<<<<<<< HEAD
                 # Buscar inicio de partidos
                 fila_partidos = df[
                     df.iloc[:,0] == "Partidos"
@@ -1505,16 +1498,11 @@ def consultar_por_torneo(request):
                 tournament_data.append((elementos, tabla.columns.to_list(), tabla.to_dict(orient="records"), partidos.columns.to_list(), partidos.to_dict(orient="records")))
 
             #print(tournament_data)
-=======
-                print(df.head())
-
->>>>>>> cbb3fcc64d501702e72cc1b74cb854126a66434c
             tourament_info = None
             #Imagen y bracket del torneo#
             try:
                 sport = Teamsports.objects.get(team_sport_name = deporte)
                 tourament_info = Teamtitleregister.objects.filter(team_sport_id = sport.team_sport_id, title_year = str(año))
-<<<<<<< HEAD
                 for ti in tourament_info:
                     champion = ''
                     not_champion = ''
@@ -1546,15 +1534,6 @@ def consultar_por_torneo(request):
                     tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image))
         except FileNotFoundError as e:
             print(e)
-=======
-                print(tourament_info)
-                pass
-            except Teamtitleregister.DoesNotExist:
-                sport = Playertournamentsports.objects.get(player_trn_sport_name = deporte)
-                tourament_info = Playertitleregister.objects.filter(player_trn_sport_id = sport.player_trn_sport_id, title_year = str(año))
-        except:
-            print('No existe')
->>>>>>> cbb3fcc64d501702e72cc1b74cb854126a66434c
     else:
         sublista_nombres = ['fase_ligas', 'UEFA Champions League', 'UEFA Europa League', 'UEFA Conference League', 'Copa Libertadores', 'Copa Sudamericana',
                 'AFC Champions League Elite','AFC Champions League Two', 'AFC Challenge League', 'CAF Champions League', 'CAF Conference League', 'Mundial de Clubes']
@@ -1576,7 +1555,6 @@ def consultar_por_torneo(request):
                 lista_excel.append(hojas)
                 for elementos, df in hojas.items():
                     print("Hoja: ", elementos)
-<<<<<<< HEAD
                     # Buscar inicio de partidos
                     fila_partidos = df[
                         df.iloc[:,0] == "Partidos"
@@ -1630,16 +1608,3 @@ def consultar_por_torneo(request):
             print(e)
     
     return render(request, 'logs/tournament_search_results.html', {'resultados_torneo': tournament_data, 'campeones_torneo': tournament_teams})
-=======
-                    print(df.head())
-
-            tourament_info = None
-            #Imagen y bracket del torneo#
-            tourament_info = Clubtitleregister.objects.filter(title_year = str(año))
-            print(tourament_info)
-        except:
-            print('No existe')
-    
-
-    return HttpResponse("")
->>>>>>> cbb3fcc64d501702e72cc1b74cb854126a66434c

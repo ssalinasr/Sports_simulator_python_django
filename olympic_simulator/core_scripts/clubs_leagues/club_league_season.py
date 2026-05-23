@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 from appolympics.models import Clubs, Clubleague, Nationalteams
-=======
-from appolympics.models import Clubs, Clubleague
->>>>>>> cbb3fcc64d501702e72cc1b74cb854126a66434c
 from core_scripts.leagues import league_group
 from collections import defaultdict
 from openpyxl import Workbook
@@ -68,12 +64,6 @@ class ClubLeagueSeason:
         print(primer_nombre)
         self.champions.append((primer_nombre[0], groups.get_group_name()))
 
-<<<<<<< HEAD
-=======
-        if self.has_save:
-            self.save_results()
-
->>>>>>> cbb3fcc64d501702e72cc1b74cb854126a66434c
         if self.teams_tuple[3] == '1D':
             if self.has_promotion:
                 self.relegated_teams.append(groups.get_qualified_reversed_teams(self.promotions))
@@ -91,7 +81,6 @@ class ClubLeagueSeason:
         elif self.teams_tuple[3] == '2D':
             self.promoted_teams.append(groups.get_qualified_specified_teams(0, self.promotions))
 
-<<<<<<< HEAD
         if self.has_save:
             self.save_results()
             self.update_promotions_relegations()
@@ -127,9 +116,6 @@ class ClubLeagueSeason:
             print('No hay cambios (?)')
 
         
-=======
-    def update_promotions_relegations(self):
->>>>>>> cbb3fcc64d501702e72cc1b74cb854126a66434c
         pass
 
     def get_full_results(self):
