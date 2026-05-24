@@ -90,3 +90,43 @@
         .navbar-toggler-icon {
             filter: invert(1);
         }
+
+        /* Dropdown menu */
+.dropdown-menu {
+    background: var(--dark-panel);
+    border: 1px solid rgba(0, 183, 255, 0.35);
+    box-shadow: 0 0 18px rgba(0, 183, 255, 0.15);
+    border-radius: 10px;
+    padding: 0.5rem;
+}
+
+/* Items */
+.dropdown-item {
+    color: var(--text-muted);
+    font-family: 'Shameimaru Sans', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    border-radius: 6px;
+    padding: 0.7rem 1rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+/* Hover */
+.dropdown-item:hover {
+    background: rgba(0, 183, 255, 0.12);
+    color: var(--text-main);
+}
+
+/* Iconos */
+.dropdown-item i {
+    color: var(--neon-blue);
+}
+
+/* Flecha del dropdown */
+.dropdown-toggle::after {
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}

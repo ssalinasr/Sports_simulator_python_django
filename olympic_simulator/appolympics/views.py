@@ -11,7 +11,7 @@ from core_scripts.interfaces.games_interfaces import goldeneye_interface, mariok
 from core_scripts.leagues import league_group
 from core_scripts.tournaments import tournament_group
 from core_scripts.tournaments import full_tournament, full_tournament_clubs
-from core_scripts.interfaces.olympic_sports_interfaces import sports_by_heats, sports_by_individual, sports_by_rounds
+from core_scripts.interfaces.olympic_sports_interfaces import sports_by_heats, sports_by_individual, sports_by_rounds, sports_by_elimination
 from core_scripts.clubs_leagues import club_league_season
 import itertools
 from openpyxl import Workbook
@@ -1043,11 +1043,11 @@ def generar_simulacion(request, match_class):
     groups = None
     sport = Teamsports.objects.get(team_sport_name = request.GET.get('categoria'))
     contest = request.GET.get('prueba')
-    print(sport.team_sport_name)
-
+    num_heats = 0
+    print(sport.team_sport_name, contest) 
     if match_class == 1 or match_class == 5:
         equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
-        deporte = Sportsrecords.objects.get(sp_record_name = contest)
+        deporte = Sportsrecords.objects.get(sp_record_name = contest, team_sport_id = sport.team_sport_id)
         for eq in equipos:
             rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = sport.team_sport_id)
             teams.append(eq.team_name)
@@ -1060,7 +1060,7 @@ def generar_simulacion(request, match_class):
         else:
             equipos = Olympicplayers.objects.filter(ol_player_name__contains='_GE')
 
-        deporte = Sportsrecords.objects.get(sp_record_name = contest)
+        deporte = Sportsrecords.objects.get(sp_record_name = contest, team_sport_id = sport.team_sport_id)
         for eq in equipos:
             rank = eq.ol_player_value
             teams.append(eq.ol_player_name)
@@ -1068,7 +1068,7 @@ def generar_simulacion(request, match_class):
             ranks.append(rank_tuple)
     else:
         equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
-        deporte = Sportsrecords.objects.get(sp_record_name = contest)
+        deporte = Sportsrecords.objects.get(sp_record_name = contest, team_sport_id = sport.team_sport_id)
         for eq in equipos:
             rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = sport.team_sport_id)
             teams.append(eq.team_name)
@@ -1076,33 +1076,61 @@ def generar_simulacion(request, match_class):
             ranks.append(rank_tuple)
 
     table_results = []
-    if deporte.sport_class == 'H':    
-        olympic_sim = sports_by_heats.SportsByHeats(deporte.sp_record_name, float(deporte.sp_record_best), float(deporte.sp_record_last), deporte.sport_class)
+    if deporte.sport_class == 'H':
+        olympic_sim = sports_by_heats.SportsByHeats(deporte.sp_record_name, float(deporte.sp_record_best), float(deporte.sp_record_last), deporte.sport_class, sport.team_sport_name)   
+        num_heats = 1
+        if sport.team_sport_name == 'Ciclismo de Montania':
+            num_heats = 8
+        elif sport.team_sport_name == 'Tiro Deportivo':
+            if any(k in deporte.sp_record_name for k in ['25m']):
+                num_heats = 5
+            else:
+                num_heats = 6
+        elif sport.team_sport_name in ['Bobsleigh', 'Luge', 'Skeleton','Remo']:
+            num_heats = 4
+        elif sport.team_sport_name in ['Esqui Alpino','Snowboard de Velocidad']:
+            num_heats = 2
         for r in ranks:
-            results = (r[0] ,r[1] ,olympic_sim.select_type_game(r[1], 4, 0))
+            results = (r[0] ,r[1] ,olympic_sim.select_type_game(r[1], num_heats, 0))
             table_results.append(results)
-    elif deporte.sport_class == 'I':
-        olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(deporte.sp_record_best), float(deporte.sp_record_last), deporte.sport_class)
+    elif deporte.sport_class == 'T':
+        olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(deporte.sp_record_best), float(deporte.sp_record_last), deporte.sport_class, sport.team_sport_name)
         for r in ranks:
             results = (r[0] ,r[1] ,olympic_sim.select_type_game(r[1], 1, 0))
             table_results.append(results)
     elif deporte.sport_class == 'R':
-        olympic_sim = sports_by_rounds.SportsByRounds(deporte.sp_record_name, float(deporte.sp_record_best), float(deporte.sp_record_last), deporte.sport_class)
+        olympic_sim = sports_by_rounds.SportsByRounds(deporte.sp_record_name, float(deporte.sp_record_best), float(deporte.sp_record_last), deporte.sport_class, sport.team_sport_name)
         for r in ranks:
-            results = (r[0] ,r[1] ,olympic_sim.select_type_game(r[1], 4, 7))
+            num_rondas = 6
+            num_heats = num_rondas
+            results = (r[0] ,r[1] ,olympic_sim.select_type_game(r[1], num_rondas, 0))
             table_results.append(results)
+    elif deporte.sport_class == 'E':
+        olympic_sim = sports_by_elimination.SportsByElimination(deporte.sp_record_name, float(deporte.sp_record_best), float(deporte.sp_record_last), deporte.sport_class, sport.team_sport_name)
+        for r in ranks:
+            results = (r[0] ,r[1] ,olympic_sim.select_type_game(r[1], 0, 0))
+            table_results.append(results)
+        print(table_results)
+
     else:
-        olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(deporte.sp_record_best), float(deporte.sp_record_last), deporte.sport_class)
+        olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(deporte.sp_record_best), float(deporte.sp_record_last), deporte.sport_class, sport.team_sport_name)
         for r in ranks:
             results = (r[0] ,r[1] ,olympic_sim.select_type_game(r[1], 1, 0))
             table_results.append(results)
 
-    if float(deporte.sp_record_best) < float(deporte.sp_record_last):
-        table_results = sorted(table_results, key=lambda x: x[2])
-    else:
-        table_results = sorted(table_results, key=lambda x: x[2], reverse=True)
 
-    return render(request, 'olympic/simulation_table_template.html',{'resultados': table_results, 'clase': match_class})
+    if float(deporte.sp_record_best) < float(deporte.sp_record_last):
+        try:
+            table_results = sorted(table_results, key=lambda x: x[2][1])
+        except:
+            table_results = sorted(table_results, key=lambda x: x[2])
+    else:
+        try:
+            table_results = sorted(table_results, key=lambda x: x[2][1], reverse=True)
+        except:
+            table_results = sorted(table_results, key=lambda x: x[2], reverse=True)
+
+    return render(request, 'olympic/simulation_table_template.html',{'resultados': table_results, 'clase': deporte.sport_class, 'rondas': range(num_heats)})
 
 def pagina_registro_por_pais(request):
     sports = Teamsports.objects.filter(~Q(team_sport_name__icontains = 'Mario'), team_sport_class = 'T')

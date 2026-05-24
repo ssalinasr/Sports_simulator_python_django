@@ -255,6 +255,7 @@ class Teamsports(models.Model):
     team_sport_id = models.BigAutoField(primary_key=True)
     team_sport_name = models.CharField(max_length=50)
     team_sport_class = models.CharField(max_length=2)
+    team_sport_rules = models.JSONField()
 
     class Meta:
         managed = False

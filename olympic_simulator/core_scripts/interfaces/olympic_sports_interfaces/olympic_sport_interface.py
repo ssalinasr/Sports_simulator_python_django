@@ -3,32 +3,33 @@ import random
 
 class OlympicSportsInterface(ABC):
 
-    def __init__(self, sport_name, best_res, last_res, type_mode):
+    def __init__(self, sport_name, best_res, last_res, type_mode, category_name):
         self.sport_name = sport_name
         self.best_res = best_res
         self.last_res = last_res
         self.type_mode = type_mode
+        self.category_name = category_name
         self.intervals_list = []
         self.probs = []
 
     @abstractmethod
     def get_probability_list(self, rank):
         if rank == 1:
-            self.probs = [1.0,0.25,0.1,0.013,0.004,0.0004,0.00001]
+            self.probs = [1.0,0.15,0.05,0.013,0.004,0.0004,0.00001]
         elif rank == 2:
-            self.probs = [0.25,1.0,0.25,0.1,0.013,0.004,0.0004]
+            self.probs = [0.15,1.0,0.15,0.05,0.013,0.004,0.0004]
         elif rank == 3:
-            self.probs = [0.1,0.25,1.0,0.25,0.1,0.013,0.004]
+            self.probs = [0.05,0.15,1.0,0.15,0.05,0.013,0.004]
         elif rank == 4:
-            self.probs = [0.013,0.1,0.25,1.0,0.25,0.1,0.013]
+            self.probs = [0.013,0.05,0.15,1.0,0.15,0.05,0.013]
         elif rank == 5:
-            self.probs = [0.004,0.013,0.1,0.25,1.0,0.25,0.1]
+            self.probs = [0.004,0.013,0.05,0.15,1.0,0.15,0.05]
         elif rank == 6:
-            self.probs = [0.0004,0.004,0.013,0.1,0.25,1.0,0.25]
+            self.probs = [0.0004,0.004,0.013,0.05,0.15,1.0,0.15]
         elif rank == 7:
-            self.probs = [0.00001,0.0004,0.004,0.013,0.1,0.25,1.0]
+            self.probs = [0.00001,0.0004,0.004,0.013,0.05,0.15,1.0]
         else:
-            self.probs = [1.0,0.25,0.1,0.013,0.004,0.0004,0.00001]
+            self.probs = [1.0,0.15,0.05,0.013,0.004,0.0004,0.00001]
 
     @abstractmethod
     def generate_intervals(self):
@@ -78,12 +79,18 @@ class OlympicSportsInterface(ABC):
         pass
 
     @abstractmethod
+    def generate_round_by_elimination(self, rank, num_rounds, num_scores):
+        pass
+
+    @abstractmethod
     def select_type_game(self, rank, num_rounds, num_scores):
-        if self.type_mode == 'I':
+        if self.type_mode == 'T':
             return self.generate_round_individual(rank)
         if self.type_mode == 'H':
             return self.generate_round_by_heats(rank, num_rounds)
         if self.type_mode == 'R':
             return self.generate_round_by_rounds(rank, num_rounds, num_scores)
+        if self.type_mode == 'E':
+            return self.generate_round_by_elimination(rank, num_rounds, num_scores)
 
         

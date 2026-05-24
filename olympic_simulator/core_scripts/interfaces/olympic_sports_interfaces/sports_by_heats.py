@@ -2,8 +2,8 @@ from .olympic_sport_interface import OlympicSportsInterface
 
 class SportsByHeats(OlympicSportsInterface):
 
-    def __init__(self, sport_name, best_res, last_res, type_mode):
-        super().__init__(sport_name, best_res, last_res, type_mode)
+    def __init__(self, sport_name, best_res, last_res, type_mode, category_name):
+        super().__init__(sport_name, best_res, last_res, type_mode, category_name)
 
     def get_probability_list(self, rank):
         super().get_probability_list(rank)
@@ -23,10 +23,34 @@ class SportsByHeats(OlympicSportsInterface):
     def generate_round_by_heats(self, rank, num_heats):
         self.generate_intervals()
         interval = self.get_team_interval(rank)
-        list = [self.simulate_points(interval) * num_heats]
-        return [sum(list)]
+        list = []
+        for _ in range(num_heats):
+            if self.category_name == 'Tiro Deportivo' and not any(k in self.sport_name for k in ['Foso', 'Skeet']):
+                temp_list = []
+                for _ in range(num_heats):
+                    temp_list.append(round(self.simulate_points(interval), 0))
+                list.append(sum(temp_list))
+            elif self.category_name == 'Tiro Deportivo' and any(k in self.sport_name for k in ['Foso', 'Skeet']):
+                temp_list = []
+                for _ in range(num_heats):
+                    sub_temp_list = []
+                    for _ in range(num_heats):
+                        point = self.simulate_points(interval)
+                        if point > 0.5:
+                            sub_temp_list.append(1)
+                        else:
+                            sub_temp_list.append(0)
+                    temp_list.append(sum(sub_temp_list))
+                list.append(sum(temp_list))
+            else:
+                list.append(round(self.simulate_points(interval),2))
+        return [list, round(sum(list), 2)]
+        
     
     def generate_round_by_rounds(self, rank, num_rounds, num_scores):
+        pass
+
+    def generate_round_by_elimination(self, rank, num_rounds, num_scores):
         pass
         
     def select_type_game(self, rank, num_rounds, num_scores):

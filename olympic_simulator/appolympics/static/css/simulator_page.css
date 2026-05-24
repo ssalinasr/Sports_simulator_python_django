@@ -60,6 +60,7 @@
 /* Botones */
 .esports-btn {
     width: 100%;
+    min-height: 75px;
     background: transparent;
     color: #e5e7eb;
     border: 1px solid rgba(0, 183, 255, 0.45);
@@ -67,12 +68,15 @@
     padding: 0.6rem 0.75rem;
     margin-bottom: 0.65rem;
     text-transform: uppercase;
-    font-size: 0.82rem;
+    justify-content: center;
+    font-size: 0.8rem;
     letter-spacing: 0.9px;
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
     transition: all 0.25s ease;
+    text-align: center;
+    line-height: 1.2;
 }
 
 .esports-btn i {

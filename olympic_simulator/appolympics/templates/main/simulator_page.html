@@ -22,124 +22,268 @@
             <!-- DEPORTES -->
             <div class="col-lg-3 col-md-6 dashboard-item">
                 <div class="esports-card">
+
                     <h5 class="card-title">Deportes</h5>
-                    <form method="POST" action="{% url 'pagina_partido_individual' 1 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-lightning-fill"></i>Partido Masculino</button>
-                    </form>
-                    <form method="POST" action="{% url 'pagina_partido_individual' 5 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-lightning-fill"></i>Partido Femenino</button>
-                    </form>
-                    <form method="POST" action="{% url 'pagina_partidos_liga' 1 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-people-fill"></i>Grupo de Partidos
-                            Masculino</button>
-                    </form>
-                    <form method="POST" action="{% url 'pagina_partidos_liga' 5 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-people-fill"></i>Grupo de Partidos
-                            Femenino</button>
-                    </form>
-                    <form method="POST" action="{% url 'pagina_partidos_torneo' 1 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-diagram-2-fill"></i>Torneo Masculino</button>
-                    </form>
-                    <form method="POST" action="{% url 'pagina_partidos_torneo' 5 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-diagram-2-fill"></i>Torneo Femenino</button>
-                    </form>
 
-                    <form method="POST" action="{% url 'pagina_competencia' 1 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-dice-5-fill"></i>Competencia</button>
-                    </form>
+                    <div class="row g-2">
 
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partido_individual' 1 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-lightning-fill"></i>
+                                    Partido Masculino
+                                </button>
+                            </form>
+                        </div>
 
-                    <form method="POST" action="{% url 'pagina_simulacion_completa' 1 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-trophy-fill"></i>Simulación Masculina
-                            Completa</button>
-                    </form>
-                    <form method="POST" action="{% url 'pagina_simulacion_completa' 5 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-trophy-fill"></i>Simulación Femenina
-                            Completa</button>
-                    </form>
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partido_individual' 5 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-lightning-fill"></i>
+                                    Partido Femenino
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partidos_liga' 1 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-people-fill"></i>
+                                    Grupo Masculino
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partidos_liga' 5 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-people-fill"></i>
+                                    Grupo Femenino
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partidos_torneo' 1 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-diagram-2-fill"></i>
+                                    Torneo Masculino
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partidos_torneo' 5 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-diagram-2-fill"></i>
+                                    Torneo Femenino
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_competencia' 1 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-dice-5-fill"></i>
+                                    Competencia
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_simulacion_completa' 1 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-trophy-fill"></i>
+                                    Simulación Masculina
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_simulacion_completa' 5 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-trophy-fill"></i>
+                                    Simulación Femenina
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
                 </div>
             </div>
 
             <!-- JUEGOS -->
             <div class="col-lg-3 col-md-6 dashboard-item">
                 <div class="esports-card">
-                    <h5 class="card-title">Juegos</h5>
-                    <form method="POST" action="{% url 'pagina_partido_individual' 2 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-lightning-fill"></i>Partido</button>
-                    </form>
-                    <form method="POST" action="{% url 'pagina_partidos_liga' 2 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-people-fill"></i>Grupo de Partidos</button>
-                    </form>
-                    <form method="POST" action="{% url 'pagina_partidos_torneo' 2 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-diagram-2-fill"></i> Torneo</button>
-                    </form>
-                    <form method="POST" action="{% url 'pagina_simulacion_completa' 2 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-trophy-fill"></i>Simulación Completa</button>
-                    </form>
 
-                    <form method="POST" action="{% url 'pagina_competencia' 2 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-dice-5-fill"></i>Competencia</button>
-                    </form>
+                    <h5 class="card-title">Juegos</h5>
+
+                    <div class="row g-2">
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partido_individual' 2 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-lightning-fill"></i>
+                                    Partido
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partidos_liga' 2 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-people-fill"></i>
+                                    Grupo
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partidos_torneo' 2 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-diagram-2-fill"></i>
+                                    Torneo
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_simulacion_completa' 2 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-trophy-fill"></i>
+                                    Simulación
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_competencia' 2 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-dice-5-fill"></i>
+                                    Competencia
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
                 </div>
             </div>
 
             <!-- CLUBES -->
             <div class="col-lg-3 col-md-6 dashboard-item">
                 <div class="esports-card">
+
                     <h5 class="card-title">Clubes</h5>
-                    <form method="POST" action="{% url 'pagina_partido_individual' 3 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-lightning-fill"></i> Partido</button>
-                    </form>
-                    <form method="POST" action="{% url 'pagina_partidos_liga' 3 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-people-fill"></i>Grupo de Partidos</button>
-                    </form>
-                    <form method="POST" action="{% url 'pagina_partidos_torneo' 3 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-diagram-2-fill"></i> Torneo</button>
-                    </form>
-                    <form method="POST" action="{% url 'pagina_simulacion_completa_clubes' 3 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-trophy-fill"></i>Simulación Completa</button>
-                    </form>
+
+                    <div class="row g-2">
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partido_individual' 3 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-lightning-fill"></i>
+                                    Partido
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partidos_liga' 3 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-people-fill"></i>
+                                    Grupo
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partidos_torneo' 3 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-diagram-2-fill"></i>
+                                    Torneo
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_simulacion_completa_clubes' 3 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-trophy-fill"></i>
+                                    Simulación
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
                 </div>
             </div>
 
             <!-- MUÑECOS -->
             <div class="col-lg-3 col-md-6 dashboard-item">
                 <div class="esports-card">
+
                     <h5 class="card-title">Muñecos</h5>
-                    <form method="POST" action="{% url 'pagina_partido_individual' 4 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-lightning-fill"></i> Partido</button>
-                    </form>
-                    <form method="POST" action="{% url 'pagina_partidos_torneo' 4 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-diagram-2-fill"></i>Torneo</button>
-                    </form>
-                    <form method="POST" action="{% url 'pagina_simulacion_completa' 4 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-trophy-fill"></i>Simulación Completa</button>
-                    </form>
-                    <form method="POST" action="{% url 'pagina_competencia' 4 %}">
-                        {% csrf_token %}
-                        <button class="btn esports-btn"><i class="bi bi-dice-5-fill"></i>Competencia</button>
-                    </form>
+
+                    <div class="row g-2">
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partido_individual' 4 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-lightning-fill"></i>
+                                    Partido
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partidos_torneo' 4 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-diagram-2-fill"></i>
+                                    Torneo
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_simulacion_completa' 4 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-trophy-fill"></i>
+                                    Simulación
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_competencia' 4 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-dice-5-fill"></i>
+                                    Competencia
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
                 </div>
             </div>
 
