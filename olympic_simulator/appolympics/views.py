@@ -1040,6 +1040,7 @@ def limpiar_nombre(nombre):
 def generar_simulacion(request, match_class):
     ranks = []
     teams = []
+    nombres = []
     groups = None
     sport = Teamsports.objects.get(team_sport_name = request.GET.get('categoria'))
     contest = request.GET.get('prueba')
@@ -1055,17 +1056,24 @@ def generar_simulacion(request, match_class):
             ranks.append(rank_tuple)
 
     elif match_class in [2,4]:
-        if sport.team_sport_name != 'Goldeneye':
-            equipos = Olympicplayers.objects.filter(~Q(ol_player_name__contains='/'), team_sport_id = sport.team_sport_id)
+        if sport.team_sport_name == 'Tokyo':
+            equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
+        elif sport.team_sport_name != 'Goldeneye':
+            equipos = Olympicplayers.objects.filter(~Q(ol_player_name__contains='/'),~Q(ol_player_name__contains='_MN'), team_sport_id = sport.team_sport_id)
         else:
             equipos = Olympicplayers.objects.filter(ol_player_name__contains='_GE')
 
         deporte = Sportsrecords.objects.get(sp_record_name = contest, team_sport_id = sport.team_sport_id)
         for eq in equipos:
-            rank = eq.ol_player_value
-            teams.append(eq.ol_player_name)
-            rank_tuple = (eq.ol_player_name, rank)
-            ranks.append(rank_tuple)
+            rank = random.randint(1,7)
+            if sport.team_sport_name != 'Tokyo':
+                teams.append(eq.ol_player_name)
+                rank_tuple = (eq.ol_player_name, rank)
+                ranks.append(rank_tuple)
+            else:
+                teams.append(eq.team_name)
+                rank_tuple = (eq.team_name, rank)
+                ranks.append(rank_tuple)
     else:
         equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
         deporte = Sportsrecords.objects.get(sp_record_name = contest, team_sport_id = sport.team_sport_id)
@@ -1076,6 +1084,7 @@ def generar_simulacion(request, match_class):
             ranks.append(rank_tuple)
 
     table_results = []
+
     if deporte.sport_class == 'H':
         olympic_sim = sports_by_heats.SportsByHeats(deporte.sp_record_name, float(deporte.sp_record_best), float(deporte.sp_record_last), deporte.sport_class, sport.team_sport_name)   
         num_heats = 1
@@ -1110,8 +1119,232 @@ def generar_simulacion(request, match_class):
         for r in ranks:
             results = (r[0] ,r[1] ,olympic_sim.select_type_game(r[1], 0, 0))
             table_results.append(results)
-        print(table_results)
+    
+    elif deporte.sport_class == 'P':
+        rules = dict(sport.team_sport_rules)
+        if 'Heptatlón' in deporte.sp_record_name:
+            current_rules = rules['disciplines']['heptathlon'] 
+            print(current_rules.keys())
+            score = 0
+            final_score = 0
+            sports_done = []
+            for event in current_rules['events']:
+                current_sport = Sportsrecords.objects.get(sp_record_name__contains = event['name']+' Femenino', team_sport = sport.team_sport_id)
+                nombres.append(current_sport.sp_record_name)
+            for r in ranks:
+                final_score = 0
+                sports_done = []
+                for event in current_rules['events']:
+                    current_sport = Sportsrecords.objects.get(sp_record_name__contains = event['name']+' Femenino', team_sport = sport.team_sport_id)
+                    if current_sport.sport_class == 'T':
+                        olympic_sim = sports_by_individual.SportsByIndividual(current_sport.sp_record_name, float(current_sport.sp_record_best), float(current_sport.sp_record_last), current_sport.sport_class, sport.team_sport_name)
+                        result = olympic_sim.select_type_game(r[1], 1, 0)
+                        score = float(event['A']) * pow(abs(float(event['B']) - result[0]),float(event['C']))
+                        sports_done.append(round(score))
+                    elif current_sport.sport_class == 'E':
+                        olympic_sim = sports_by_elimination.SportsByElimination(current_sport.sp_record_name, float(current_sport.sp_record_best), float(current_sport.sp_record_last), current_sport.sport_class, sport.team_sport_name)
+                        result = olympic_sim.select_type_game(r[1], 0, 0)
+                        score = float(event['A']) * pow(abs(float(result[1]) - event['B']),float(event['C']))
+                        sports_done.append(round(score, 0))
+                    elif current_sport.sport_class == 'R':
+                        olympic_sim = sports_by_rounds.SportsByRounds(current_sport.sp_record_name, float(current_sport.sp_record_best), float(current_sport.sp_record_last), current_sport.sport_class, sport.team_sport_name)
+                        result = olympic_sim.select_type_game(r[1], 6, 0)
+                        score = float(event['A']) * pow(abs(float(result[1]) - event['B']), float(event['C']))
+                        sports_done.append(round(score))
+                    final_score += score
+                num_heats = len(sports_done)
+                results = (r[0] ,r[1] , [sports_done ,round(final_score, 0)])
+                table_results.append(results)
+            pass
+        elif 'Decatlón' in deporte.sp_record_name:
+            current_rules = rules['disciplines']['decathlon'] 
+            current_sport = None
+            print(current_rules.keys())
+            score = 0
+            final_score = 0
+            sports_done = []
+            for event in current_rules['events']:
+                try:
+                    current_sport = Sportsrecords.objects.get(sp_record_name__contains = event['name']+' Masculino', team_sport = sport.team_sport_id)
+                    nombres.append(current_sport.sp_record_name)
+                except Sportsrecords.MultipleObjectsReturned:
+                    current_sport = Sportsrecords.objects.filter(sp_record_name__contains = event['name']+' Masculino', team_sport = sport.team_sport_id).first()
+                    nombres.append(current_sport.sp_record_name)
+            for r in ranks:
+                final_score = 0
+                sports_done = []
+                for event in current_rules['events']:
+                    try:
+                        current_sport = Sportsrecords.objects.get(sp_record_name__contains = event['name']+' Masculino', team_sport = sport.team_sport_id)
+                    except Sportsrecords.MultipleObjectsReturned:
+                        current_sport = Sportsrecords.objects.filter(sp_record_name__contains = event['name']+' Masculino', team_sport = sport.team_sport_id).first()
+                    if current_sport.sport_class == 'T':
+                        olympic_sim = sports_by_individual.SportsByIndividual(current_sport.sp_record_name, float(current_sport.sp_record_best), float(current_sport.sp_record_last), current_sport.sport_class, sport.team_sport_name)
+                        result = olympic_sim.select_type_game(r[1], 1, 0)
+                        score = float(event['A']) * pow(abs(float(event['B']) - result[0]),float(event['C']))
+                        sports_done.append(round(score))
+                    elif current_sport.sport_class == 'E':
+                        olympic_sim = sports_by_elimination.SportsByElimination(current_sport.sp_record_name, float(current_sport.sp_record_best), float(current_sport.sp_record_last), current_sport.sport_class, sport.team_sport_name)
+                        result = olympic_sim.select_type_game(r[1], 0, 0)
+                        score = float(event['A']) * pow(abs(float(result[1]) - event['B']),float(event['C']))
+                        sports_done.append(round(score, 0))
+                    elif current_sport.sport_class == 'R':
+                        olympic_sim = sports_by_rounds.SportsByRounds(current_sport.sp_record_name, float(current_sport.sp_record_best), float(current_sport.sp_record_last), current_sport.sport_class, sport.team_sport_name)
+                        result = olympic_sim.select_type_game(r[1], 6, 0)
+                        score = float(event['A']) * pow(abs(float(result[1]) - event['B']), float(event['C']))
+                        sports_done.append(round(score))
+                    final_score += score
+                num_heats = len(sports_done)
+                results = (r[0] ,r[1] , [sports_done ,round(final_score, 0)])
+                table_results.append(results)
+            pass
 
+        elif sport.team_sport_name == 'Gimnasia Artistica':
+            if 'Concurso general' in deporte.sp_record_name:
+                if 'masculino' in deporte.sp_record_name:
+                    nombres = ['Barras paralelas masculinas','Barra fija masculina','Anillas masculinas','Caballo con arzones masculino','Suelo masculino','Salto de potro masculino']
+                    specific_rules = rules['scoring_rules']['variables']
+                    difficulty_range = specific_rules['D']['range']
+                    execution_range = specific_rules['E']['base_value']
+                    penalty_range = specific_rules['P']['range']
+                    final_score = 0
+                    country_scores = []
+                    print('D: ',difficulty_range, ' E: ', execution_range, ' P: ', penalty_range)
+                    for r in ranks:
+                        country_scores = []
+                        final_score = 0
+                        for _ in range(len(nombres)):
+                            current_score = 0
+                            #Simula dificultad
+                            olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(difficulty_range[1]), float(difficulty_range[0]), 'T', sport.team_sport_name)
+                            dif_result = olympic_sim.select_type_game(r[1], 1, 0)
+                            #Simula penalizaciones
+                            olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(penalty_range[0]), float(penalty_range[1]), 'T', sport.team_sport_name)
+                            pen_result = olympic_sim.select_type_game(r[1], 1, 0)
+                            #Puntaje final
+                            final_score += dif_result[0] + (execution_range - pen_result[0])
+                            current_score = dif_result[0] + (execution_range - pen_result[0])
+                            country_scores.append(round(current_score, 3))
+                        results = (r[0] ,r[1] , [country_scores ,round(final_score, 3)])
+                        table_results.append(results)
+
+                else:                  
+                    nombres = ['Barras asimétricas femeninas','Barra fija femenina','Suelo femenino','Salto de potro femenino']
+                    specific_rules = rules['scoring_rules']['variables']
+                    difficulty_range = specific_rules['D']['range']
+                    execution_range = specific_rules['E']['base_value']
+                    penalty_range = specific_rules['P']['range']
+                    final_score = 0
+                    country_scores = []
+                    print('D: ',difficulty_range, ' E: ', execution_range, ' P: ', penalty_range)
+                    for r in ranks:
+                        country_scores = []
+                        final_score = 0
+                        for _ in range(len(nombres)):
+                            current_score = 0
+                            #Simula dificultad
+                            olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(difficulty_range[1]), float(difficulty_range[0]), 'T', sport.team_sport_name)
+                            dif_result = olympic_sim.select_type_game(r[1], 1, 0)
+                            #Simula penalizaciones
+                            olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(penalty_range[0]), float(penalty_range[1]), 'T', sport.team_sport_name)
+                            pen_result = olympic_sim.select_type_game(r[1], 1, 0)
+                            #Puntaje final
+                            final_score += dif_result[0] + (execution_range - pen_result[0])
+                            current_score = dif_result[0] + (execution_range - pen_result[0])
+                            country_scores.append(round(current_score, 3))
+                        results = (r[0] ,r[1] , [country_scores ,round(final_score, 3)])
+                        table_results.append(results)
+
+
+
+                pass     
+            else:
+                specific_rules = rules['scoring_rules']['variables']
+                difficulty_range = specific_rules['D']['range']
+                execution_range = specific_rules['E']['base_value']
+                penalty_range = specific_rules['P']['range']
+                final_score = 0
+                country_scores = []
+                nombres = ['Dificultad', 'Penalización']
+                print('D: ',difficulty_range, ' E: ', execution_range, ' P: ', penalty_range)
+                for r in ranks:
+                    country_scores = []
+                    final_score = 0
+                    #Simula dificultad
+                    olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(difficulty_range[1]), float(difficulty_range[0]), 'T', sport.team_sport_name)
+                    dif_result = olympic_sim.select_type_game(r[1], 1, 0)
+                    country_scores.append(dif_result[0])
+                    #Simula penalizaciones
+                    olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(penalty_range[0]), float(penalty_range[1]), 'T', sport.team_sport_name)
+                    pen_result = olympic_sim.select_type_game(r[1], 1, 0)
+                    country_scores.append(pen_result[0])
+                    #Puntaje final
+                    final_score = dif_result[0] + (execution_range - pen_result[0])
+                    results = (r[0] ,r[1] , [country_scores ,round(final_score, 3)])
+                    table_results.append(results)
+            pass       
+        elif sport.team_sport_name == 'Gimnasia Ritmica':
+            if 'Concurso completo' in deporte.sp_record_name:
+                nombres = ['Aro','Pelota','Mazas','Cinta']
+                specific_rules = rules['scoring_rules']['variables']
+                difficulty_range = specific_rules['D']['range']
+                execution_range = specific_rules['E']['base_value']
+                artistic_range = specific_rules['A']['range']
+                penalty_range = specific_rules['P']['range']
+                final_score = 0
+                country_scores = []
+                print('D: ',difficulty_range, ' E: ', execution_range, ' P: ', penalty_range)
+                for r in ranks:
+                    country_scores = []
+                    final_score = 0
+                    for _ in range(len(nombres)):
+                        current_score = 0
+                        #Simula dificultad
+                        olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(difficulty_range[1]), float(difficulty_range[0]), 'T', sport.team_sport_name)
+                        dif_result = olympic_sim.select_type_game(r[1], 1, 0)
+                        #Simula Artistico
+                        olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(artistic_range[1]), float(artistic_range[0]), 'T', sport.team_sport_name)
+                        art_result = olympic_sim.select_type_game(r[1], 1, 0)
+                        #Simula penalizaciones
+                        olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(penalty_range[0]), float(penalty_range[1]), 'T', sport.team_sport_name)
+                        pen_result = olympic_sim.select_type_game(r[1], 1, 0)
+                        #Puntaje final
+                        final_score += dif_result[0] + art_result[0] + (execution_range - pen_result[0])
+                        current_score = dif_result[0] + art_result[0] + (execution_range - pen_result[0])
+                        country_scores.append(round(current_score, 3))
+                    results = (r[0] ,r[1] , [country_scores ,round(final_score, 3)])
+                    table_results.append(results)
+                pass     
+            else:
+                specific_rules = rules['scoring_rules']['variables']
+                difficulty_range = specific_rules['D']['range']
+                artistic_range = specific_rules['A']['range']
+                execution_range = specific_rules['E']['base_value']
+                penalty_range = specific_rules['P']['range']
+                final_score = 0
+                country_scores = []
+                nombres = ['Dificultad','Componente Artístico', 'Penalización']
+                print('D: ',difficulty_range, ' E: ', execution_range, ' P: ', penalty_range)
+                for r in ranks:
+                    country_scores = []
+                    final_score = 0
+                    #Simula dificultad
+                    olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(difficulty_range[1]), float(difficulty_range[0]), 'T', sport.team_sport_name)
+                    dif_result = olympic_sim.select_type_game(r[1], 1, 0)
+                    country_scores.append(dif_result[0])
+                    #Simula Artistico
+                    olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(artistic_range[1]), float(artistic_range[0]), 'T', sport.team_sport_name)
+                    art_result = olympic_sim.select_type_game(r[1], 1, 0)
+                    country_scores.append(art_result[0])
+                    #Simula penalizaciones
+                    olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(penalty_range[0]), float(penalty_range[1]), 'T', sport.team_sport_name)
+                    pen_result = olympic_sim.select_type_game(r[1], 1, 0)
+                    country_scores.append(pen_result[0])
+                    #Puntaje final
+                    final_score = dif_result[0] + art_result[0] + (execution_range - pen_result[0])
+                    results = (r[0] ,r[1] , [country_scores ,round(final_score, 3)])
+                    table_results.append(results)
+        pass
     else:
         olympic_sim = sports_by_individual.SportsByIndividual(deporte.sp_record_name, float(deporte.sp_record_best), float(deporte.sp_record_last), deporte.sport_class, sport.team_sport_name)
         for r in ranks:
@@ -1130,7 +1363,8 @@ def generar_simulacion(request, match_class):
         except:
             table_results = sorted(table_results, key=lambda x: x[2], reverse=True)
 
-    return render(request, 'olympic/simulation_table_template.html',{'resultados': table_results, 'clase': deporte.sport_class, 'rondas': range(num_heats)})
+
+    return render(request, 'olympic/simulation_table_template.html',{'resultados': table_results, 'clase': deporte.sport_class, 'nombres': nombres, 'rondas': range(num_heats)})
 
 def pagina_registro_por_pais(request):
     sports = Teamsports.objects.filter(~Q(team_sport_name__icontains = 'Mario'), team_sport_class = 'T')

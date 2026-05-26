@@ -13,24 +13,31 @@
                     <th onclick="sortTable(1)">Resultado Final</th>
                     {% elif clase == 'H' %}
                     {% for c in rondas %}
-                        <th onclick="sortTable(1)">Heat {{ c }}</th>
+                    <th onclick="sortTable(1)">Heat {{ c }}</th>
                     {% endfor %}
                     <th onclick="sortTable(1)">Resultado Final</th>
                     {% elif clase == 'R' %}
                     {% for c in rondas %}
-                        <th onclick="sortTable(1)">Ronda {{ c }}</th>
+                    <th onclick="sortTable(1)">Ronda {{ c }}</th>
                     {% endfor %}
                     <th onclick="sortTable(1)">Resultado Final</th>
+
+                    {% elif clase == 'P' %}
+                    {% for c in nombres %}
+                    <th onclick="sortTable(1)">{{ c }}</th>
+                    {% endfor %}
+                    <th onclick="sortTable(1)">Resultado Final</th>
+
                     {% elif clase == 'E' %}
                     <th onclick="sortTable(1)">Intentos</th>
                     <th onclick="sortTable(1)">Resultado Final</th>
                     {% endif %}
-                    
+
                 </tr>
             </thead>
             <tbody>
 
-             {% if clase == 'T' %}
+                {% if clase == 'T' %}
                 {% for r in resultados %}
                 <tr>
                     <td>{{ r.0 }}</td>
@@ -38,31 +45,31 @@
                     <td>{{ r.2.0 }}</td>
                 </tr>
                 {% endfor %}
-            
-            {% elif clase == 'H' %}
-            {% for r in resultados %}
+
+                {% elif clase == 'H' %}
+                {% for r in resultados %}
                 <tr>
                     <td>{{ r.0 }}</td>
                     <td>{{ r.1 }}</td>
                     {% for val in r.2.0 %}
-                        <td>{{ val }}</td>
+                    <td>{{ val }}</td>
                     {% endfor %}
                     <td>{{ r.2.1 }}</td>
                 </tr>
                 {% endfor %}
 
-            {% elif clase == 'R' %}
-            {% for r in resultados %}
+                {% elif clase == 'R' %}
+                {% for r in resultados %}
                 <tr>
                     <td>{{ r.0 }}</td>
                     <td>{{ r.1 }}</td>
                     {% for val in r.2.0 %}
-                        <td>{{ val }}</td>
+                    <td>{{ val }}</td>
                     {% endfor %}
                     <td>{{ r.2.1 }}</td>
                 </tr>
                 {% endfor %}
-            {% elif clase == 'E' %}
+                {% elif clase == 'E' %}
                 {% for r in resultados %}
                 <tr>
                     <td>{{ r.0 }}</td>
@@ -72,7 +79,19 @@
                 </tr>
                 {% endfor %}
 
-            {% endif %}
+
+                {% elif clase == 'P' %}
+                {% for r in resultados %}
+                <tr>
+                    <td>{{ r.0 }}</td>
+                    <td>{{ r.1 }}</td>
+                    {% for val in r.2.0 %}
+                    <td>{{ val }}</td>
+                    {% endfor %}
+                    <td>{{ r.2.1 }}</td>
+                </tr>
+                {% endfor %}
+                {% endif %}
             </tbody>
         </table>
     </div>

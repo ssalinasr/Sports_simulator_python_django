@@ -38,7 +38,6 @@ class SportsByElimination(OlympicSportsInterface):
         if self.category_name in ['Atletismo','Munecos']:
             current_score = self.last_res
             while alive:    
-                print(num_tries, end=' ')
                 marks = ''  
                 rand = random.random()
                 if rand < self.get_fail_chance(rank, base_fail):
@@ -54,13 +53,11 @@ class SportsByElimination(OlympicSportsInterface):
                 if num_tries == 3:
                     alive = False
                     attempts.append((round(current_score,2), marks))
-            print()
                    
         elif self.category_name == 'Halterofilia':
             self.generate_intervals()
             current_score = intervals[1]
             while alive:    
-                print(num_tries, end=' ')
                 marks = ''  
                 rand = random.random()
                 if rand < self.get_fail_chance(rank, base_fail):
@@ -76,10 +73,9 @@ class SportsByElimination(OlympicSportsInterface):
                 if num_tries == 3:
                     alive = False
                     attempts.append((math.floor(round(current_score,2)), marks))
-            print()
             pass
         if len(attempts) > 1:
-            return [attempts, math.floor(round(current_score,2))]
+            return [attempts, round(current_score,2)]
         else:
             return [attempts, 0]
     
