@@ -8,3 +8,9 @@ truncate table "PlayerTournamentRegister";
 truncate table "TeamMatchesRegister";
 truncate table "TeamTitleRegister";
 truncate table "TeamTournamentRegister";
+
+truncate table "TeamSimulationRegister";
+truncate table "PlayerSimulationRegister";
+
+truncate table "TeamMedalRegister";
+truncate table "PlayerMedalRegister";

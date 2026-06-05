@@ -1,7 +1,7 @@
 from django.urls import path, include
 from .views import pagina_principal, pagina_partido_individual, cargar_equipos, mostrar_equipo, generar_partido, pagina_partidos_liga, generar_liga, insertar_equipo
 from .views import pagina_partidos_torneo, generar_torneo, pagina_simulacion_completa, generar_simulacion_completa, generar_simulacion_completa_clubes, pagina_simulacion_completa_clubes
-from .views import pagina_competencia, cargar_pruebas, generar_simulacion, eliminar_equipo
+from .views import pagina_competencia, cargar_pruebas, generar_simulacion, eliminar_equipo, pagina_simulacion_completa_olimpica, generar_simulacion_completa_olimpica
 
 from .views import pagina_registro_por_pais, pagina_registro_por_jugador_individual, pagina_registro_por_pais_mayor, pagina_registro_por_pais_olimpico, pagina_registro_por_jugador_individual_olimpico, pagina_registro_por_pais_mayor_olimpico, pagina_registro_por_torneo
 from .views import pagina_registro_por_club, consultar_por_pais, consultar_por_jugador, consultar_por_clubes, consultar_por_pais_mayor, consultar_por_torneo
@@ -28,8 +28,10 @@ urlpatterns = [
     path('functions/simulated_olympic/simulate_sport/<int:match_class>/', generar_simulacion, name='generar_simulacion'),
     #URLS Simulación Completa#
     path('functions/full_simulation/<int:match_class>/', pagina_simulacion_completa, name='pagina_simulacion_completa'),
+    path('functions/full_simulation_olympic/<int:match_class>/', pagina_simulacion_completa_olimpica, name='pagina_simulacion_completa_olimpica'),
     path('functions/full_simulation_clubs/<int:match_class>/', pagina_simulacion_completa_clubes, name='pagina_simulacion_completa_clubes'),
     path('functions/full_simulation/simulate_tournament/<int:match_class>/', generar_simulacion_completa, name='generar_simulacion_completa'),
+    path('functions/full_simulation/simulate_tournament_olympic/<int:match_class>/', generar_simulacion_completa_olimpica, name='generar_simulacion_completa_olimpica'),
     path('functions/full_simulation_clubs/simulate_tournament/<int:match_class>/', generar_simulacion_completa_clubes, name='generar_simulacion_completa_clubes'),
     #URLS Páginas de registros#
     path('logs/register_by_club/', pagina_registro_por_club, name='pagina_registro_por_club'),

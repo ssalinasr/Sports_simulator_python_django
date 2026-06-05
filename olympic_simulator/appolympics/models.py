@@ -299,3 +299,26 @@ class Tournamentstage(models.Model):
     class Meta:
         managed = False
         db_table = 'TournamentStage'
+
+class Playermedalregister(models.Model):
+    player_medal_id = models.BigAutoField(primary_key=True)
+    ol_player = models.ForeignKey(Olympicplayers, models.DO_NOTHING)
+    medal_label = models.CharField(max_length=2)
+    medal_year = models.CharField(max_length=4)  
+    sp_record = models.ForeignKey(Sportsrecords, models.DO_NOTHING)   
+
+    class Meta:
+        managed = False
+        db_table = 'PlayerMedalRegister'
+
+class Teammedalregister(models.Model):
+    team_medal_id = models.BigAutoField(primary_key=True)
+    team = models.ForeignKey(Nationalteams, models.DO_NOTHING)
+    medal_label = models.CharField(max_length=2)
+    medal_year = models.CharField(max_length=4)
+    sp_record = models.ForeignKey(Sportsrecords, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'TeamMedalRegister'
+

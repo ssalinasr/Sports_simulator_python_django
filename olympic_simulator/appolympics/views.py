@@ -11,7 +11,7 @@ from core_scripts.interfaces.sports_interfaces import sports_by_time, sports_by_
 from core_scripts.interfaces.games_interfaces import goldeneye_interface, mariokart_interface, supersmash_interface, muns_interface
 from core_scripts.leagues import league_group
 from core_scripts.tournaments import tournament_group
-from core_scripts.tournaments import full_tournament, full_tournament_clubs
+from core_scripts.tournaments import full_tournament, full_tournament_clubs, full_tournament_olympic
 
 from core_scripts.clubs_leagues import club_league_season
 import itertools
@@ -1086,7 +1086,7 @@ def generar_simulacion(request, match_class):
 
     table_results = []
     
-    sim_sports = simulated_sports.SimulatedSports(sport, deporte, table_results, ranks)
+    sim_sports = simulated_sports.SimulatedSports(sport, deporte, table_results, ranks, match_class)
     sim_sports.simulate_olympic_sport()
     
     return render(request, 'olympic/simulation_table_template.html',{'resultados': sim_sports.get_table_results(), 'clase': deporte.sport_class, 'nombres': sim_sports.get_nombres(), 'rondas': range(sim_sports.get_heats())})
@@ -1595,3 +1595,116 @@ def consultar_por_torneo(request):
             print(e)
     
     return render(request, 'logs/tournament_search_results.html', {'resultados_torneo': tournament_data, 'campeones_torneo': tournament_teams})
+
+def pagina_simulacion_completa_olimpica(request, match_class):
+    request.session.flush()
+    years = itertools.chain(range(1880,2016,4), range(2013,2101))
+    sports_categories = []
+    sports = []
+    list_of_ex = list(range(39,47))
+    list_of_ids = list(range(39,46))
+    if match_class == 1:
+        sports_categories = Teamsports.objects.filter(~Q(team_sport_id__in = list_of_ex ), team_sport_class = 'L')
+    elif match_class == 2:
+        sports_categories = Teamsports.objects.filter(team_sport_id__in = list_of_ids)
+    elif match_class == 4:
+        sports_categories = Teamsports.objects.filter(team_sport_id = 46)
+    else:
+        sports_categories = Teamsports.objects.filter(~Q(team_sport_id__in = list_of_ex ), team_sport_class = 'L')
+    
+    sports_elements = Sportsrecords.objects.all()
+    for sp in sports_elements:
+        sports.append(sp.sp_record_name)
+    return render(request, 'full_simulation/sports_full_simulation_page.html',{'categorias': sports_categories, 'años': years, 'clase': match_class})
+
+def generar_simulacion_completa_olimpica(request, match_class):
+    teams_by_cn = []
+    full_trn = None
+    categoria = request.GET.get('categoria')
+    valor_año = request.GET.get('valoryear')
+    hay_guardado = request.GET.get('registrarres')
+    file_name = ''
+
+    ranks = []
+    teams = []
+    groups = []
+    simulation_pairs = []
+
+    if match_class == 1:
+        if str(categoria) == 'jo_verano':
+            sport = Teamsports.objects.filter(team_sport_id__gte = 1, team_sport_id__lt = 21)
+        elif str(categoria) == 'jo_invierno':
+            sp_first = Teamsports.objects.filter(team_sport_id__gte = 61, team_sport_id__lt = 69)
+            sp_second = Teamsports.objects.filter(team_sport_id__gte = 72, team_sport_id__lt = 75)
+            sport = sp_first.union(sp_second)
+        pass
+    elif match_class in [2,4]:
+        sport = Teamsports.objects.filter(team_sport_name = str(categoria))
+        pass
+
+    for sp in sport:
+        ranks = []
+        disc = Sportsrecords.objects.filter(team_sport = sp)
+        if sp.team_sport_name == 'Gimnasia Artistica' or sp.team_sport_name == 'Gimnasia Ritmica':
+            disc_list = []
+            for d in disc:
+                if 'Concurso' in d.sp_record_name:
+                    disc_list.append(d)
+        else:
+            disc_list = [d for d in disc]
+
+        if match_class == 1 or match_class == 5:
+            equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
+            for eq in equipos:
+                rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = sp.team_sport_id)
+                teams.append(eq.team_name)
+                rank_tuple = (eq.team_name, rank.team_rank)
+                ranks.append(rank_tuple)
+
+        elif match_class in [2,4]:
+            if sp.team_sport_name == 'Tokyo':
+                equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
+            elif sp.team_sport_name != 'Goldeneye':
+                equipos = Olympicplayers.objects.filter(~Q(ol_player_name__contains='/'),~Q(ol_player_name__contains='_MN'), team_sport_id = sp.team_sport_id)
+            else:
+                equipos = Olympicplayers.objects.filter(ol_player_name__contains='_GE')
+
+            for eq in equipos:
+                rank = random.randint(1,7)
+                if sp.team_sport_name != 'Tokyo':
+                    teams.append(eq.ol_player_name)
+                    rank_tuple = (eq.ol_player_name, rank)
+                    ranks.append(rank_tuple)
+                else:
+                    teams.append(eq.team_name)
+                    rank_tuple = (eq.team_name, rank)
+                    ranks.append(rank_tuple)
+        else:
+            equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
+            for eq in equipos:
+                rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = sp.team_sport_id)
+                teams.append(eq.team_name)
+                rank_tuple = (eq.team_name, rank.team_rank)
+                ranks.append(rank_tuple)
+    
+        simulation_pairs.append([sp, disc_list, ranks])
+    
+    full_trn = full_tournament_olympic.FullTournament(simulation_pairs, str(categoria), 1, match_class, valor_año, hay_guardado)
+    full_trn.simulate_tournament()
+    if categoria == 'jo_verano':
+        file_name = 'simulacion_Juegos_Olimpicos_Verano_'+str(valor_año)+'.xlsx'
+    elif categoria == 'jo_invierno':
+        file_name = 'simulacion_Juegos_Olimpicos_Invierno_'+str(valor_año)+'.xlsx'
+    else:
+        file_name = 'simulacion_'+str(categoria)+'_'+str(valor_año)+'.xlsx'
+    file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+        # Crear carpeta media si no existe
+    os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+
+    full_trn.generate_tournament_excel(file_path)
+
+    download_url = settings.MEDIA_URL + file_name
+
+    return render(request, "general/generate_download_excel.html", {
+        "download_url": download_url
+    })

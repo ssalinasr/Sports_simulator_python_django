@@ -4,13 +4,14 @@ from core_scripts.interfaces.olympic_sports_interfaces import sports_by_heats, s
 import itertools, random
 
 class SimulatedSports():
-    def __init__(self, sport, deporte, table_results, ranks):
+    def __init__(self, sport, deporte, table_results, ranks, match_class):
         self.sport = sport
         self.deporte = deporte
         self.table_results = table_results
         self.ranks = ranks
         self.nombres = []
         self.num_heats = 0
+        self.match_class = match_class
         pass
 
     def simulate_olympic_sport(self):
@@ -34,7 +35,11 @@ class SimulatedSports():
         elif self.deporte.sport_class == 'T':
             olympic_sim = sports_by_individual.SportsByIndividual(self.deporte.sp_record_name, float(self.deporte.sp_record_best), float(self.deporte.sp_record_last), self.deporte.sport_class, self.sport.team_sport_name)
             for r in self.ranks:
-                results = (r[0] ,r[1] ,olympic_sim.select_type_game(r[1], 1, 0))
+                if self.match_class in [2,4]:
+                    rand = random.randint(1,7)
+                    results = (r[0] ,rand, olympic_sim.select_type_game(rand, 1, 0))
+                else:
+                    results = (r[0] ,r[1], olympic_sim.select_type_game(r[1], 1, 0))
                 self.table_results.append(results)
         elif self.deporte.sport_class == 'R':
             olympic_sim = sports_by_rounds.SportsByRounds(self.deporte.sp_record_name, float(self.deporte.sp_record_best), float(self.deporte.sp_record_last), self.deporte.sport_class, self.sport.team_sport_name)
@@ -57,7 +62,6 @@ class SimulatedSports():
 
             if 'Heptatlón' in self.deporte.sp_record_name:
                 current_rules = rules['disciplines']['heptathlon'] 
-                print(current_rules.keys())
                 score = 0
                 final_score = 0
                 sports_done = []
@@ -93,7 +97,6 @@ class SimulatedSports():
             elif 'Decatlón' in self.deporte.sp_record_name:
                 current_rules = rules['disciplines']['decathlon'] 
                 current_sport = None
-                print(current_rules.keys())
                 score = 0
                 final_score = 0
                 sports_done = []
@@ -366,7 +369,7 @@ class SimulatedSports():
                         olympic_sim = sports_by_individual.SportsByIndividual(self.deporte.sp_record_name, float(sync_range[0]), float(sync_range[1]), 'T', self.sport.team_sport_name)
                         sync_result = olympic_sim.select_type_game(r[1], 1, 0)
                         country_scores.append(sync_result[0])
-                        final_score = dif_result[0] + (time_result[0] + hor_result[0] + exec_result[0] + sync_result) - pen_result[0] - random.randint(0,2)
+                        final_score = dif_result[0] + (time_result[0] + hor_result[0] + exec_result[0] + sync_result[0]) - pen_result[0] - random.randint(0,2)
                     else:
                         #Puntaje final
                         final_score = dif_result[0] + (time_result[0] + hor_result[0] + exec_result[0]) - pen_result[0] - random.randint(0,2)
@@ -665,9 +668,6 @@ class SimulatedSports():
                         full_scores = []
                         full_scores.append(round_result)
                         full_scores.extend(trick_results)
-                        print('Rondas ', country_scores, 'Tricks ', trick_results)
-                        print('Resultados ', full_scores)
-                        print(all_results)
                         results = (r[0] ,r[1] , [all_results ,round(sum(full_scores), 2)])
                         self.table_results.append(results)
                     pass
@@ -1393,7 +1393,6 @@ class SimulatedSports():
 
             elif self.sport.team_sport_name == 'Ciclismo de Pista':
                 if 'Madison' in self.deporte.sp_record_name:
-                    print('Madison Here')
                     final_score = 0
                     country_scores = []
                     self.nombres = ['Check '+str(i) for i in range(20)]
@@ -1416,11 +1415,9 @@ class SimulatedSports():
                         sorted_results = sorted(current_results, key=lambda x: x[2])
 
                         first_four = sorted_results[:4]
-                        print(first_four)
                         
                         for c in country_points_list:
                             if first_four[0][0] == c[0]:
-                                print('primero')
                                 c[2].append(5)
                             elif first_four[1][0] == c[0]:
                                 c[2].append(3)
@@ -1432,12 +1429,10 @@ class SimulatedSports():
                                 c[2].append(0)
                                                          
                     for k in country_points_list:
-                        print(k[0],len(k[2]), k[2])
                         results = (k[0] ,k[1] , [k[2] ,round(sum(k[2]), 2)])
                         self.table_results.append(results)
                     pass
                 elif 'Ómnium' in self.deporte.sp_record_name:
-                    print('Omnium Here')
                     final_score = 0
                     country_scores = []
                     self.nombres = ['Keirin','Velocidad','Puntos','Eliminación']
@@ -1533,7 +1528,6 @@ class SimulatedSports():
                 results = (r[0] ,r[1] ,olympic_sim.select_type_game(r[1], 1, 0))
                 self.table_results.append(results)
 
-        print(self.deporte.sp_record_best, self.deporte.sp_record_last)
 
         if float(self.deporte.sp_record_best) < float(self.deporte.sp_record_last):
             if 'Madison' in self.deporte.sp_record_name:
