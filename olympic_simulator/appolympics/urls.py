@@ -6,6 +6,8 @@ from .views import pagina_competencia, cargar_pruebas, generar_simulacion, elimi
 from .views import pagina_registro_por_pais, pagina_registro_por_jugador_individual, pagina_registro_por_pais_mayor, pagina_registro_por_pais_olimpico, pagina_registro_por_jugador_individual_olimpico, pagina_registro_por_pais_mayor_olimpico, pagina_registro_por_torneo
 from .views import pagina_registro_por_club, consultar_por_pais, consultar_por_jugador, consultar_por_clubes, consultar_por_pais_mayor, consultar_por_torneo
 
+from .views import pagina_records, consultar_records, consultar_medallas_jugador, consultar_medallas_pais, consultar_medallas_pais_mayor
+
 urlpatterns = [
     path('', pagina_principal , name='pagina_principal'),
     #URLs Simulación de partidos#
@@ -47,9 +49,15 @@ urlpatterns = [
     path('logs/register_by_club/search', consultar_por_clubes, name='consultar_por_clubes'),
     path('logs/register_by_individual_player/search', consultar_por_jugador, name='consultar_por_jugador'),
     path('logs/register_by_major_country/search', consultar_por_pais_mayor, name='consultar_por_pais_mayor'),
-    path('logs/register_by_tournament/search', consultar_por_torneo, name='consultar_por_torneo')
+    path('logs/register_by_tournament/search', consultar_por_torneo, name='consultar_por_torneo'),
+    path('logs/register_by_country_olympic/search', consultar_medallas_pais, name='consultar_medallas_pais'),
+    path('logs/register_by_individual_player_olympic/search', consultar_medallas_jugador, name='consultar_medallas_jugador'),
+    path('logs/register_by_major_country_olympic/search', consultar_medallas_pais_mayor, name='consultar_medallas_pais_mayor'),
+    #path('logs/register_by_tournament/search', consultar_por_torneo, name='consultar_por_torneo'),
 
-   
+    #URLs Consulta de records#
+    path('logs/records_register/<int:match_class>/', pagina_records, name='pagina_records'),
+    path('logs/records_register/search/<int:match_class>/', consultar_records, name='consultar_records')
     ]
 
 

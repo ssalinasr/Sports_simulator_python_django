@@ -1,0 +1,63 @@
+<!-- 3️⃣ ORIGEN -->
+<div class="row league-row">
+    <div class="col-12 dashboard-item">
+        <div class="esports-card text-center">
+            <h5 class="card-title">Dueño del record</h5>
+            <div class="row">
+                {% if clase == 1 %}
+                <div class="col-md-6 col-12">
+                    <div class="score-label">País</div>
+                    <div class="score-part mt-2">{{ resultado.team.team_name }}</div>
+                </div>
+                {% else %}
+                <div class="col-md-6 col-12">
+                    <div class="score-label">Jugador</div>
+                    <div class="score-part mt-2">{{ resultado.ol_player.ol_player_name }}</div>
+                </div>
+                {% endif %}
+                <div class="col-md-6 col-12">
+                    <div class="score-label">Nación</div>
+                    <div class="score-part mt-2">{{ nacion.ol_country_name }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4️⃣ RESULTADOS -->
+<div class="row league-row">
+    <div class="col-12 dashboard-item">
+        <div class="esports-card text-center">
+            <h5 class="card-title">Resultados</h5>
+            <div class="row">
+                <div class="col-md-3 col-12">
+                    <div class="score-label"><i class="bi bi-award"></i>Deporte</div>
+                    <div class="score-part mt-2">{{ deporte.team_sport_name }}</div>
+                </div>
+                <div class="col-md-3 col-12">
+                    <div class="score-label"><i class="bi bi-award-fill"></i>Disciplina</div>
+                    <div class="score-part mt-2">{{ disciplina.sp_record_name }}</div>
+                </div>
+                {% if clase == 1 %}
+                <div class="col-md-3 col-12">
+                    <div class="score-label"><i class="bi bi-1-circle-fill"></i>Resultado</div>
+                    <div class="score-part mt-2">{{ resultado.team_result }}</div>
+                </div>
+                <div class="col-md-3 col-12">
+                    <div class="score-label"><i class="bi bi-calendar-check"></i>Año</div>
+                    <div class="score-part mt-2">{{ resultado.team_year }}</div>
+                </div>
+                {% else %}
+                <div class="col-md-3 col-12">
+                    <div class="score-label"><i class="bi bi-1-circle-fill"></i>Resultado</div>
+                    <div class="score-part mt-2">{{ resultado.ol_player_result }}</div>
+                </div>
+                <div class="col-md-3 col-12">
+                    <div class="score-label"><i class="bi bi-calendar-check"></i>Año</div>
+                    <div class="score-part mt-2">{{ resultado.ol_player_year }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

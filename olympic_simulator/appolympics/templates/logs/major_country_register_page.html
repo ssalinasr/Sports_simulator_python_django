@@ -27,7 +27,7 @@
                         <div class="col-md-12 col-12">
                             <label class="score-label mb-2">País</label>
                             <select class="form-select esports-select" id="countrySelect" name="pais">
-                                <option value="">Seleccionar país mayor</option>
+                                <option value="">Seleccionar nación</option>
                                 {%for pais in paises_mayores %}
                                 <option value="{{pais.ol_country_name}}">{{pais.ol_country_name}}</option>
                                 {% endfor %}
@@ -36,7 +36,7 @@
                         <div class="col-md-12 col-12">
                             <button class="esports-btn justify-content-center" hx-get="{% url 'consultar_por_pais_mayor' %}"
                                 hx-target="#searchResults" hx-include="#countrySelect">
-                                <i class="bi bi-people"></i>Consultar país mayor
+                                <i class="bi bi-people"></i>Consultar nación
                             </button>
                         </div>
                     </div>

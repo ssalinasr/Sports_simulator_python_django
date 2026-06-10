@@ -230,7 +230,7 @@ class FullTournament():
                 sport = Sportsrecords.objects.get(sp_record_name = medal[0], team_sport_id = medal[1])
                 counter = 0
                 for md in medal[2]:
-                    team_obj = Olympicplayers.objects.get(ol_player_name = md)
+                    team_obj = Olympicplayers.objects.filter(ol_player_name = md).first()
                     try:
                         existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = str(self.year))
                         existing_log.ol_player_id = team_obj.ol_player_id

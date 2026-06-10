@@ -1,10 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
-from django.db.models import Q, Sum, F, Case, When, IntegerField, Max, Min
+from django.db.models import Q, Sum, F, Case, When, IntegerField, Max, Min, Count
 from django.db.models.functions import Coalesce
 from .models import Teamregion, Nationalteams, Olympicplayers, Teamsports, Clubleague, Clubs, Playercountry, Playertournamentsports, Teamranks, Sportsrecords, Clubmatchesregister, Teamtournamentregister
-from .models import Teammatchesregister, Teamtitleregister, Playertitleregister, Clubtitleregister, Playertournamentregister, Clubtournamentregister
+from .models import Teammatchesregister, Teamtitleregister, Playertitleregister, Clubtitleregister, Playertournamentregister, Clubtournamentregister, Teamsimulationregister, Playersimulationregister, Teammedalregister, Playermedalregister
 from core_scripts.interfaces.olympic_sports_interfaces import simulated_sports
 import base64
 from core_scripts.interfaces.sports_interfaces import sports_by_time, sports_by_sets, sports_by_ends, sports_by_special_sets, sports_by_timed_points
@@ -1096,9 +1096,6 @@ def pagina_registro_por_pais(request):
     countries = Nationalteams.objects.all()
     return render(request, 'logs/country_register_page.html', {'deportes': sports, 'paises': countries})
 
-def pagina_registro_por_pais_olimpico(request):
-    return render(request, 'logs/country_register_page_olympic.html')
-
 def pagina_registro_por_jugador_individual(request):
     list_games = ['Super Smash', 'Goldeneye', 'Mario Kart']
     id_games_query = Teamsports.objects.filter(team_sport_name__in = list_games)
@@ -1110,15 +1107,9 @@ def pagina_registro_por_jugador_individual(request):
     sports = Playertournamentsports.objects.filter(Q(player_trn_sport_id__lt = 11) | Q(player_trn_sport_id__gt = 19))
     return render(request, 'logs/player_register_page.html', {'deportes': sports, 'jugadores': players})
 
-def pagina_registro_por_jugador_individual_olimpico(request):
-    return render(request, 'logs/player_register_page_olympic.html')
-
 def pagina_registro_por_pais_mayor(request):
     countries = Playercountry.objects.all()
     return render(request, 'logs/major_country_register_page.html', {'paises_mayores': countries})
-
-def pagina_registro_por_pais_mayor_olimpico(request):
-    return render(request, 'logs/major_country_register_page_olympic.html')
 
 def pagina_registro_por_torneo(request):
     sports = Teamsports.objects.filter(~Q(team_sport_name__icontains = 'Mario'), team_sport_class = 'T')
@@ -1708,3 +1699,204 @@ def generar_simulacion_completa_olimpica(request, match_class):
     return render(request, "general/generate_download_excel.html", {
         "download_url": download_url
     })
+
+
+def pagina_records(request, match_class):
+    sports_categories = []
+    sports = []
+    list_of_ex = list(range(39,47))
+    list_of_ids = list(range(39,46))
+    if match_class == 1:
+        sports_categories = Teamsports.objects.filter(~Q(team_sport_id__in = list_of_ex ), team_sport_class = 'L')
+    elif match_class == 2:
+        sports_categories = Teamsports.objects.filter(team_sport_id__in = list_of_ids)
+    elif match_class == 4:
+        sports_categories = Teamsports.objects.filter(team_sport_id = 46)
+    else:
+        sports_categories = Teamsports.objects.filter(~Q(team_sport_id__in = list_of_ex ), team_sport_class = 'L')
+    
+    sports_elements = Sportsrecords.objects.all()
+    for sp in sports_elements:
+        sports.append(sp.sp_record_name)
+
+    print(sports_categories)
+
+    return render(request, 'logs/sports_records_page.html', {'categorias': sports_categories, 'deportes': sports, 'clase': match_class})
+
+def consultar_records(request, match_class):
+    categoria = request.GET.get('categoria')
+    deporte = request.GET.get('prueba')
+    print(categoria, deporte)
+    flag = ''
+    nacion = None
+
+    sport = Teamsports.objects.get(team_sport_name = categoria)
+    discipline = Sportsrecords.objects.get(sp_record_name = deporte, team_sport_id = sport.team_sport_id)
+
+    if float(discipline.sp_record_best) < float(discipline.sp_record_last):
+        if 'Madison' in discipline.sp_record_name:
+            flag = 'MAX'
+        else:
+            flag = 'MIN'
+    elif float(discipline.sp_record_best) > float(discipline.sp_record_last):
+            flag = 'MAX'
+    elif float(discipline.sp_record_best) == float(discipline.sp_record_last):
+        if 'obstáculos' in discipline.sp_record_name: 
+            flag = 'MIN'
+        else:
+            flag = 'MAX'
+        
+        if 'TN +' in discipline.sp_record_name or 'TG +' in discipline.sp_record_name:
+            flag = 'MIN'
+
+    print(discipline.sp_record_id, discipline.sp_record_best, discipline.sp_record_last)
+
+    if match_class == 1:
+        if flag == 'MIN':
+            resultado = (
+                Teamsimulationregister.objects
+                .filter(sp_record_id= discipline.sp_record_id)
+                .order_by('team_result')
+                .select_related('team')
+                .first()
+            )
+
+        elif flag == 'MAX':
+            resultado = (
+                Teamsimulationregister.objects
+                .filter(sp_record_id = discipline.sp_record_id)
+                .order_by('-team_result')
+                .select_related('team')
+                .first()
+            )
+        
+        nacion = resultado.team.ol_country
+
+    elif match_class in [2,4]: 
+        if flag == 'MIN':
+            resultado = (
+                Playersimulationregister.objects
+                .filter(sp_record_id= discipline.sp_record_id)
+                .order_by('ol_player_result')
+                .select_related('ol_player')
+                .first()
+            )
+
+        elif flag == 'MAX':
+            resultado = (
+                Playersimulationregister.objects
+                .filter(sp_record_id = discipline.sp_record_id)
+                .order_by('-ol_player_result')
+                .select_related('ol_player')
+                .first()
+            )
+
+        try:
+            nacion = resultado.ol_player.ol_country
+        except:
+            print('No hay record...')
+       
+        print(resultado)
+    
+    return render(request, 'logs/sports_records_results.html', {'resultado': resultado, 'deporte': sport, 'disciplina': discipline,
+                                                                 'clase': match_class, 'nacion': nacion})
+
+def pagina_registro_por_pais_olimpico(request):
+    countries = Nationalteams.objects.exclude(team_name__icontains='Fem')
+    return render(request, 'logs/country_register_page_olympic.html', {'paises': countries})
+
+def pagina_registro_por_jugador_individual_olimpico(request):
+    players = Olympicplayers.objects.all()
+    return render(request, 'logs/player_register_page_olympic.html', {'jugadores': players})
+
+def pagina_registro_por_pais_mayor_olimpico(request):
+    countries = Playercountry.objects.all()
+    return render(request, 'logs/major_country_register_page_olympic.html', {'paises_mayores': countries})
+
+def consultar_medallas_pais(request):
+    pais = request.GET.get('pais')
+
+    country = Nationalteams.objects.get(team_name = pais)
+    region = Teamregion.objects.get(team_region_id = country.team_region.team_region_id)
+    major_country = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+
+    general = (
+        Teammedalregister.objects
+        .filter(team_id= country.team_id)
+        .aggregate(
+            oros=Count('team_medal_id', filter=Q(medal_label='O')),
+            platas=Count('team_medal_id', filter=Q(medal_label='P')),
+            bronces=Count('team_medal_id', filter=Q(medal_label='B')),
+            total=Count('team_medal_id')
+        )
+        
+    )
+
+    medallero = (
+        Teammedalregister.objects
+        .filter(team_id= country.team_id)
+        .annotate(deporte=F('sp_record__team_sport__team_sport_name'))
+        .values(
+            'deporte'
+        )
+        .annotate(
+            oros=Count('team_medal_id', filter=Q(medal_label='O')),
+            platas=Count('team_medal_id', filter=Q(medal_label='P')),
+            bronces=Count('team_medal_id', filter=Q(medal_label='B')),
+            total=Count('team_medal_id')
+        )
+        .order_by(
+        '-oros',
+        '-platas',
+        '-bronces',
+        'sp_record__team_sport__team_sport_name'
+        )
+    )
+
+    return render(request, 'logs/country_search_olympic_results.html', {'medallero': medallero, 'pais': country, 'region': region,
+                                                                         'nacion': major_country, 'general': general})
+
+def consultar_medallas_jugador(request):
+    jugador = request.GET.get('jugador')
+
+    player = Olympicplayers.objects.get(ol_player_name = jugador)
+    major_country = Playercountry.objects.get(ol_country_id = player.ol_country.ol_country_id)
+
+    general = (
+        Playermedalregister.objects
+        .filter(ol_player_id= player.ol_player_id)
+        .aggregate(
+            oros=Count('player_medal_id', filter=Q(medal_label='O')),
+            platas=Count('player_medal_id', filter=Q(medal_label='P')),
+            bronces=Count('player_medal_id', filter=Q(medal_label='B')),
+            total=Count('player_medal_id')
+        )
+    )
+
+    medallero = (
+        Playermedalregister.objects
+        .filter(ol_player_id = player.ol_player_id)
+        .annotate(deporte=F('sp_record__sp_record_name'))
+        .values(
+            'deporte'
+        )
+        .annotate(
+            oros=Count('player_medal_id', filter=Q(medal_label='O')),
+            platas=Count('player_medal_id', filter=Q(medal_label='P')),
+            bronces=Count('player_medal_id', filter=Q(medal_label='B')),
+            total=Count('player_medal_id')
+        )
+        .order_by(
+        '-oros',
+        '-platas',
+        '-bronces',
+        'sp_record__sp_record_name'
+        )
+    )
+
+    return render(request, 'logs/player_olympic_search_results.html', {'medallero': medallero, 'jugador': player, 'nacion': major_country,
+                                                                       'general': general})
+
+
+def consultar_medallas_pais_mayor(request):
+    return HttpResponse("")

@@ -40,35 +40,75 @@
                         <li>
                             <a class="dropdown-item" href="{% url 'pagina_registro_por_jugador_individual' %}">
                                 <i class="bi bi-people-fill"></i>
-                                Jugador Individual
+                                Registro por jugador
                             </a>
                         </li>
 
                         <li>
                             <a class="dropdown-item" href="{% url 'pagina_registro_por_pais' %}">
                                 <i class="bi bi-flag-fill"></i>
-                                País
+                                Registro por país
                             </a>
                         </li>
 
                         <li>
                             <a class="dropdown-item" href="{% url 'pagina_registro_por_club' %}">
                                 <i class="bi bi-trophy"></i>
-                                Club
+                                Registro por club
                             </a>
                         </li>
 
                         <li>
                             <a class="dropdown-item" href="{% url 'pagina_registro_por_pais_mayor' %}">
                                 <i class="bi bi-star-fill"></i>
-                                País Mayor
+                                Registro por nación
                             </a>
                         </li>
 
                         <li>
                             <a class="dropdown-item" href="{% url 'pagina_registro_por_torneo' %}">
                                 <i class="bi bi-trophy-fill"></i>
-                                Torneo
+                                Registro por torneo
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- REGISTROS -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="registrosDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+
+                        <i class="bi bi-folder-fill"></i>
+                        Medalleros
+                    </a>
+
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                        <li>
+                            <a class="dropdown-item" href="{% url 'pagina_registro_por_jugador_individual_olimpico' %}">
+                                <i class="bi bi-people-fill"></i>
+                                Medallas por jugador
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item" href="{% url 'pagina_registro_por_pais_olimpico' %}">
+                                <i class="bi bi-flag-fill"></i>
+                                Medallas por país
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item" href="{% url 'pagina_registro_por_pais_mayor_olimpico' %}">
+                                <i class="bi bi-star-fill"></i>
+                                Medallas por nación
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item" href="{% url 'pagina_registro_por_torneo' %}">
+                                <i class="bi bi-trophy-fill"></i>
+                                Registro por torneo olímpico
                             </a>
                         </li>
                     </ul>
@@ -87,14 +127,28 @@
                         <li>
                             <a class="dropdown-item" href="#">
                                 <i class="bi bi-capslock-fill"></i>
-                                Medallero General
+                                Rankings
                             </a>
                         </li>
 
                         <li>
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item" href="{% url 'pagina_records' 1 %}">
                                 <i class="bi bi-bar-chart-line-fill"></i>
-                                Records
+                                Records por país
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item" href="{% url 'pagina_records' 2 %}">
+                                <i class="bi bi-bar-chart-line-fill"></i>
+                                Records por juego
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item" href="{% url 'pagina_records' 4 %}">
+                                <i class="bi bi-bar-chart-line-fill"></i>
+                                Records JOM
                             </a>
                         </li>
                     </ul>

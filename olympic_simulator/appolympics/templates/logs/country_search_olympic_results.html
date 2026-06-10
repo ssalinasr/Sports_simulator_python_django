@@ -1,0 +1,84 @@
+<!-- 3️⃣ ORIGEN -->
+<div class="row league-row">
+    <div class="col-12 dashboard-item">
+        <div class="esports-card text-center">
+            <h5 class="card-title">Origen</h5>
+            <div class="row">
+                <div class="col-md-4 col-12">
+                    <div class="score-label">País</div>
+                    <div class="score-part mt-2">{{ pais.team_name }}</div>
+                </div>
+                <div class="col-md-4 col-12">
+                    <div class="score-label">Continente</div>
+                    <div class="score-part mt-2">{{ region.team_region_name }}</div>
+                </div>
+                <div class="col-md-4 col-12">
+                    <div class="score-label">Nación</div>
+                    <div class="score-part mt-2">{{ nacion.ol_country_name }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4️⃣ RESULTADOS -->
+<div class="row league-row">
+    <div class="col-12 dashboard-item">
+        <div class="esports-card text-center">
+            <h5 class="card-title">Resultados</h5>
+            <div class="row">
+                <div class="col-md-3 col-12">
+                    <div class="score-label">🥇Oros</div>
+                    <div class="score-part mt-2">{{ general.oros }}</div>
+                </div>
+                <div class="col-md-3 col-12">
+                    <div class="score-label">🥈Platas</div>
+                    <div class="score-part mt-2">{{ general.platas }}</div>
+                </div>
+                <div class="col-md-3 col-12">
+                    <div class="score-label">🥉Bronces</div>
+                    <div class="score-part mt-2">{{ general.bronces }}</div>
+                </div>
+                <div class="col-md-3 col-12">
+                    <div class="score-label"><i class="bi bi-arrow-up-circle"></i>Total medallas</div>
+                    <div class="score-part mt-2">{{ general.total }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="esports-card">
+    <div class="card-title">
+        <i class="bi bi-table"></i> Tabla
+    </div>
+
+    <div class="table-responsive">
+        <table class="table esports-table text-center" id="leagueTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Deporte</th>
+                    <th onclick="sortTable(1)">O</th>
+                    <th onclick="sortTable(2)">P</th>
+                    <th onclick="sortTable(3)">B</th>
+                    <th onclick="sortTable(4)">Total</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in medallero %}
+                <tr>
+                    <td>{{ m.deporte }}</td>
+                    <td>{{ m.oros }}</td>
+                    <td>{{ m.platas }}</td>
+                    <td>{{ m.bronces }}</td>
+                    <td>{{ m.total }}</td>
+                </tr>
+                {% empty %}
+                <div class="col-md-12 col-12">
+                    <div class="score-part mt-2">{{ pais.team_name }} no tiene medallas.</div>
+                </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
