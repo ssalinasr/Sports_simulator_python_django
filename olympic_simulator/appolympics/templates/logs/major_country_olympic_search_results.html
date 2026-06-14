@@ -1,227 +1,76 @@
-
-            <!-- 4️⃣ RESULTADOS -->
-            {% for cr in valores_historicos_paises %}
-            <div class="row league-row">
-                <div class="col-12 dashboard-item">
-                    <div class="esports-card text-center">
-                        <h5 class="card-title">Resultados históricos en {{ cr.sport_name }}</h5>
-                        <div class="row">
-                            <div class="col-md-2 col-12">
-                                <div class="score-label"><i class="bi bi-emoji-smile"></i>Victorias</div>
-                                <div class="score-part mt-2">{{ cr.total_wins }}</div>
-                            </div>
-                            <div class="col-md-2 col-12">
-                                <div class="score-label"><i class="bi bi-emoji-frown"></i>Derrotas</div>
-                                <div class="score-part mt-2">{{ cr.total_loses }}</div>
-                            </div>
-                            <div class="col-md-2 col-12">
-                                <div class="score-label"><i class="bi bi-emoji-neutral"></i>Empates</div>
-                                <div class="score-part mt-2">{{ cr.total_draws }}</div>
-                            </div>
-                            <div class="col-md-3 col-12">
-                                <div class="score-label"><i class="bi bi-arrow-up-circle"></i>Goles/sets a favor</div>
-                                <div class="score-part mt-2">{{ cr.total_scored }}</div>
-                            </div>
-
-                            <div class="col-md-3 col-12">
-                                <div class="score-label"><i class="bi bi-arrow-down-circle"></i>Goles/sets en contra</div>
-                                <div class="score-part mt-2">{{ cr.total_against }}</div>
-                            </div>
-                        </div>
-                    </div>
+<!-- 3️⃣ ORIGEN -->
+<div class="row league-row">
+    <div class="col-12 dashboard-item">
+        <div class="esports-card text-center">
+            <h5 class="card-title">Origen</h5>
+            <div class="row">
+                <div class="col-md-12 col-12">
+                    <div class="score-label">Nación</div>
+                    <div class="score-part mt-2">{{ nacion.ol_country_name }}</div>
                 </div>
             </div>
-            {% endfor %}
+        </div>
+    </div>
+</div>
 
-            <!-- 4️⃣ RESULTADOS -->
-            {% for cj in valores_historicos_jugadores %}
-            <div class="row league-row">
-                <div class="col-12 dashboard-item">
-                    <div class="esports-card text-center">
-                        <h5 class="card-title">Resultados históricos en {{ cj.sport_name }} </h5>
-                        <div class="row">
-                            <div class="col-md-2 col-12">
-                                <div class="score-label"><i class="bi bi-emoji-smile"></i>Victorias</div>
-                                <div class="score-part mt-2">{{ cj.total_wins }}</div>
-                            </div>
-                            <div class="col-md-2 col-12">
-                                <div class="score-label"><i class="bi bi-emoji-frown"></i>Derrotas</div>
-                                <div class="score-part mt-2">{{ cj.total_loses }}</div>
-                            </div>
-                            <div class="col-md-2 col-12">
-                                <div class="score-label"><i class="bi bi-emoji-neutral"></i>Empates</div>
-                                <div class="score-part mt-2">{{ cj.total_draws }}</div>
-                            </div>
-                            <div class="col-md-3 col-12">
-                                <div class="score-label"><i class="bi bi-arrow-up-circle"></i>Puntos a favor</div>
-                                <div class="score-part mt-2">{{ cj.total_scored }}</div>
-                            </div>
-
-                            <div class="col-md-3 col-12">
-                                <div class="score-label"><i class="bi bi-arrow-down-circle"></i>Puntos en contra</div>
-                                <div class="score-part mt-2">{{ cj.total_against }}</div>
-                            </div>
-                        </div>
-                    </div>
+<!-- 4️⃣ RESULTADOS -->
+<div class="row league-row">
+    <div class="col-12 dashboard-item">
+        <div class="esports-card text-center">
+            <h5 class="card-title">Resultados</h5>
+            <div class="row">
+                <div class="col-md-3 col-12">
+                    <div class="score-label">🥇Oros</div>
+                    <div class="score-part mt-2">{{ general.oros }}</div>
+                </div>
+                <div class="col-md-3 col-12">
+                    <div class="score-label">🥈Platas</div>
+                    <div class="score-part mt-2">{{ general.platas }}</div>
+                </div>
+                <div class="col-md-3 col-12">
+                    <div class="score-label">🥉Bronces</div>
+                    <div class="score-part mt-2">{{ general.bronces }}</div>
+                </div>
+                <div class="col-md-3 col-12">
+                    <div class="score-label"><i class="bi bi-arrow-up-circle"></i>Total medallas</div>
+                    <div class="score-part mt-2">{{ general.total }}</div>
                 </div>
             </div>
-            {% endfor %}
+        </div>
+    </div>
+</div>
 
-            <!-- 4️⃣ RESULTADOS -->
-            <div class="row league-row">
-                <div class="col-12 dashboard-item">
-                    <div class="esports-card text-center">
-                        <h5 class="card-title">Resultados históricos por clubes</h5>
-                        <div class="row">
-                            <div class="col-md-2 col-12">
-                                <div class="score-label"><i class="bi bi-emoji-smile"></i>Victorias</div>
-                                <div class="score-part mt-2">{{ valores_historicos_clubes.total_wins }}</div>
-                            </div>
-                            <div class="col-md-2 col-12">
-                                <div class="score-label"><i class="bi bi-emoji-frown"></i>Derrotas</div>
-                                <div class="score-part mt-2">{{ valores_historicos_clubes.total_loses }}</div>
-                            </div>
-                            <div class="col-md-2 col-12">
-                                <div class="score-label"><i class="bi bi-emoji-neutral"></i>Empates</div>
-                                <div class="score-part mt-2">{{ valores_historicos_clubes.total_draws }}</div>
-                            </div>
-                            <div class="col-md-3 col-12">
-                                <div class="score-label"><i class="bi bi-arrow-up-circle"></i>Goles a favor</div>
-                                <div class="score-part mt-2">{{ valores_historicos_clubes.total_scored }}</div>
-                            </div>
+<div class="esports-card">
+    <div class="card-title">
+        <i class="bi bi-table"></i> Tabla
+    </div>
 
-                            <div class="col-md-3 col-12">
-                                <div class="score-label"><i class="bi bi-arrow-down-circle"></i>Goles en contra</div>
-                                <div class="score-part mt-2">{{ valores_historicos_clubes.total_against }}</div>
-                            </div>
-                        </div>
-                    </div>
+    <div class="table-responsive">
+        <table class="table esports-table text-center" id="leagueTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Deporte</th>
+                    <th onclick="sortTable(1)">O</th>
+                    <th onclick="sortTable(2)">P</th>
+                    <th onclick="sortTable(3)">B</th>
+                    <th onclick="sortTable(4)">Total</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in medallero %}
+                <tr>
+                    <td>{{ m.deporte }}</td>
+                    <td>{{ m.oros }}</td>
+                    <td>{{ m.platas }}</td>
+                    <td>{{ m.bronces }}</td>
+                    <td>{{ m.total }}</td>
+                </tr>
+                {% empty %}
+                <div class="col-md-12 col-12">
+                    <div class="score-part mt-2">{{ nacion.ol_country_name }} no tiene medallas.</div>
                 </div>
-            </div>
-
-
-            <!-- 9️⃣ TÍTULOS POR DEPORTE -->
-            <div class="row league-row">
-                <div class="col-12 dashboard-item">
-                    <div class="esports-card text-center">
-                        <h5 class="card-title">Títulos por país</h5>
-                        <div class="row">
-                            <div class="col-md-4 col-12">
-                                <div class="score-label">
-                                    <i class="bi bi-flag-fill"></i> País
-                                </div>
-                            </div>
-                            <div class="col-md-4 col-12">
-                                <div class="score-label">
-                                    <i class="bi bi-trophy-fill"></i> Título
-                                </div>
-                            </div>
-                            <div class="col-md-4 col-12">
-                                <div class="score-label">
-                                    <i class="bi bi-calendar-check"></i> Año
-                                </div>
-                            </div>
-                            {% for tit in titulos_paises%}
-                            <div class="col-md-4 col-12">
-                                <div class="score-part mt-2">{{ tit.country_name }}</div>
-                            </div>
-                            <div class="col-md-4 col-12">
-                                <div class="score-part mt-2">{{ tit.title_label }}</div>
-                            </div>
-                            <div class="col-md-4 col-12">
-                                <div class="score-part mt-2">{{ tit.title_year }}</div>
-                            </div>
-                            {% empty %}
-                            <div class="col-md-12 col-12">
-                                <div class="score-part mt-2">Este equipo no tiene títulos</div>
-                            </div>
-                            {% endfor %}
-                            
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-                        <!-- 9️⃣ TÍTULOS POR DEPORTE -->
-            <div class="row league-row">
-                <div class="col-12 dashboard-item">
-                    <div class="esports-card text-center">
-                        <h5 class="card-title">Títulos por jugador</h5>
-                        <div class="row">
-                                <div class="col-md-4 col-12">
-                                <div class="score-label">
-                                    <i class="bi bi-flag-fill"></i> Jugador
-                                </div>
-                            </div>
-                            <div class="col-md-4 col-12">
-                                <div class="score-label">
-                                    <i class="bi bi-trophy-fill"></i> Título
-                                </div>
-                            </div>
-                            <div class="col-md-4 col-12">
-                                <div class="score-label">
-                                    <i class="bi bi-calendar-check"></i> Año
-                                </div>
-                            </div>
-                            {% for tit in titulos_jugadores%}
-                            <div class="col-md-4 col-12">
-                                <div class="score-part mt-2">{{ tit.player_name }}</div>
-                            </div>
-                            <div class="col-md-4 col-12">
-                                <div class="score-part mt-2">{{ tit.title_label }}</div>
-                            </div>
-                            <div class="col-md-4 col-12">
-                                <div class="score-part mt-2">{{ tit.title_year }}</div>
-                            </div>
-                            {% empty %}
-                            <div class="col-md-12 col-12">
-                                <div class="score-part mt-2">Este equipo no tiene títulos</div>
-                            </div>
-                            {% endfor %}
-                            
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 9️⃣ TÍTULOS POR DEPORTE -->
-            <div class="row league-row">
-                <div class="col-12 dashboard-item">
-                    <div class="esports-card text-center">
-                        <h5 class="card-title">Títulos por club</h5>
-                        <div class="row">
-                                <div class="col-md-4 col-12">
-                                <div class="score-label">
-                                    <i class="bi bi-trophy"></i> Club
-                                </div>
-                            </div>
-                            <div class="col-md-4 col-12">
-                                <div class="score-label">
-                                    <i class="bi bi-trophy-fill"></i> Título
-                                </div>
-                            </div>
-                            <div class="col-md-4 col-12">
-                                <div class="score-label">
-                                    <i class="bi bi-calendar-check"></i> Año
-                                </div>
-                            </div>
-                            {% for tit in titulos_clubes%}
-                            <div class="col-md-4 col-12">
-                                <div class="score-part mt-2">{{ tit.club_name }}</div>
-                            </div>
-                            <div class="col-md-4 col-12">
-                                <div class="score-part mt-2">{{ tit.title_label }}</div>
-                            </div>
-                            <div class="col-md-4 col-12">
-                                <div class="score-part mt-2">{{ tit.title_year }}</div>
-                            </div>
-                            {% empty %}
-                            <div class="col-md-12 col-12">
-                                <div class="score-part mt-2">Este equipo no tiene títulos</div>
-                            </div>
-                            {% endfor %}
-                            
-                        </div>
-                    </div>
-                </div>
-            </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>

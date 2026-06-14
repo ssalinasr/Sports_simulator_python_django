@@ -41,27 +41,27 @@ def pagina_partido_individual(request, match_class):
     #1: Paises, 2: Juegos, 3: Clubes, 4: Muñecos, 5: Paises(Femenino)#
     if match_class == 1:
         page_groups = Teamregion.objects.all()
-        page_teams = Nationalteams.objects.exclude(team_name__icontains='Fem')
+        page_teams = Nationalteams.objects.exclude(team_name__icontains='Fem').order_by('team_id')
         page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino'))
     elif match_class == 2:
         page_groups = id_games_query
-        page_teams = Olympicplayers.objects.filter(team_sport_id__in = id_games)
+        page_teams = Olympicplayers.objects.filter(team_sport_id__in = id_games).order_by('ol_player_id')
         page_sports = Playertournamentsports.objects.filter(Q(player_trn_sport_id__lt = 11) | Q(player_trn_sport_id__gt = 19))
     elif match_class == 3:
         page_groups = Clubleague.objects.all()
-        page_teams = Clubs.objects.all()
+        page_teams = Clubs.objects.all().order_by('club_id')
         page_sports.append('Clubes')
     elif match_class == 4:
         page_groups = Playercountry.objects.all()
-        page_teams = Olympicplayers.objects.filter(team_sport_id = id_munecos)
+        page_teams = Olympicplayers.objects.filter(team_sport_id = id_munecos).order_by('ol_player_id')
         page_sports = Playertournamentsports.objects.filter(player_trn_sport_id__gt = 10, player_trn_sport_id__lt = 20)
     elif match_class == 5:
         page_groups = Teamregion.objects.all()
-        page_teams = Nationalteams.objects.filter(team_name__icontains='Fem')
+        page_teams = Nationalteams.objects.filter(team_name__icontains='Fem').order_by('team_id')
         page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Femenino'))
     else:
         page_groups = Teamregion.objects.all()
-        page_teams = Nationalteams.objects.all()
+        page_teams = Nationalteams.objects.all().order_by('team_id')
         page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino') | Q(team_sport_name__icontains='Femenino'))
 
     return render(request, 'match/sports_match_page.html', 
@@ -80,23 +80,23 @@ def pagina_partidos_liga(request, match_class):
     #1: Paises, 2: Juegos, 3: Clubes, 4: Muñecos, 5: Paises(Femenino)#
     if match_class == 1:
         page_groups = Teamregion.objects.all()
-        page_teams = Nationalteams.objects.exclude(team_name__icontains='Fem')
+        page_teams = Nationalteams.objects.exclude(team_name__icontains='Fem').order_by('team_id')
         page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino'))
     elif match_class == 2:
         page_groups = id_games_query
-        page_teams = Olympicplayers.objects.filter(team_sport_id__in = id_games)
+        page_teams = Olympicplayers.objects.filter(team_sport_id__in = id_games).order_by('ol_player_id')
         page_sports = Playertournamentsports.objects.filter(player_trn_sport_id__in = [7,8,9,10,20,21,22])
     elif match_class == 3:
         page_groups = Clubleague.objects.all()
-        page_teams = Clubs.objects.all()
+        page_teams = Clubs.objects.all().order_by('club_id')
         page_sports.append('Clubes')
     elif match_class == 5:
         page_groups = Teamregion.objects.all()
-        page_teams = Nationalteams.objects.filter(team_name__icontains='Fem')
+        page_teams = Nationalteams.objects.filter(team_name__icontains='Fem').order_by('team_id')
         page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Femenino'))
     else:
         page_groups = Teamregion.objects.all()
-        page_teams = Nationalteams.objects.all()
+        page_teams = Nationalteams.objects.all().order_by('team_name')
         page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino') | Q(team_sport_name__icontains='Femenino'))
 
     return render(request, 'league/sports_league_page.html', 
@@ -117,27 +117,27 @@ def pagina_partidos_torneo(request, match_class):
     #1: Paises, 2: Juegos, 3: Clubes, 4: Muñecos, 5: Paises(Femenino)#
     if match_class == 1:
         page_groups = Teamregion.objects.all()
-        page_teams = Nationalteams.objects.exclude(team_name__icontains='Fem')
+        page_teams = Nationalteams.objects.exclude(team_name__icontains='Fem').order_by('team_id')
         page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino'))
     elif match_class == 2:
         page_groups = id_games_query
-        page_teams = Olympicplayers.objects.filter(team_sport_id__in = id_games)
+        page_teams = Olympicplayers.objects.filter(team_sport_id__in = id_games).order_by('ol_player_id')
         page_sports = Playertournamentsports.objects.filter(Q(player_trn_sport_id__lt = 11) | Q(player_trn_sport_id__gt = 19))
     elif match_class == 3:
         page_groups = Clubleague.objects.all()
-        page_teams = Clubs.objects.all()
+        page_teams = Clubs.objects.all().order_by('club_id')
         page_sports.append('Clubes')
     elif match_class == 4:
         page_groups = Playercountry.objects.all()
-        page_teams = Olympicplayers.objects.filter(team_sport_id = id_munecos)
+        page_teams = Olympicplayers.objects.filter(team_sport_id = id_munecos).order_by('ol_player_id')
         page_sports = Playertournamentsports.objects.filter(player_trn_sport_id__gt = 10, player_trn_sport_id__lt = 20)
     elif match_class == 5:
         page_groups = Teamregion.objects.all()
-        page_teams = Nationalteams.objects.filter(team_name__icontains='Fem')
+        page_teams = Nationalteams.objects.filter(team_name__icontains='Fem').order_by('team_id')
         page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Femenino'))
     else:
         page_groups = Teamregion.objects.all()
-        page_teams = Nationalteams.objects.all()
+        page_teams = Nationalteams.objects.all().order_by('team_id')
         page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino') | Q(team_sport_name__icontains='Femenino'))
 
     return render(request, 'tournament/sports_tournament_page.html', 
@@ -1624,6 +1624,7 @@ def generar_simulacion_completa_olimpica(request, match_class):
     if match_class == 1:
         if str(categoria) == 'jo_verano':
             sport = Teamsports.objects.filter(team_sport_id__gte = 1, team_sport_id__lt = 21)
+            print(sport)
         elif str(categoria) == 'jo_invierno':
             sp_first = Teamsports.objects.filter(team_sport_id__gte = 61, team_sport_id__lt = 69)
             sp_second = Teamsports.objects.filter(team_sport_id__gte = 72, team_sport_id__lt = 75)
@@ -1640,6 +1641,12 @@ def generar_simulacion_completa_olimpica(request, match_class):
             disc_list = []
             for d in disc:
                 if 'Concurso' in d.sp_record_name:
+                    disc_list.append(d)
+        
+        if sp.team_sport_name == 'Halterofilia':
+            disc_list = []
+            for d in disc:
+                if 'completo' in d.sp_record_name:
                     disc_list.append(d)
         else:
             disc_list = [d for d in disc]
@@ -1680,6 +1687,7 @@ def generar_simulacion_completa_olimpica(request, match_class):
     
         simulation_pairs.append([sp, disc_list, ranks])
     
+    print(simulation_pairs)
     full_trn = full_tournament_olympic.FullTournament(simulation_pairs, str(categoria), 1, match_class, valor_año, hay_guardado)
     full_trn.simulate_tournament()
     if categoria == 'jo_verano':
@@ -1770,7 +1778,10 @@ def consultar_records(request, match_class):
                 .first()
             )
         
-        nacion = resultado.team.ol_country
+        try:
+            nacion = resultado.team.ol_country
+        except:
+            print('No hay record...')
 
     elif match_class in [2,4]: 
         if flag == 'MIN':
@@ -1899,4 +1910,40 @@ def consultar_medallas_jugador(request):
 
 
 def consultar_medallas_pais_mayor(request):
-    return HttpResponse("")
+    pais = request.GET.get('pais')
+    major_country = Playercountry.objects.get(ol_country_name = pais)
+
+    general = (
+        Teammedalregister.objects
+        .filter(team_id__ol_country__ol_country_name = str(pais))
+        .aggregate(
+            oros=Count('team_medal_id', filter=Q(medal_label='O')),
+            platas=Count('team_medal_id', filter=Q(medal_label='P')),
+            bronces=Count('team_medal_id', filter=Q(medal_label='B')),
+            total=Count('team_medal_id')
+        )
+        
+    )
+
+    medallero = (
+        Teammedalregister.objects
+        .filter(team_id__ol_country__ol_country_name = str(pais))
+        .annotate(deporte=F('sp_record__team_sport__team_sport_name'))
+        .values(
+            'deporte'
+        )
+        .annotate(
+            oros=Count('team_medal_id', filter=Q(medal_label='O')),
+            platas=Count('team_medal_id', filter=Q(medal_label='P')),
+            bronces=Count('team_medal_id', filter=Q(medal_label='B')),
+            total=Count('team_medal_id')
+        )
+        .order_by(
+        '-oros',
+        '-platas',
+        '-bronces',
+        'sp_record__team_sport__team_sport_name'
+        )
+    )
+
+    return render(request, 'logs/major_country_olympic_search_results.html', {'medallero': medallero, 'nacion': major_country, 'general': general})

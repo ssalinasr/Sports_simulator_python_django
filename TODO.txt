@@ -1,4 +1,7 @@
-Corregir Halterofilia
-Añadir Copas Fzero, Mkart
-Añadir Medallero general naciones
+Corregir Halterofilia (DONE)
+Añadir Copas Fzero, Mkart (DONE)
+Añadir Medallero general naciones (DONE)
+Añadir Registro por Torneo Olímpico
 Añadir Rankings
+Añadir Modulo de registro Excel independiente
+Añadir a BD: Osu!, Mario Tenis, Mario Party, Need for Speed (DONE)

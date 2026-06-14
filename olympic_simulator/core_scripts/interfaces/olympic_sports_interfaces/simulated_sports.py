@@ -1522,6 +1522,73 @@ class SimulatedSports():
                     results = (r[0] ,r[1] , [country_scores ,round(max(country_scores), 2)])
                     self.table_results.append(results)
 
+            elif self.sport.team_sport_name == 'Halterofilia':
+                    if 'masculino' in self.deporte.sp_record_name:
+                        if '60 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['60 kg arranque masculino','60 kg envión masculino']
+                        elif '65 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['65 kg arranque masculino','65 kg envión masculino']
+                        elif '71 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['71 kg arranque masculino','71 kg envión masculino']
+                        elif '79 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['79 kg arranque masculino','79 kg envión masculino']
+                        elif '88 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['88 kg arranque masculino','88 kg envión masculino']
+                        elif '94 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['94 kg arranque masculino','94 kg envión masculino']
+                        elif '110 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['110 kg arranque masculino','110 kg envión masculino']
+                        elif '+110 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['+110 kg arranque masculino','+110 kg envión masculino']
+                        final_score = 0
+                        country_scores = []
+                        for r in self.ranks:
+                            country_scores = []
+                            final_score = 0
+                            for n in self.nombres:
+                                current_score = 0
+                                #Simula dificultad
+                                current_sport = Sportsrecords.objects.get(sp_record_name = n, team_sport = self.sport.team_sport_id)
+                                olympic_sim = sports_by_elimination.SportsByElimination(current_sport.sp_record_name, float(current_sport.sp_record_best), float(current_sport.sp_record_last), current_sport.sport_class, self.sport.team_sport_name)
+                                dif_result = olympic_sim.select_type_game(r[1], 1, 0)
+                                current_score = dif_result[1]
+                                country_scores.append(round(current_score, 3))
+                            results = (r[0] ,r[1] , [country_scores ,round(sum(country_scores), 3)])
+                            self.table_results.append(results)
+
+                    else:                  
+                        if '48 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['48 kg arranque femenino','48 kg envión femenino']
+                        elif '53 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['53 kg arranque femenino','53 kg envión femenino']
+                        elif '58 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['58 kg arranque femenino','58 kg envión femenino']
+                        elif '63 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['63 kg arranque femenino','63 kg envión femenino']
+                        elif '69 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['69 kg arranque femenino','69 kg envión femenino']
+                        elif '77 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['77 kg arranque femenino','77 kg envión femenino']
+                        elif '86 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['86 kg arranque femenino','86 kg envión femenino']
+                        elif '+86 kg' in self.deporte.sp_record_name:
+                            self.nombres = ['+86 kg arranque femenino','+110 kg envión femenino']
+                        final_score = 0
+                        country_scores = []
+                        for r in self.ranks:
+                            country_scores = []
+                            final_score = 0
+                            for n in self.nombres:
+                                current_score = 0
+                                #Simula dificultad
+                                current_sport = Sportsrecords.objects.get(sp_record_name = n, team_sport = self.sport.team_sport_id)
+                                olympic_sim = sports_by_elimination.SportsByElimination(current_sport.sp_record_name, float(current_sport.sp_record_best), float(current_sport.sp_record_last), current_sport.sport_class, self.sport.team_sport_name)
+                                dif_result = olympic_sim.select_type_game(r[1], 1, 0)
+                                current_score = dif_result[1]
+                                country_scores.append(round(current_score, 3))
+                            results = (r[0] ,r[1] , [country_scores ,round(sum(country_scores), 3)])
+                            self.table_results.append(results)
+                    pass   
         else:
             olympic_sim = sports_by_individual.SportsByIndividual(self.deporte.sp_record_name, float(self.deporte.sp_record_best), float(self.deporte.sp_record_last), self.deporte.sport_class, self.sport.team_sport_name)
             for r in self.ranks:
