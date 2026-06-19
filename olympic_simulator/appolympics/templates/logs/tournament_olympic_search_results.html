@@ -1,0 +1,99 @@
+<div class="esports-card">
+    <div class="card-title">
+        <i class="bi bi-table"></i> Medallero general
+    </div>
+
+    <div class="table-responsive">
+        <table class="table esports-table text-center" id="leagueTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Nación</th>
+                    <th onclick="sortTable(1)">O</th>
+                    <th onclick="sortTable(2)">P</th>
+                    <th onclick="sortTable(3)">B</th>
+                    <th onclick="sortTable(4)">Total</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for pais, stats in medallero %}
+                <tr>
+                    <td>{{ pais }}</td>
+                    <td>{{ stats.O }}</td>
+                    <td>{{ stats.P }}</td>
+                    <td>{{ stats.B }}</td>
+                    <td>{{ stats.Total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% for dis in disciplinas_torneo %}
+
+<div class="card-title">
+    <i class="bi bi-diagram-3-fill"></i> Resultados Finales {{ dis }}
+</div>
+
+{% for medals in medallas_torneo %}
+{% if medals.1 == dis %}
+<div class="bracket-section dashboard-item">
+
+    <div class="matches-grid">
+
+        <div class="match-card">
+            <div class="team-name">🥇 Campeón</div>
+            <div></div>
+            <div></div>
+            <div class="team-name">{{ medals.0.0.0 }}</div>
+        </div>
+
+        <div class="match-card">
+            <div class="team-name">🥈 Subcampeón</div>
+            <div></div>
+            <div></div>
+            <div class="team-name">{{ medals.0.1.0 }}</div>
+        </div>
+
+        <div class="match-card">
+            <div class="team-name">🥉 Tercer Lugar</div>
+            <div></div>
+            <div></div>
+            <div class="team-name">{{ medals.0.2.0 }}</div>
+        </div>
+
+    </div>
+
+</div>
+{% endif %}
+{% endfor %}
+
+{% for tables in tablas_torneo %}
+{% if tables.3 == dis %}
+<div class="card-title">
+    <i class="bi bi-table"></i> Tabla {{ dis }}
+</div>
+
+<div class="table-responsive">
+    <table class="table esports-table text-center" id="leagueTable">
+        <thead>
+            <tr>
+                {% for columna in tables.1 %}
+                <th>{{ columna }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for fila in tables.2 %}
+            <tr>
+                {% for valor in fila.values %}
+                <td>{{ valor }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endfor %}
+{% endfor %}

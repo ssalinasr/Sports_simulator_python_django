@@ -12,7 +12,7 @@ from core_scripts.interfaces.games_interfaces import goldeneye_interface, mariok
 from core_scripts.leagues import league_group
 from core_scripts.tournaments import tournament_group
 from core_scripts.tournaments import full_tournament, full_tournament_clubs, full_tournament_olympic
-
+from collections import Counter, defaultdict
 from core_scripts.clubs_leagues import club_league_season
 import itertools
 from openpyxl import Workbook
@@ -1117,6 +1117,14 @@ def pagina_registro_por_torneo(request):
     years = itertools.chain(range(1880,2016,4), range(2013,2101))
     return render(request, 'logs/tournament_register_page.html', {'years': years, 'deportes': sports, 'deportes_jug': sports_players})
 
+def pagina_registro_por_torneo_olimpico(request):
+    list_of_ids = list(range(39,46))
+    sports_categories = Teamsports.objects.filter(team_sport_id__in = list_of_ids)
+    sports_mun = Teamsports.objects.filter(team_sport_id = 46)
+    sports_general = sports_categories.union(sports_mun)
+    years = itertools.chain(range(1880,2016,4), range(2013,2101))
+    return render(request, 'logs/tournament_olympic_register_page.html', {'years': years, 'deportes': sports_general})
+
 def pagina_registro_por_club(request):
     clubs = Clubs.objects.all()
     return render(request, 'logs/club_register_page.html', {'clubes': clubs})
@@ -1947,3 +1955,153 @@ def consultar_medallas_pais_mayor(request):
     )
 
     return render(request, 'logs/major_country_olympic_search_results.html', {'medallero': medallero, 'nacion': major_country, 'general': general})
+
+def consultar_por_torneo_olimpico(request):
+    deporte = request.GET.get('deporte')
+    año = request.GET.get('valoryear')
+    print(deporte, año)
+    tournament_data = []
+    tournament_teams = []
+    tournament_disciplines = []
+    medallero_sorted = []
+    #Archivo Excel con el torneo
+    try:
+        if str(deporte) == 'jo_verano':
+            hojas = pd.read_excel(
+            "media/simulacion_Juegos_Olimpicos_Verano_"+str(año)+".xlsx",
+            sheet_name=None
+            )
+        elif str(deporte) == 'jo_invierno':
+            hojas = pd.read_excel(
+            "media/simulacion_Juegos_Olimpicos_Invierno_"+str(año)+".xlsx",
+            sheet_name=None
+            )
+        else:
+            hojas = pd.read_excel(
+            "media/simulacion_"+str(deporte)+"_"+str(año)+".xlsx",
+            sheet_name=None
+            )
+
+        for elementos, df in hojas.items():
+            #print("Hoja: ", elementos)
+            # --------------------
+            # TABLA DE POSICIONES
+            # --------------------
+ 
+            tabla = df.iloc[0:].copy()
+            tabla.columns = tabla.iloc[0]
+            tabla = tabla[1:].reset_index(drop=True)
+            tabla = tabla.dropna(axis=1, how='all')
+            tabla_name = df.iloc[0].index.to_list()
+            tabla_name = tabla_name[0]
+
+            if str(deporte) == 'jo_verano' or str(deporte) == 'jo_invierno':
+                nombre_evento = " ".join(tabla_name.split()[:-1])
+                if tabla_name.split()[-1] == 'F':
+                    if nombre_evento not in tournament_disciplines:
+                        tournament_disciplines.append(nombre_evento)
+                    tournament_data.append((elementos, tabla.columns.to_list(), tabla.to_dict(orient="records"), nombre_evento))
+            else:
+                nombre_evento = tabla_name
+                if nombre_evento not in tournament_disciplines:
+                    tournament_disciplines.append(nombre_evento)
+                    tournament_data.append((elementos, tabla.columns.to_list(), tabla.to_dict(orient="records"), tabla_name))
+
+        tourament_info = None
+        #Medallas#
+        if str(deporte) == 'jo_verano' or str(deporte) == 'jo_invierno':
+            for td in tournament_disciplines:
+                discipline = Sportsrecords.objects.get(sp_record_name = td)
+                tourament_info = Teammedalregister.objects.filter(sp_record = discipline.sp_record_id, medal_year = str(año))
+                medalists = []
+                for ti in tourament_info:
+                    medalists.append((ti.team.team_name, ti.medal_label))
+                tournament_teams.append((medalists, discipline.sp_record_name ,año))
+                pass
+        else:
+                for td in tournament_disciplines:
+                    discipline = Sportsrecords.objects.get(sp_record_name = td)
+                    tourament_info = Playermedalregister.objects.filter(sp_record = discipline.sp_record_id, medal_year = str(año))
+                    medalists = []
+                    for ti in tourament_info:
+                        medalists.append((ti.ol_player.ol_player_name, ti.medal_label))
+                    tournament_teams.append((medalists, discipline.sp_record_name ,año))
+                    pass
+
+        medallero = defaultdict(lambda: {
+            "O": 0,
+            "P": 0,
+            "B": 0,
+            "Total": 0
+            }
+        )
+
+        print(tournament_teams)
+
+        for sports in tournament_teams:
+            for medals in sports[0]:
+                if str(deporte) == 'jo_verano' or str(deporte) == 'jo_invierno':
+                    country = Nationalteams.objects.get(team_name = medals[0])
+                    nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+                    if medals[1] == 'O':
+                        medallero[nation.ol_country_name]["O"] += 1
+                    elif medals[1] == 'P':
+                        medallero[nation.ol_country_name]["P"] += 1
+                    elif medals[1] == 'B':
+                        medallero[nation.ol_country_name]["B"] += 1
+                else:
+                    print(medals[0])
+                    country = Olympicplayers.objects.get(ol_player_name = medals[0])
+                    nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+                    if medals[1] == 'O':
+                        medallero[nation.ol_country_name]["O"] += 1
+                    elif medals[1] == 'P':
+                        medallero[nation.ol_country_name]["P"] += 1
+                    elif medals[1] == 'B':
+                        medallero[nation.ol_country_name]["B"] += 1
+        
+        for pais, datos in medallero.items():
+            datos["Total"] = datos["O"] + datos["P"] + datos["B"]
+
+        print(medallero)
+
+        medallero_sorted = sorted(
+            medallero.items(),
+            key= lambda item:(
+                item[1]['O'],
+                item[1]['P'],
+                item[1]['B']
+            ),
+            reverse=True
+        )
+
+        resumen = {
+                "O": sum(datos["O"] for datos in medallero.values()),
+                "P": sum(datos["P"] for datos in medallero.values()),
+                "B": sum(datos["B"] for datos in medallero.values())
+            }
+
+        resumen["Total"] = (
+                resumen["O"] +
+                resumen["P"] +
+                resumen["B"]
+            )
+
+        medallero_sorted.append(("TOTAL", resumen))
+        print(medallero_sorted)
+        
+    except FileNotFoundError as e:
+        print(e)
+    
+    return render(request, 'logs/tournament_olympic_search_results.html', {'tablas_torneo': tournament_data, 'disciplinas_torneo': tournament_disciplines, 
+                                                                           'medallas_torneo': tournament_teams, 'cant_equipos': range(len(tournament_disciplines)),
+                                                                           'medallero': medallero_sorted})
+
+def pagina_rankings(request):
+    sports = Teamsports.objects.filter(~Q(team_sport_name__icontains = 'Mario'), team_sport_class = 'T')
+    sports_players = Playertournamentsports.objects.all()
+    years = itertools.chain(range(1880,2016,4), range(2013,2101))
+    return render(request, 'logs/rankings_page.html', {'years': years, 'deportes': sports, 'deportes_jug': sports_players})
+
+def consultar_rankings(request):
+    return HttpResponse("")
