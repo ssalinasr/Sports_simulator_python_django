@@ -45,19 +45,10 @@
         <div class="row league-row">
             <div class="col-12 dashboard-item">
                 <div class="esports-card">
-                    <h5 class="card-title">Deporte</h5>
+                    <h5 class="card-title">Rankings</h5>
                     <div class="row g-3 align-items-end">
                         <div class="col-md-12 col-12">
-                            <label class="score-label mb-2">Año</label>
-                            <select class="form-select esports-select" name="valoryear" id="yearSelect">
-                                <option selected>Seleccionar año</option>
-                                {% for year in years %}
-                                <option value="{{ year }}">{{ year }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-12 col-12">
-                            <button class="esports-btn justify-content-center" hx-get="{% url 'consultar_por_torneo' %}"
+                            <button class="esports-btn justify-content-center" hx-get="{% url 'consultar_rankings' %}"
                                 hx-target="#searchResults" hx-include="#sportSelect, #yearSelect">
                                 <i class="bi bi-people"></i>Consultar rankings
                             </button>

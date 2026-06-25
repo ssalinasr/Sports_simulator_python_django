@@ -2,7 +2,7 @@ Corregir Halterofilia (DONE)
 Añadir Copas Fzero, Mkart (DONE)
 Añadir Medallero general naciones (DONE)
 Añadir Registro por Torneo Olímpico (DONE)
-Añadir Rankings
+Añadir Rankings (DONE)
 Añadir Modulo de registro Excel independiente
 Añadir a BD: Osu!, Mario Tenis, Mario Party, Need for Speed (DONE)
-Añadir a función Mario Tenis, Mario Party
+Añadir a función Mario Tenis, Mario Party (DONE)

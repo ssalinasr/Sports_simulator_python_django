@@ -8,7 +8,7 @@ from .models import Teammatchesregister, Teamtitleregister, Playertitleregister,
 from core_scripts.interfaces.olympic_sports_interfaces import simulated_sports
 import base64
 from core_scripts.interfaces.sports_interfaces import sports_by_time, sports_by_sets, sports_by_ends, sports_by_special_sets, sports_by_timed_points
-from core_scripts.interfaces.games_interfaces import goldeneye_interface, mariokart_interface, supersmash_interface, muns_interface
+from core_scripts.interfaces.games_interfaces import goldeneye_interface, mariokart_interface, supersmash_interface, muns_interface, mariogames_interface
 from core_scripts.leagues import league_group
 from core_scripts.tournaments import tournament_group
 from core_scripts.tournaments import full_tournament, full_tournament_clubs, full_tournament_olympic
@@ -32,7 +32,7 @@ def pagina_partido_individual(request, match_class):
     page_teams = []
     page_sports = []
     name_mun = 'Munecos'
-    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart']
+    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart','Mario Tenis','Mario Party']
     id_munecos = Teamsports.objects.get(team_sport_name = name_mun).team_sport_id
     id_games_query = Teamsports.objects.filter(team_sport_name__in = list_games)
     id_games = []
@@ -108,7 +108,7 @@ def pagina_partidos_torneo(request, match_class):
     page_teams = []
     page_sports = []
     name_mun = 'Munecos'
-    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart']
+    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart','Mario Tenis','Mario Party']
     id_munecos = Teamsports.objects.get(team_sport_name = name_mun).team_sport_id
     id_games_query = Teamsports.objects.filter(team_sport_name__in = list_games)
     id_games = []
@@ -376,6 +376,11 @@ def generar_partido(request, match_class):
         elif deporte.player_trn_sport_name == 'SSB-Sudden':
             sport_object = supersmash_interface.SuperSmashInterface(deporte.player_trn_sport_name, 'Tiempo', 1, 0)
             sport_class = 'time'
+        elif deporte.player_trn_sport_name == 'Mario Party':
+            sport_object = mariogames_interface.MarioGamesInterface(deporte.player_trn_sport_name,'Cumulativo', 5, 0)
+
+        elif deporte.player_trn_sport_name == 'Mario Tenis':
+            sport_object = mariogames_interface.MarioGamesInterface(deporte.player_trn_sport_name,'Vidas', 0, 3)
         
         elif deporte.player_trn_sport_name in ['Futbol', 'Hockey en Piso']:
             sport_object = muns_interface.MunsInterface(deporte.player_trn_sport_name, 'Tiempo', 2, 0)
@@ -620,12 +625,12 @@ def generar_torneo(request, match_class):
 
 def pagina_simulacion_completa(request, match_class):
     request.session.flush()
-    years = itertools.chain(range(1880,2016,4), range(2013,2101))
+    years = range(1880,2400,4)
     page_groups = []
     page_teams = []
     page_sports = []
     name_mun = 'Munecos'
-    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart']
+    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart','Mario Tenis','Mario Party']
     id_munecos = Teamsports.objects.get(team_sport_name = name_mun).team_sport_id
     id_games_query = Teamsports.objects.filter(team_sport_name__in = list_games)
     id_games = []
@@ -713,7 +718,7 @@ def generar_simulacion_completa(request, match_class):
     elif match_class == 2 or match_class == 4:      
         deporte = Playertournamentsports.objects.get(player_trn_sport_name = request.GET.get('deporte'))
         equipos = Olympicplayers.objects.all()
-        list_games = ['Goldeneye', 'Super Smash', 'Mario Kart']
+        list_games = ['Super Smash', 'Goldeneye', 'Mario Kart', 'Mario Tenis', 'Mario Party']
         name_mun = 'Munecos'
         id_munecos = Teamsports.objects.get(team_sport_name = name_mun).team_sport_id
 
@@ -727,6 +732,14 @@ def generar_simulacion_completa(request, match_class):
             num_groups = 8
         elif "MK" in deporte.player_trn_sport_name:
             id_games_query = Teamsports.objects.get(team_sport_name = list_games[2])
+            equipos = equipos.filter(team_sport_id = id_games_query)
+            num_groups = 1
+        elif "Mario Tenis" in deporte.player_trn_sport_name:
+            id_games_query = Teamsports.objects.get(team_sport_name = list_games[3])
+            equipos = equipos.filter(team_sport_id = id_games_query)
+            num_groups = 1
+        elif "Mario Party" in deporte.player_trn_sport_name:
+            id_games_query = Teamsports.objects.get(team_sport_name = list_games[4])
             equipos = equipos.filter(team_sport_id = id_games_query)
             num_groups = 1
         else:
@@ -783,7 +796,7 @@ def generar_simulacion_completa(request, match_class):
 def pagina_simulacion_completa_clubes(request, match_class):
     request.session.flush()
 
-    years = itertools.chain(range(1880,2016,4), range(2013,2101))
+    years = range(1880,2400,4)
     page_groups = []
     page_teams = []
     page_sports = []
@@ -1097,7 +1110,7 @@ def pagina_registro_por_pais(request):
     return render(request, 'logs/country_register_page.html', {'deportes': sports, 'paises': countries})
 
 def pagina_registro_por_jugador_individual(request):
-    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart']
+    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart','Mario Tenis','Mario Party']
     id_games_query = Teamsports.objects.filter(team_sport_name__in = list_games)
     id_games = []
     for id_game in id_games_query:
@@ -1114,7 +1127,7 @@ def pagina_registro_por_pais_mayor(request):
 def pagina_registro_por_torneo(request):
     sports = Teamsports.objects.filter(~Q(team_sport_name__icontains = 'Mario'), team_sport_class = 'T')
     sports_players = Playertournamentsports.objects.all()
-    years = itertools.chain(range(1880,2016,4), range(2013,2101))
+    years = range(1880,2400,4)
     return render(request, 'logs/tournament_register_page.html', {'years': years, 'deportes': sports, 'deportes_jug': sports_players})
 
 def pagina_registro_por_torneo_olimpico(request):
@@ -1122,7 +1135,7 @@ def pagina_registro_por_torneo_olimpico(request):
     sports_categories = Teamsports.objects.filter(team_sport_id__in = list_of_ids)
     sports_mun = Teamsports.objects.filter(team_sport_id = 46)
     sports_general = sports_categories.union(sports_mun)
-    years = itertools.chain(range(1880,2016,4), range(2013,2101))
+    years = range(1880,2400,4)
     return render(request, 'logs/tournament_olympic_register_page.html', {'years': years, 'deportes': sports_general})
 
 def pagina_registro_por_club(request):
@@ -1597,7 +1610,7 @@ def consultar_por_torneo(request):
 
 def pagina_simulacion_completa_olimpica(request, match_class):
     request.session.flush()
-    years = itertools.chain(range(1880,2016,4), range(2013,2101))
+    years = range(1880,2400,4)
     sports_categories = []
     sports = []
     list_of_ex = list(range(39,47))
@@ -2100,8 +2113,124 @@ def consultar_por_torneo_olimpico(request):
 def pagina_rankings(request):
     sports = Teamsports.objects.filter(~Q(team_sport_name__icontains = 'Mario'), team_sport_class = 'T')
     sports_players = Playertournamentsports.objects.all()
-    years = itertools.chain(range(1880,2016,4), range(2013,2101))
-    return render(request, 'logs/rankings_page.html', {'years': years, 'deportes': sports, 'deportes_jug': sports_players})
+    return render(request, 'logs/rankings_page.html', {'deportes': sports, 'deportes_jug': sports_players})
 
 def consultar_rankings(request):
-    return HttpResponse("")
+    deporte = request.GET.get('deporte')
+    table_ranking = []
+    pos_counter = 1
+    if str(deporte) != 'Clubes':
+        #Si son paises
+        try:
+            sport = Teamsports.objects.get(team_sport_name=str(deporte))
+            if 'Masculino' in str(deporte):
+                teams = Nationalteams.objects.exclude(team_name__icontains='Fem').order_by('team_id')
+            else:
+                teams = Nationalteams.objects.filter(team_name__icontains='Fem').order_by('team_id')
+
+            for tm in teams:
+                #Victorias, derrotas y empates históricos
+                historic_values = Teamtournamentregister.objects.filter(
+                    team_id=tm.team_id,
+                    team_sport_id=sport.team_sport_id
+                ).aggregate(
+                    total_wins=Coalesce(Sum('team_wins'), 0),
+                    total_draws=Coalesce(Sum('team_draws'), 0),
+                    total_loses=Coalesce(Sum('team_loses'), 0)
+                )
+
+                titulos = None
+                try:
+                    titulos = Teamtitleregister.objects.filter(team_id = tm.team_id, team_sport_id = sport.team_sport_id)
+                except Teamtitleregister.DoesNotExist:
+                    titulos = []
+
+                title_score = int(titulos.count())*50
+                historic_score = historic_values['total_wins']*15 + historic_values['total_draws']*2 - historic_values['total_loses']*0.5
+                if historic_score <= 0: historic_score = 0
+                final_score = title_score *0.35 + historic_score*0.65
+                table_ranking.append([pos_counter, tm.team_name, tm.ol_country.ol_country_name, round(final_score, 2)])
+                pos_counter += 1
+
+        #Si son jugadores
+        except Teamsports.DoesNotExist:
+            sport = Playertournamentsports.objects.get(player_trn_sport_name=str(deporte))
+            if str(deporte) not in ['Jenga','Ajedrez','Domino','Parques','Horripicasa','Lucha','Futbol','Baloncesto','Hockey en Piso']:
+                
+                if 'GE-' in str(deporte):
+                    name_game = 'Goldeneye'
+                elif 'SSB-' in str(deporte):
+                    name_game = 'Super Smash'
+                elif 'MK-' in str(deporte):
+                    name_game = 'Mario Kart'
+                
+                id_games = Teamsports.objects.get(team_sport_name = name_game)
+                if name_game == 'Goldeneye':
+                    if 'Teams' in str(deporte):
+                        teams = Olympicplayers.objects.filter(team_sport_id = id_games).filter(ol_player_name__contains = '/').exclude(ol_player_name__contains = '_GE')
+                    else:
+                        teams = Olympicplayers.objects.filter(team_sport_id = id_games).exclude(ol_player_name__contains = '/').exclude(ol_player_name__contains = '_GE')
+                else:
+                    teams = Olympicplayers.objects.filter(team_sport_id = id_games)
+            else:
+                id_munecos = Teamsports.objects.get(team_sport_name = 'Munecos').team_sport_id
+                if str(deporte) in ['Futbol','Baloncesto']:
+                    teams = Olympicplayers.objects.filter(team_sport_id = id_munecos).filter(ol_player_name__contains = '_MN')
+                else:
+                    teams = Olympicplayers.objects.filter(team_sport_id = id_munecos).exclude(ol_player_name__contains = '_MN')
+            for tm in teams:
+                #Victorias, derrotas y empates históricos
+                historic_values = Playertournamentregister.objects.filter(
+                        ol_player_id=tm.ol_player_id,
+                        player_trn_sport_id=sport.player_trn_sport_id
+                    ).aggregate(
+                        total_wins=Coalesce(Sum('ol_player_wins'), 0),
+                        total_draws=Coalesce(Sum('ol_player_draws'), 0),
+                        total_loses=Coalesce(Sum('ol_player_loses'), 0)
+                    )
+                titulos = None
+                try:
+                    titulos = Playertitleregister.objects.filter(ol_player_id = tm.ol_player_id, player_trn_sport_id = sport.player_trn_sport_id)
+                except Playertitleregister.DoesNotExist:
+                    titulos = []
+
+                title_score = int(titulos.count())*50
+                historic_score = historic_values['total_wins']*15 + historic_values['total_draws']*2 - historic_values['total_loses']*0.5
+                if historic_score <= 0: historic_score = 0
+                final_score = title_score *0.35 + historic_score*0.65
+                table_ranking.append([pos_counter,tm.ol_player_name, tm.ol_country.ol_country_name, round(final_score, 2)])
+                pos_counter += 1
+            
+    else:
+        teams = Clubs.objects.all()
+
+        for tm in teams:
+            #Victorias, derrotas y empates históricos
+            historic_values = Clubtournamentregister.objects.filter(
+                club_id=tm.club_id,
+            ).aggregate(
+                total_wins=Coalesce(Sum('club_wins'), 0),
+                total_draws=Coalesce(Sum('club_draws'), 0),
+                total_loses=Coalesce(Sum('club_loses'), 0)
+            )
+
+            titulos = None
+            try:
+                titulos = Clubtitleregister.objects.filter(club_id = tm.club_id)
+            except Clubtitleregister.DoesNotExist:
+                titulos = []
+
+            title_score = int(titulos.count())*50
+            historic_score = historic_values['total_wins']*15 + historic_values['total_draws']*2 - historic_values['total_loses']*0.5
+            if historic_score <= 0: historic_score = 0
+            final_score = title_score *0.35 + historic_score*0.65
+            table_ranking.append([pos_counter, tm.club_name, tm.club_country.ol_country.ol_country_name, round(final_score, 2)])
+            pos_counter += 1
+
+    sorted_ranking = sorted(table_ranking, key=lambda x: x[3], reverse=True)
+    pos_counter = 1
+    for s in sorted_ranking:
+        s[0] = pos_counter
+        pos_counter += 1
+    print(sorted_ranking)
+    return render(request, 'logs/rankings_page_results.html', {'deporte': deporte, 'tabla_ranking': sorted_ranking})

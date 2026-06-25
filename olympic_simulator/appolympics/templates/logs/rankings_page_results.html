@@ -1,0 +1,41 @@
+<!-- 3️⃣ ORIGEN -->
+<div class="row league-row">
+    <div class="col-12 dashboard-item">
+        <div class="esports-card text-center">
+            <h5 class="card-title">Ranking global de {{ deporte }}</h5>
+        </div>
+    </div>
+</div>
+
+<div class="esports-card">
+    <div class="card-title">
+        <i class="bi bi-table"></i> Tabla
+    </div>
+
+    <div class="table-responsive">
+        <table class="table esports-table text-center" id="leagueTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Posición</th>
+                    <th onclick="sortTable(1)">Participante</th>
+                    <th onclick="sortTable(2)">Nación</th>
+                    <th onclick="sortTable(3)">Ranking</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in tabla_ranking %}
+                <tr>
+                    <td>{{ m.0 }}</td>
+                    <td>{{ m.1 }}</td>
+                    <td>{{ m.2 }}</td>
+                    <td>{{ m.3 }}</td>
+                </tr>
+                {% empty %}
+                <div class="col-md-12 col-12">
+                    <div class="score-part mt-2">No existen registros para el deporte {{ deporte }}</div>
+                </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
