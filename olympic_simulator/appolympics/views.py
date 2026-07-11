@@ -42,7 +42,7 @@ def pagina_partido_individual(request, match_class):
     if match_class == 1:
         page_groups = Teamregion.objects.all()
         page_teams = Nationalteams.objects.exclude(team_name__icontains='Fem').order_by('team_id')
-        page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino'))
+        page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino')|Q(team_sport_name__icontains='Mixto'))
     elif match_class == 2:
         page_groups = id_games_query
         page_teams = Olympicplayers.objects.filter(team_sport_id__in = id_games).order_by('ol_player_id')
@@ -81,7 +81,7 @@ def pagina_partidos_liga(request, match_class):
     if match_class == 1:
         page_groups = Teamregion.objects.all()
         page_teams = Nationalteams.objects.exclude(team_name__icontains='Fem').order_by('team_id')
-        page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino'))
+        page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino')|Q(team_sport_name__icontains='Mixto'))
     elif match_class == 2:
         page_groups = id_games_query
         page_teams = Olympicplayers.objects.filter(team_sport_id__in = id_games).order_by('ol_player_id')
@@ -118,7 +118,7 @@ def pagina_partidos_torneo(request, match_class):
     if match_class == 1:
         page_groups = Teamregion.objects.all()
         page_teams = Nationalteams.objects.exclude(team_name__icontains='Fem').order_by('team_id')
-        page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino'))
+        page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Masculino')|Q(team_sport_name__icontains='Mixto'))
     elif match_class == 2:
         page_groups = id_games_query
         page_teams = Olympicplayers.objects.filter(team_sport_id__in = id_games).order_by('ol_player_id')
@@ -311,25 +311,30 @@ def generar_partido(request, match_class):
         elif deporte.team_sport_name in ['Squash Masculino', 'Squash Femenino']:
             sport_object = sports_by_sets.SetsSport(deporte.team_sport_name, 3, 11, 0, hay_tiempo_extra, hay_doble_ronda)
             sport_class = 'sets'
-        elif deporte.team_sport_name in ['Tenis de Mesa Masculino', 'Tenis de Mesa Femenino']:
+        elif deporte.team_sport_name in ['Tenis de Mesa Masculino Individual', 'Tenis de Mesa Femenino Individual','Tenis de Mesa Masculino Dobles',
+                                          'Tenis de Mesa Femenino Dobles','Tenis de Mesa Mixto']:
             sport_object = sports_by_sets.SetsSport(deporte.team_sport_name, 3, 11, 0, hay_tiempo_extra, hay_doble_ronda)
             sport_class = 'sets'
-        elif deporte.team_sport_name in ['Tenis Masculino', 'Tenis Femenino']:
+        elif deporte.team_sport_name in ['Tenis Masculino Individual', 'Tenis Femenino Individual','Tenis Masculino Dobles','Tenis Femenino Dobles',
+                                         'Tenis Mixto']:
             sport_object = sports_by_sets.SetsSport(deporte.team_sport_name, 3, 60, 0, hay_tiempo_extra, hay_doble_ronda)
             sport_class = 'sets'
-        elif deporte.team_sport_name in ['Badminton Masculino', 'Badminton Femenino']:
+        elif deporte.team_sport_name in ['Badminton Masculino Individual', 'Badminton Femenino Individual','Badminton Masculino Dobles','Badminton Femenino Dobles',
+                                         'Badminton Mixto']:
             sport_object = sports_by_sets.SetsSport(deporte.team_sport_name, 3, 21, 21, hay_tiempo_extra, hay_doble_ronda)
             sport_class = 'sets'
         elif deporte.team_sport_name in ['Beisbol Masculino', 'Beisbol Femenino']:
             sport_object = sports_by_ends.EndsSport(deporte.team_sport_name, 9, hay_tiempo_extra, hay_doble_ronda)
             sport_class = 'ends'
-        elif deporte.team_sport_name in ['Tiro con Arco Masculino', 'Tiro con Arco Femenino']:
+        elif deporte.team_sport_name in ['Tiro con Arco Masculino Individual', 'Tiro con Arco Femenino Individual','Tiro con Arco Masculino Dobles',
+                                         'Tiro con Archo Femenino Dobles','Tiro con Arco Mixto']:
             sport_object = sports_by_special_sets.SpecialSetsSport(deporte.team_sport_name, 6, hay_tiempo_extra, hay_doble_ronda)
             sport_class = 'sets'
         elif deporte.team_sport_name in ['Curling Masculino', 'Curling Femenino']:
             sport_object = sports_by_ends.EndsSport(deporte.team_sport_name, 10, hay_tiempo_extra, hay_doble_ronda)
             sport_class = 'ends'
-        elif deporte.team_sport_name in ['Esgrima Masculino', 'Esgrima Femenino']:
+        elif deporte.team_sport_name in ['Esgrima Masculino Espada', 'Esgrima Femenino Espada','Esgrima Masculino Sable', 'Esgrima Femenino Sable',
+                                         'Esgrima Masculino Florete', 'Esgrima Femenino Florete']:
             sport_object = sports_by_timed_points.TimedPointsSport(deporte.team_sport_name, 3, 15, hay_tiempo_extra, hay_doble_ronda)
             sport_class = 'sets'
 
