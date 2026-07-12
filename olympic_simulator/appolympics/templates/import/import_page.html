@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Importar Resultados</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/major_country_register_page.css' %}">
+
+</head>
+
+<body>
+    {% include "navbar_template.html" %}
+    <div class="container-fluid py-4">
+        <!-- 2️⃣ EQUIPO -->
+        <div class="row league-row">
+            <div class="col-12 dashboard-item">
+                <div class="esports-card">
+                    <h5 class="card-title">Deporte</h5>
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-12 col-12">
+                            <label class="score-label mb-2">País</label>
+                            <select class="form-select esports-select" id="sportsSelect" name="deporte">
+                                <option value="">Seleccionar deporte</option>
+                                {%for deporte in deportes %}
+                                <option value="{{deporte.team_sport_name}}">{{deporte.team_sport_name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-12 col-12">
+                            <button class="esports-btn justify-content-center" hx-get="{% url 'importar_resultados' %}"
+                                hx-target="#importResults" hx-include="#sportsSelect">
+                                <i class="bi bi-people"></i>Importar Resultados
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="importResults">
+            <!--Resultados de la búsqueda-->
+        </div>
+
+
+    </div>
+
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</body>
+
+</html>

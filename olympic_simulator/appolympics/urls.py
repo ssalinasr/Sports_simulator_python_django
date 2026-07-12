@@ -7,7 +7,7 @@ from .views import pagina_registro_por_pais, pagina_registro_por_jugador_individ
 from .views import pagina_registro_por_club, consultar_por_pais, consultar_por_jugador, consultar_por_clubes, consultar_por_pais_mayor, consultar_por_torneo
 
 from .views import pagina_records, consultar_records, consultar_medallas_jugador, consultar_medallas_pais, consultar_medallas_pais_mayor, pagina_registro_por_torneo_olimpico, consultar_por_torneo_olimpico
-from .views import pagina_rankings, consultar_rankings
+from .views import pagina_rankings, consultar_rankings, pagina_importar, importar_resultados
 
 urlpatterns = [
     path('', pagina_principal , name='pagina_principal'),
@@ -62,7 +62,12 @@ urlpatterns = [
     path('logs/records_register/<int:match_class>/', pagina_records, name='pagina_records'),
     path('logs/records_register/search/<int:match_class>/', consultar_records, name='consultar_records'),
     path('logs/rankings/', pagina_rankings, name='pagina_rankings'),
-    path('logs/records_register/search/', consultar_rankings, name='consultar_rankings')
+    path('logs/records_register/search/', consultar_rankings, name='consultar_rankings'),
+
+    #URLs Importación de resultados#
+    path('import/results_import/', pagina_importar, name='pagina_importar'),
+    path('import/results_import/load', importar_resultados, name='importar_resultados')
     ]
+
 
 

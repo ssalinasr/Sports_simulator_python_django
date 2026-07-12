@@ -1,7 +1,7 @@
 import random
 import math
 from collections import defaultdict
-from core_scripts.interfaces.games_interfaces import supersmash_interface, goldeneye_interface, muns_interface, mariokart_interface, mariogames_interface
+from core_scripts.interfaces.games_interfaces import supersmash_interface, goldeneye_interface, muns_interface, mariokart_interface, mariogames_interface, pkstadium_interface
 from core_scripts.interfaces.sports_interfaces import sports_by_ends, sports_by_sets, sports_by_special_sets, sports_by_time, sports_by_timed_points
 from core_scripts.leagues import league_tools
 from PIL import Image, ImageDraw, ImageFont
@@ -213,6 +213,9 @@ class Tournament():
             
             elif self.sport_name == 'Mario Tenis':
                 sport_object = mariogames_interface.MarioGamesInterface(self.sport_name,'Vidas', 0, 3)
+
+            elif self.sport_name == 'PKS-Torneo':
+                sport_object = pkstadium_interface.PkstadiumInterface(self.sport_name,'Vidas', 0, 3)
             
             elif self.sport_name in ['Futbol', 'Hockey en Piso']:
                 sport_object = muns_interface.MunsInterface(self.sport_name, 'Tiempo', 2, 0)

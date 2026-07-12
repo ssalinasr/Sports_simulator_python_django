@@ -8,12 +8,13 @@ from .models import Teammatchesregister, Teamtitleregister, Playertitleregister,
 from core_scripts.interfaces.olympic_sports_interfaces import simulated_sports
 import base64
 from core_scripts.interfaces.sports_interfaces import sports_by_time, sports_by_sets, sports_by_ends, sports_by_special_sets, sports_by_timed_points
-from core_scripts.interfaces.games_interfaces import goldeneye_interface, mariokart_interface, supersmash_interface, muns_interface, mariogames_interface
+from core_scripts.interfaces.games_interfaces import goldeneye_interface, mariokart_interface, supersmash_interface, muns_interface, mariogames_interface, pkstadium_interface
 from core_scripts.leagues import league_group
 from core_scripts.tournaments import tournament_group
 from core_scripts.tournaments import full_tournament, full_tournament_clubs, full_tournament_olympic
 from collections import Counter, defaultdict
 from core_scripts.clubs_leagues import club_league_season
+from core_scripts.import_tools import excel_importer
 import itertools
 from openpyxl import Workbook
 import os
@@ -32,7 +33,7 @@ def pagina_partido_individual(request, match_class):
     page_teams = []
     page_sports = []
     name_mun = 'Munecos'
-    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart','Mario Tenis','Mario Party']
+    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart','Mario Tenis','Mario Party','Pokemon Stadium']
     id_munecos = Teamsports.objects.get(team_sport_name = name_mun).team_sport_id
     id_games_query = Teamsports.objects.filter(team_sport_name__in = list_games)
     id_games = []
@@ -108,7 +109,7 @@ def pagina_partidos_torneo(request, match_class):
     page_teams = []
     page_sports = []
     name_mun = 'Munecos'
-    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart','Mario Tenis','Mario Party']
+    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart','Mario Tenis','Mario Party','Pokemon Stadium']
     id_munecos = Teamsports.objects.get(team_sport_name = name_mun).team_sport_id
     id_games_query = Teamsports.objects.filter(team_sport_name__in = list_games)
     id_games = []
@@ -386,6 +387,9 @@ def generar_partido(request, match_class):
 
         elif deporte.player_trn_sport_name == 'Mario Tenis':
             sport_object = mariogames_interface.MarioGamesInterface(deporte.player_trn_sport_name,'Vidas', 0, 3)
+
+        elif deporte.player_trn_sport_name == 'PKS-Torneo':
+            sport_object = pkstadium_interface.PkstadiumInterface(deporte.player_trn_sport_name,'Vidas', 0, 3)
         
         elif deporte.player_trn_sport_name in ['Futbol', 'Hockey en Piso']:
             sport_object = muns_interface.MunsInterface(deporte.player_trn_sport_name, 'Tiempo', 2, 0)
@@ -2239,3 +2243,321 @@ def consultar_rankings(request):
         pos_counter += 1
     print(sorted_ranking)
     return render(request, 'logs/rankings_page_results.html', {'deporte': deporte, 'tabla_ranking': sorted_ranking})
+
+def pagina_importar(request):
+    deportes = Teamsports.objects.filter(team_sport_class = 'N')
+    return render(request, 'import/import_page.html',{'deportes': deportes})
+
+def importar_resultados(request):
+    deporte = request.GET.get('deporte')
+    filepath = "media/resultados_"+str(deporte)+".xlsx"
+    importer = None
+    try:
+        sport_check = Teamsports.objects.get(team_sport_name = deporte)
+    except:
+        sport_check = Playertournamentsports.objects.get (player_trn_sport_name = deporte)
+    try:
+        importer = excel_importer.ExcelImporter(filepath)
+    except FileNotFoundError:
+        message = 'No existe archivo para el deporte '+str(deporte)
+        return render(request, "general/import_response.html", {
+        "message": message
+        })
+    results = importer.read()
+
+    todos_los_resultados = []
+
+    for bloque in results:
+        year = bloque["year"]
+        pruebas = bloque["headers"][1:]
+        rule = True
+        for prueba in pruebas:
+            if 'Radar' in prueba or 'Km/h' in prueba:
+                rule = False
+            else:
+                rule = True
+
+            top3 = importer.ranking_prueba(
+                bloque,
+                prueba,
+                ascendente=rule
+            )[:3]
+            todos_los_resultados.append({
+                "year": year,
+                "discipline": prueba,
+                "gold": top3[0],
+                "silver": top3[1],
+                "bronze": top3[2]
+            })
+
+    list_games = ['Osu!','Need for Speed','Pokemon Stadium']
+    if deporte in list_games:
+        if deporte != 'Osu!':
+            for bloque in results:
+                year = bloque["year"]
+                pruebas = bloque["headers"][1:]
+                rule = True
+                index = 0
+                for prueba in pruebas:
+                    for pais in bloque["rows"]:
+                        team_obj = Olympicplayers.objects.get(ol_player_name = pais["País"])
+                        sport = Sportsrecords.objects.get(sp_record_name = prueba)
+                        try:
+                            existing_log = Playersimulationregister.objects.get(ol_player_id = team_obj.ol_player_id, ol_player_year = str(year), sp_record = sport.sp_record_id)
+                            existing_log.ol_player_id = team_obj.ol_player_id
+                            existing_log.ol_player_result = pais[prueba]
+                            existing_log.ol_player_year = str(year)
+                            existing_log.sp_record = sport
+                            existing_log.save()
+
+                        except Playersimulationregister.DoesNotExist:
+                            team_result = pais[prueba]
+                            tournament_element = Playersimulationregister(
+                                ol_player_id = team_obj.ol_player_id,
+                                ol_player_result = team_result,
+                                ol_player_year = str(year),
+                                sp_record = sport
+                            )
+                            tournament_element.save()
+
+
+            for r in todos_los_resultados:
+                print(r)
+                sport = Sportsrecords.objects.get(sp_record_name = r['discipline'])
+                team_obj = Olympicplayers.objects.filter(ol_player_name = r['gold']['participant']).first()
+                try:
+                    existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = str(r['year']))
+                    existing_log.ol_player_id = team_obj.ol_player_id
+                    existing_log.medal_label = 'O'
+                    existing_log.medal_year = str(r['year'])
+                    existing_log.sp_record = sport
+                    existing_log.save()
+                except Playermedalregister.DoesNotExist:
+                    title_label = 'O'
+                    title_element = Playermedalregister(
+                        ol_player_id = team_obj.ol_player_id,
+                        medal_label = title_label,
+                        medal_year = str(r['year']),
+                        sp_record_id = sport.sp_record_id
+                    )
+                    title_element.save()
+
+                team_obj = Olympicplayers.objects.filter(ol_player_name = r['silver']['participant']).first()
+                try:
+                    existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = str(r['year']))
+                    existing_log.ol_player_id = team_obj.ol_player_id
+                    existing_log.medal_label = 'P'
+                    existing_log.medal_year = str(r['year'])
+                    existing_log.sp_record = sport
+                    existing_log.save()
+                except Playermedalregister.DoesNotExist:
+                    title_label = 'P'
+                    title_element = Playermedalregister(
+                        ol_player_id = team_obj.ol_player_id,
+                        medal_label = title_label,
+                        medal_year = str(r['year']),
+                        sp_record_id = sport.sp_record_id
+                    )
+                    title_element.save()
+
+                team_obj = Olympicplayers.objects.filter(ol_player_name = r['bronze']['participant']).first()
+                try:
+                    existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = str(r['year']))
+                    existing_log.ol_player_id = team_obj.ol_player_id
+                    existing_log.medal_label = 'B'
+                    existing_log.medal_year = str(r['year'])
+                    existing_log.sp_record = sport
+                    existing_log.save()
+                except Playermedalregister.DoesNotExist:
+                    title_label = 'B'
+                    title_element = Playermedalregister(
+                        ol_player_id = team_obj.ol_player_id,
+                        medal_label = title_label,
+                        medal_year = str(r['year']),
+                        sp_record_id = sport.sp_record_id
+                    )
+                    title_element.save()
+
+
+        else:
+            for bloque in results:
+                year = bloque["year"]
+                pruebas = bloque["headers"][1:]
+                rule = True
+                index = 1
+                for prueba in pruebas:
+                    for pais in bloque["rows"]:
+                        team_obj = Olympicplayers.objects.get(ol_player_name = pais["País"])
+                        if prueba != 'Osu! Total Score':
+                            sport = Sportsrecords.objects.get(sp_record_name = 'Osu! Song '+str(index))
+                        else: 
+                            sport = Sportsrecords.objects.get(sp_record_name = prueba)
+                        try:
+                            existing_log = Playersimulationregister.objects.get(ol_player_id = team_obj.ol_player_id, ol_player_year = str(year), sp_record = sport.sp_record_id)
+                            existing_log.ol_player_id = team_obj.ol_player_id
+                            existing_log.ol_player_result = pais[prueba]
+                            existing_log.ol_player_year = str(year)
+                            existing_log.sp_record = sport
+                            existing_log.save()
+
+                        except Playersimulationregister.DoesNotExist:
+                            team_result = pais[prueba]
+                            tournament_element = Playersimulationregister(
+                                ol_player_id = team_obj.ol_player_id,
+                                ol_player_result = team_result,
+                                ol_player_year = str(year),
+                                sp_record = sport
+                            )
+                            tournament_element.save()
+
+            index = 1
+            for r in todos_los_resultados:
+                print(r)
+                if prueba != 'Osu! Total Score':
+                    sport = Sportsrecords.objects.get(sp_record_name = 'Osu! Song '+str(index))
+                else: 
+                    sport = Sportsrecords.objects.get(sp_record_name = r['discipline'])
+                team_obj = Olympicplayers.objects.filter(ol_player_name = r['gold']['participant']).first()
+                try:
+                    existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = str(r['year']))
+                    existing_log.ol_player_id = team_obj.ol_player_id
+                    existing_log.medal_label = 'O'
+                    existing_log.medal_year = str(r['year'])
+                    existing_log.sp_record = sport
+                    existing_log.save()
+                except Playermedalregister.DoesNotExist:
+                    title_label = 'O'
+                    title_element = Playermedalregister(
+                        ol_player_id = team_obj.ol_player_id,
+                        medal_label = title_label,
+                        medal_year = str(r['year']),
+                        sp_record_id = sport.sp_record_id
+                    )
+                    title_element.save()
+
+                team_obj = Olympicplayers.objects.filter(ol_player_name = r['silver']['participant']).first()
+                try:
+                    existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = str(r['year']))
+                    existing_log.ol_player_id = team_obj.ol_player_id
+                    existing_log.medal_label = 'P'
+                    existing_log.medal_year = str(r['year'])
+                    existing_log.sp_record = sport
+                    existing_log.save()
+                except Playermedalregister.DoesNotExist:
+                    title_label = 'P'
+                    title_element = Playermedalregister(
+                        ol_player_id = team_obj.ol_player_id,
+                        medal_label = title_label,
+                        medal_year = str(r['year']),
+                        sp_record_id = sport.sp_record_id
+                    )
+                    title_element.save()
+
+                team_obj = Olympicplayers.objects.filter(ol_player_name = r['bronze']['participant']).first()
+                try:
+                    existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = str(r['year']))
+                    existing_log.ol_player_id = team_obj.ol_player_id
+                    existing_log.medal_label = 'B'
+                    existing_log.medal_year = str(r['year'])
+                    existing_log.sp_record = sport
+                    existing_log.save()
+                except Playermedalregister.DoesNotExist:
+                    title_label = 'B'
+                    title_element = Playermedalregister(
+                        ol_player_id = team_obj.ol_player_id,
+                        medal_label = title_label,
+                        medal_year = str(r['year']),
+                        sp_record_id = sport.sp_record_id
+                    )
+                    title_element.save()
+    else:
+        for bloque in results:
+            year = bloque["year"]
+            pruebas = bloque["headers"][1:]
+            rule = True
+            index = 0
+            for prueba in pruebas:
+                for pais in bloque["rows"]:
+                    team_obj = Nationalteams.objects.get(team_name = pais["País"])
+                    sport = Sportsrecords.objects.get(sp_record_name = prueba)
+                    try:
+                        existing_log = Teamsimulationregister.objects.get(team_id = team_obj.ol_player_id, team_year = str(year), sp_record = sport.sp_record_id)
+                        existing_log.team_id = team_obj.team_id
+                        existing_log.team_result = pais[prueba]
+                        existing_log.team_year = str(year)
+                        existing_log.sp_record = sport
+                        existing_log.save()
+
+                    except Teamsimulationregister.DoesNotExist:
+                        team_result = pais[prueba]
+                        tournament_element = Teamsimulationregister(
+                            team_id = team_obj.team_id,
+                            team_result = team_result,
+                            team_year = str(year),
+                            sp_record = sport
+                        )
+                        tournament_element.save()
+
+
+        for r in todos_los_resultados:
+            print(r)
+            sport = Sportsrecords.objects.get(sp_record_name = r['discipline'])
+            team_obj = Nationalteams.objects.filter(team_name = r['gold']['participant']).first()
+            try:
+                existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = str(r['year']))
+                existing_log.team_id = team_obj.team_id
+                existing_log.medal_label = 'O'
+                existing_log.medal_year = str(r['year'])
+                existing_log.sp_record = sport
+                existing_log.save()
+            except Playermedalregister.DoesNotExist:
+                title_label = 'O'
+                title_element = Teammedalregister(
+                    team_id = team_obj.team_id,
+                    medal_label = title_label,
+                    medal_year = str(r['year']),
+                    sp_record_id = sport.sp_record_id
+                )
+                title_element.save()
+
+            team_obj = Nationalteams.objects.filter(team_name = r['silver']['participant']).first()
+            try:
+                existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = str(r['year']))
+                existing_log.team_id = team_obj.team_id
+                existing_log.medal_label = 'P'
+                existing_log.medal_year = str(r['year'])
+                existing_log.sp_record = sport
+                existing_log.save()
+            except Playermedalregister.DoesNotExist:
+                title_label = 'P'
+                title_element = Teammedalregister(
+                    team_id = team_obj.team_id,
+                    medal_label = title_label,
+                    medal_year = str(r['year']),
+                    sp_record_id = sport.sp_record_id
+                )
+                title_element.save()
+
+            team_obj = Nationalteams.objects.filter(team_name = r['bronze']['participant']).first()
+            try:
+                existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = str(r['year']))
+                existing_log.team_id = team_obj.team_id
+                existing_log.medal_label = 'B'
+                existing_log.medal_year = str(r['year'])
+                existing_log.sp_record = sport
+                existing_log.save()
+            except Playermedalregister.DoesNotExist:
+                title_label = 'B'
+                title_element = Teammedalregister(
+                    team_id = team_obj.team_id,
+                    medal_label = title_label,
+                    medal_year = str(r['year']),
+                    sp_record_id = sport.sp_record_id
+                )
+                title_element.save()
+
+        
+    message = 'Los resultados para el deporte '+str(deporte)+' han sido guardados correctamente.'
+    return render(request, "general/import_response.html", {
+        "message": message
+    })

@@ -3,6 +3,6 @@ Añadir Copas Fzero, Mkart (DONE)
 Añadir Medallero general naciones (DONE)
 Añadir Registro por Torneo Olímpico (DONE)
 Añadir Rankings (DONE)
-Añadir Modulo de registro Excel independiente
+Añadir Modulo de registro Excel independiente (DONE) -> Falta para torneos, verificar casos como JO verano,invierno,Osu!,etc
 Añadir a BD: Osu!, Mario Tenis, Mario Party, Need for Speed (DONE)
 Añadir a función Mario Tenis, Mario Party (DONE)
