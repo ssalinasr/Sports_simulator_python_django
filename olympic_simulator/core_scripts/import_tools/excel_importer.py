@@ -48,7 +48,7 @@ class ExcelImporter:
         ranking = []
         for atleta in tabla["rows"]:
             ranking.append({
-                "participant": atleta["País"],
+                "participant": atleta["Pais"],
                 "value": atleta[prueba]
             })
         ranking.sort(

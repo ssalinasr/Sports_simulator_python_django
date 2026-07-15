@@ -1119,7 +1119,7 @@ def pagina_registro_por_pais(request):
     return render(request, 'logs/country_register_page.html', {'deportes': sports, 'paises': countries})
 
 def pagina_registro_por_jugador_individual(request):
-    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart','Mario Tenis','Mario Party']
+    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart','Mario Tenis','Mario Party','Pokemon Stadium']
     id_games_query = Teamsports.objects.filter(team_sport_name__in = list_games)
     id_games = []
     for id_game in id_games_query:
@@ -1743,7 +1743,7 @@ def pagina_records(request, match_class):
     sports_categories = []
     sports = []
     list_of_ex = list(range(39,47))
-    list_of_ids = list(range(39,46))
+    list_of_ids = [39,40,41,42,43,44,45,46,75,76,77,78]
     if match_class == 1:
         sports_categories = Teamsports.objects.filter(~Q(team_sport_id__in = list_of_ex ), team_sport_class = 'L')
     elif match_class == 2:
@@ -1955,6 +1955,25 @@ def consultar_medallas_pais_mayor(request):
         
     )
 
+    general_gm = (
+        Playermedalregister.objects
+        .filter(ol_player_id__ol_country__ol_country_name = str(pais))
+        .aggregate(
+            oros=Count('player_medal_id', filter=Q(medal_label='O')),
+            platas=Count('player_medal_id', filter=Q(medal_label='P')),
+            bronces=Count('player_medal_id', filter=Q(medal_label='B')),
+            total=Count('player_medal_id')
+        )
+        
+    )
+
+    general_tot = [general, general_gm]
+
+    general_res = {
+        clave: sum(d[clave] for d in general_tot)
+        for clave in general_tot[0]
+    }
+
     medallero = (
         Teammedalregister.objects
         .filter(team_id__ol_country__ol_country_name = str(pais))
@@ -1976,7 +1995,29 @@ def consultar_medallas_pais_mayor(request):
         )
     )
 
-    return render(request, 'logs/major_country_olympic_search_results.html', {'medallero': medallero, 'nacion': major_country, 'general': general})
+    medallero_gm = (
+        Playermedalregister.objects
+        .filter(ol_player_id__ol_country__ol_country_name = str(pais))
+        .annotate(deporte=F('sp_record__team_sport__team_sport_name'))
+        .values(
+            'deporte'
+        )
+        .annotate(
+            oros=Count('player_medal_id', filter=Q(medal_label='O')),
+            platas=Count('player_medal_id', filter=Q(medal_label='P')),
+            bronces=Count('player_medal_id', filter=Q(medal_label='B')),
+            total=Count('player_medal_id')
+        )
+        .order_by(
+        '-oros',
+        '-platas',
+        '-bronces',
+        'sp_record__team_sport__team_sport_name'
+        )
+    )
+
+    medallero_tot = medallero.union(medallero_gm)
+    return render(request, 'logs/major_country_olympic_search_results.html', {'medallero': medallero_tot, 'nacion': major_country, 'general': general_res})
 
 def consultar_por_torneo_olimpico(request):
     deporte = request.GET.get('deporte')
@@ -2245,7 +2286,7 @@ def consultar_rankings(request):
     return render(request, 'logs/rankings_page_results.html', {'deporte': deporte, 'tabla_ranking': sorted_ranking})
 
 def pagina_importar(request):
-    deportes = Teamsports.objects.filter(team_sport_class = 'N')
+    deportes = Teamsports.objects.filter(team_sport_class__in = ['N','L'])
     return render(request, 'import/import_page.html',{'deportes': deportes})
 
 def importar_resultados(request):
@@ -2267,29 +2308,6 @@ def importar_resultados(request):
 
     todos_los_resultados = []
 
-    for bloque in results:
-        year = bloque["year"]
-        pruebas = bloque["headers"][1:]
-        rule = True
-        for prueba in pruebas:
-            if 'Radar' in prueba or 'Km/h' in prueba:
-                rule = False
-            else:
-                rule = True
-
-            top3 = importer.ranking_prueba(
-                bloque,
-                prueba,
-                ascendente=rule
-            )[:3]
-            todos_los_resultados.append({
-                "year": year,
-                "discipline": prueba,
-                "gold": top3[0],
-                "silver": top3[1],
-                "bronze": top3[2]
-            })
-
     list_games = ['Osu!','Need for Speed','Pokemon Stadium']
     if deporte in list_games:
         if deporte != 'Osu!':
@@ -2299,9 +2317,25 @@ def importar_resultados(request):
                 rule = True
                 index = 0
                 for prueba in pruebas:
+                    sport = Sportsrecords.objects.get(sp_record_name = prueba)
+                    if sport.sport_sort == 'D':
+                        rule = False
+                    else:
+                        rule = True
+                    top3 = importer.ranking_prueba(
+                        bloque,
+                        prueba,
+                        ascendente=rule
+                    )[:3]
+                    todos_los_resultados.append({
+                        "year": year,
+                        "discipline": prueba,
+                        "gold": top3[0],
+                        "silver": top3[1],
+                        "bronze": top3[2]
+                    })
                     for pais in bloque["rows"]:
-                        team_obj = Olympicplayers.objects.get(ol_player_name = pais["País"])
-                        sport = Sportsrecords.objects.get(sp_record_name = prueba)
+                        team_obj = Olympicplayers.objects.get(ol_player_name = pais["Pais"])
                         try:
                             existing_log = Playersimulationregister.objects.get(ol_player_id = team_obj.ol_player_id, ol_player_year = str(year), sp_record = sport.sp_record_id)
                             existing_log.ol_player_id = team_obj.ol_player_id
@@ -2381,13 +2415,33 @@ def importar_resultados(request):
 
         else:
             for bloque in results:
+                index = 1
                 year = bloque["year"]
                 pruebas = bloque["headers"][1:]
                 rule = True
-                index = 1
                 for prueba in pruebas:
+                    if prueba != 'Osu! Total Score':
+                        sport = Sportsrecords.objects.get(sp_record_name = 'Osu! Song '+str(index))
+                    else: 
+                        sport = Sportsrecords.objects.get(sp_record_name = prueba)
+                    if sport.sport_sort == 'D':
+                        rule = False
+                    else:
+                        rule = True
+                    top3 = importer.ranking_prueba(
+                        bloque,
+                        prueba,
+                        ascendente=rule
+                    )[:3]
+                    todos_los_resultados.append({
+                        "year": year,
+                        "discipline": prueba,
+                        "gold": top3[0],
+                        "silver": top3[1],
+                        "bronze": top3[2]
+                    })
                     for pais in bloque["rows"]:
-                        team_obj = Olympicplayers.objects.get(ol_player_name = pais["País"])
+                        team_obj = Olympicplayers.objects.get(ol_player_name = pais["Pais"])
                         if prueba != 'Osu! Total Score':
                             sport = Sportsrecords.objects.get(sp_record_name = 'Osu! Song '+str(index))
                         else: 
@@ -2409,9 +2463,11 @@ def importar_resultados(request):
                                 sp_record = sport
                             )
                             tournament_element.save()
-
+                    index += 1
             index = 1
             for r in todos_los_resultados:
+                if index > 175:
+                    index = 1
                 print(r)
                 if prueba != 'Osu! Total Score':
                     sport = Sportsrecords.objects.get(sp_record_name = 'Osu! Song '+str(index))
@@ -2470,6 +2526,7 @@ def importar_resultados(request):
                         sp_record_id = sport.sp_record_id
                     )
                     title_element.save()
+                index += 1
     else:
         for bloque in results:
             year = bloque["year"]
@@ -2477,9 +2534,25 @@ def importar_resultados(request):
             rule = True
             index = 0
             for prueba in pruebas:
+                sport = Sportsrecords.objects.get(sp_record_name = prueba)
+                if sport.sport_sort == 'D':
+                        rule = False
+                else:
+                    rule = True
+                top3 = importer.ranking_prueba(
+                    bloque,
+                    prueba,
+                    ascendente=rule
+                )[:3]
+                todos_los_resultados.append({
+                    "year": year,
+                    "discipline": prueba,
+                    "gold": top3[0],
+                    "silver": top3[1],
+                    "bronze": top3[2]
+                })
                 for pais in bloque["rows"]:
-                    team_obj = Nationalteams.objects.get(team_name = pais["País"])
-                    sport = Sportsrecords.objects.get(sp_record_name = prueba)
+                    team_obj = Nationalteams.objects.get(team_name = pais["Pais"])
                     try:
                         existing_log = Teamsimulationregister.objects.get(team_id = team_obj.ol_player_id, team_year = str(year), sp_record = sport.sp_record_id)
                         existing_log.team_id = team_obj.team_id
