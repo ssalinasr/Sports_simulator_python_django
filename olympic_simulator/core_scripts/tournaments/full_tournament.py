@@ -116,7 +116,7 @@ class FullTournament():
             self.qualified_teams = []
             #Simula los torneos continentales
             for sub_qual in self.group_finals:
-                tournament = tournament_group.Tournament('Copa de '+region_sublist[index]+' '+str(self.year), self.sport, sub_qual, self.ranks, False, True, self.match_class)
+                tournament = tournament_group.Tournament('Copa de '+region_sublist[index]+' '+self.sport+' '+str(self.year), self.sport, sub_qual, self.ranks, False, True, self.match_class)
                 trn_result = tournament.simulate_tournament()
                 table = tournament.get_tournament_table()
                 matches = tournament.get_tournament_matches()

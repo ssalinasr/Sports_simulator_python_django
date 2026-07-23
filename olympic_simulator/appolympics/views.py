@@ -1147,6 +1147,11 @@ def pagina_registro_por_torneo_olimpico(request):
     years = range(1880,2400,4)
     return render(request, 'logs/tournament_olympic_register_page.html', {'years': years, 'deportes': sports_general})
 
+def pagina_registro_por_torneo_olimpico_importado(request):
+    sports_general = Teamsports.objects.filter(team_sport_class='N')
+    years = range(1880,2400,4)
+    return render(request, 'logs/tournament_olympic_register_imported_page.html', {'years': years, 'deportes': sports_general})
+
 def pagina_registro_por_club(request):
     clubs = Clubs.objects.all()
     return render(request, 'logs/club_register_page.html', {'clubes': clubs})
@@ -1614,8 +1619,84 @@ def consultar_por_torneo(request):
                 tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image))
         except FileNotFoundError as e:
             print(e)
+
+    medallero = defaultdict(lambda: {
+        "O": 0,
+        "P": 0,
+        "B": 0,
+        "Total": 0
+        }
+    )
+
+    print(tournament_teams)
+
+    for champions in tournament_teams:
+        if deporte != 'Clubes':
+            try:
+                country = Nationalteams.objects.get(team_name = champions[1])
+            except:
+                country = Olympicplayers.objects.get(ol_player_name = champions[1])
+            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+            medallero[nation.ol_country_name]["O"]+=1
+
+            try:
+                country = Nationalteams.objects.get(team_name = champions[2])
+            except:
+                country = Olympicplayers.objects.get(ol_player_name = champions[2])
+            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+            medallero[nation.ol_country_name]["P"]+=1
+
+            try:
+                country = Nationalteams.objects.get(team_name = champions[3])
+            except:
+                country = Olympicplayers.objects.get(ol_player_name = champions[3])
+            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+            medallero[nation.ol_country_name]["B"]+=1
+        else:
+            country = Clubs.objects.get(club_name = champions[1])
+            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
+            medallero[nation.ol_country_name]["O"]+=1
+
+            country = Clubs.objects.get(club_name = champions[2])
+            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
+            medallero[nation.ol_country_name]["P"]+=1
+
+            country = Clubs.objects.get(club_name = champions[3])
+            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
+            medallero[nation.ol_country_name]["B"]+=1
+
+        
+    for pais, datos in medallero.items():
+        datos["Total"] = datos["O"] + datos["P"] + datos["B"]
+
+    print(medallero)
+
+    medallero_sorted = sorted(
+        medallero.items(),
+        key= lambda item:(
+            item[1]['O'],
+            item[1]['P'],
+            item[1]['B']
+        ),
+        reverse=True
+    )
+
+    resumen = {
+            "O": sum(datos["O"] for datos in medallero.values()),
+            "P": sum(datos["P"] for datos in medallero.values()),
+            "B": sum(datos["B"] for datos in medallero.values())
+        }
+
+    resumen["Total"] = (
+            resumen["O"] +
+            resumen["P"] +
+            resumen["B"]
+        )
+
+    medallero_sorted.append(("TOTAL", resumen))
+    print(medallero_sorted)
     
-    return render(request, 'logs/tournament_search_results.html', {'resultados_torneo': tournament_data, 'campeones_torneo': tournament_teams})
+    return render(request, 'logs/tournament_search_results.html', {'resultados_torneo': tournament_data, 'campeones_torneo': tournament_teams, 'medallero': medallero_sorted})
 
 def pagina_simulacion_completa_olimpica(request, match_class):
     request.session.flush()
@@ -2286,7 +2367,7 @@ def consultar_rankings(request):
     return render(request, 'logs/rankings_page_results.html', {'deporte': deporte, 'tabla_ranking': sorted_ranking})
 
 def pagina_importar(request):
-    deportes = Teamsports.objects.filter(team_sport_class__in = ['N','L'])
+    deportes = Teamsports.objects.filter(team_sport_class__in = ['N'])
     return render(request, 'import/import_page.html',{'deportes': deportes})
 
 def importar_resultados(request):
@@ -2342,6 +2423,7 @@ def importar_resultados(request):
                             existing_log.ol_player_result = pais[prueba]
                             existing_log.ol_player_year = str(year)
                             existing_log.sp_record = sport
+                            existing_log.player_round = 'F'
                             existing_log.save()
 
                         except Playersimulationregister.DoesNotExist:
@@ -2350,6 +2432,7 @@ def importar_resultados(request):
                                 ol_player_id = team_obj.ol_player_id,
                                 ol_player_result = team_result,
                                 ol_player_year = str(year),
+                                player_round = 'F',
                                 sp_record = sport
                             )
                             tournament_element.save()
@@ -2452,6 +2535,7 @@ def importar_resultados(request):
                             existing_log.ol_player_result = pais[prueba]
                             existing_log.ol_player_year = str(year)
                             existing_log.sp_record = sport
+                            existing_log.player_round = 'F'
                             existing_log.save()
 
                         except Playersimulationregister.DoesNotExist:
@@ -2460,13 +2544,14 @@ def importar_resultados(request):
                                 ol_player_id = team_obj.ol_player_id,
                                 ol_player_result = team_result,
                                 ol_player_year = str(year),
+                                player_round = 'F',
                                 sp_record = sport
                             )
                             tournament_element.save()
                     index += 1
             index = 1
             for r in todos_los_resultados:
-                if index > 175:
+                if index > 174:
                     index = 1
                 print(r)
                 if prueba != 'Osu! Total Score':
@@ -2559,6 +2644,7 @@ def importar_resultados(request):
                         existing_log.team_result = pais[prueba]
                         existing_log.team_year = str(year)
                         existing_log.sp_record = sport
+                        existing_log.team_round = 'F'
                         existing_log.save()
 
                     except Teamsimulationregister.DoesNotExist:
@@ -2567,6 +2653,7 @@ def importar_resultados(request):
                             team_id = team_obj.team_id,
                             team_result = team_result,
                             team_year = str(year),
+                            team_round = 'F',
                             sp_record = sport
                         )
                         tournament_element.save()
@@ -2634,3 +2721,91 @@ def importar_resultados(request):
     return render(request, "general/import_response.html", {
         "message": message
     })
+
+def consultar_por_torneo_olimpico_importado(request):
+    deporte = request.GET.get('deporte')
+    valor_anio = request.GET.get('valoryear')
+    importer = None
+    tournament_data = []
+    tournament_teams = []
+    tournament_disciplines = []
+    tournament_ids = []
+    
+    disciplines = Sportsrecords.objects.filter(team_sport_id__team_sport_name = str(deporte)).order_by('sp_record_id')
+    for d in disciplines:
+        tournament_disciplines.append(d.sp_record_name)
+        tournament_ids.append(d.sp_record_id)
+
+    results = Playersimulationregister.objects.filter(sp_record_id__in = tournament_ids, ol_player_year=str(valor_anio)).order_by('sp_record_id')
+    print(results)
+
+    for d in disciplines:
+        tournament_disc = []
+        if d.sport_sort == 'D':
+            rule = True
+        else:
+            rule = False
+        for res in results:
+            if d.sp_record_id == res.sp_record.sp_record_id:
+                tournament_disc.append((res.ol_player.ol_player_name, float(res.ol_player_result)))
+    
+        tournament_disc.sort(
+            key=lambda x: x[1],
+            reverse= rule
+        )
+        print(tournament_disc)
+        tournament_data.append((tournament_disc, d.sp_record_name))
+
+    
+    tourament_info = None
+    #Medallas#
+    medallero = defaultdict(lambda: {
+        "O": 0,
+        "P": 0,
+        "B": 0,
+        "Total": 0
+        }
+    )
+
+    for d in disciplines:
+        medals_table = Playermedalregister.objects.filter(sp_record = d.sp_record_id, medal_year = str(valor_anio))
+        for m in medals_table:
+            if m.medal_label == 'O':
+                medallero[m.ol_player.ol_player_name]["O"]+=1
+            elif m.medal_label == 'P':
+                medallero[m.ol_player.ol_player_name]["P"]+=1
+            elif m.medal_label == 'B':
+                medallero[m.ol_player.ol_player_name]["B"]+=1
+    
+    for pais, datos in medallero.items():
+        datos["Total"] = datos["O"] + datos["P"] + datos["B"]
+
+    medallero_sorted = sorted(
+        medallero.items(),
+        key= lambda item:(
+            item[1]['O'],
+            item[1]['P'],
+            item[1]['B']
+        ),
+        reverse=True
+    )
+
+    resumen = {
+            "O": sum(datos["O"] for datos in medallero.values()),
+            "P": sum(datos["P"] for datos in medallero.values()),
+            "B": sum(datos["B"] for datos in medallero.values())
+        }
+
+    resumen["Total"] = (
+            resumen["O"] +
+            resumen["P"] +
+            resumen["B"]
+        )
+
+    medallero_sorted.append(("TOTAL", resumen))
+    print(medallero_sorted)
+
+        
+    return render(request, 'logs/tournament_olympic_imported_search_results.html', {'tablas_torneo': tournament_data, 'disciplinas_torneo': tournament_disciplines, 
+                                                                           'cant_equipos': range(len(tournament_disciplines)),
+                                                                          'medallero': medallero_sorted})

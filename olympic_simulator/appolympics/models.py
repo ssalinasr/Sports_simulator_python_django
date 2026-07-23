@@ -119,6 +119,7 @@ class Playersimulationregister(models.Model):
     ol_player = models.ForeignKey(Olympicplayers, models.DO_NOTHING)
     ol_player_result = models.DecimalField(max_digits=50, decimal_places=3)
     ol_player_year = models.CharField(max_length=4)
+    player_round = models.CharField(max_length=2)
     sp_record = models.ForeignKey('Sportsrecords', models.DO_NOTHING)
 
     class Meta:
@@ -245,6 +246,7 @@ class Teamsimulationregister(models.Model):
     team = models.ForeignKey(Nationalteams, models.DO_NOTHING)
     team_result = models.DecimalField(max_digits=50, decimal_places=3)
     team_year = models.CharField(max_length=4)
+    team_round = models.CharField(max_length=2)
     sp_record = models.ForeignKey(Sportsrecords, models.DO_NOTHING)
 
     class Meta:

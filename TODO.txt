@@ -3,9 +3,13 @@ Añadir Copas Fzero, Mkart (DONE)
 Añadir Medallero general naciones (DONE)
 Añadir Registro por Torneo Olímpico (DONE)
 Añadir Rankings (DONE)
-Añadir Modulo de registro Excel independiente (DONE) -> Falta para torneos, verificar casos como JO verano,invierno,Osu!,etc
+Añadir Modulo de registro Excel independiente (DONE)
 Añadir a BD: Osu!, Mario Tenis, Mario Party, Need for Speed (DONE)
 Añadir a función Mario Tenis, Mario Party (DONE)
+Añadir Registro de Torneo por deportes importados. (DONE)
 
-Añadir Registro de Torneo por deportes importados.
-Añadir Importación de resultados por torneos por fases (Fútbol, Naruto, etc.) -> Tabla general (Si hay) + Ganadores de títulos (Continentales, globales)
+Añadir Importación de resultados por únicamente campeones (Naruto, Copa de las Naciones, Ligas de Diamante)
+Añadir personajes de Naruto a BD
+Añadir NBA, MLB como deportes de torneo + sus equipos actualizados
+Ajustar Pokemon Stadium como deporte simulado, no como importado
+Añadir medallas de clubes a Medalleros generales

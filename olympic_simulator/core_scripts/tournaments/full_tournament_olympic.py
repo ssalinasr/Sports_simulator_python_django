@@ -71,15 +71,18 @@ class FullTournament():
                         result_table = [(team, stats) for team, stats in new_table.items()]
 
                         self.general_tables.append(result_table)
-                        self.save_gen_tables.append((dep.sp_record_name, sp[0], result_table))
                         if q_num == 64:
                             self.element_names.append(dep.sp_record_name + ' Q')
+                            self.save_gen_tables.append((dep.sp_record_name, sp[0], result_table,'Q'))
                         elif q_num == 32:
                             self.element_names.append(dep.sp_record_name + ' CF')
+                            self.save_gen_tables.append((dep.sp_record_name, sp[0], result_table,'CF'))
                         elif q_num == 16:
                             self.element_names.append(dep.sp_record_name + ' SF')
+                            self.save_gen_tables.append((dep.sp_record_name, sp[0], result_table,'SF'))
                         elif q_num == 8:
                             self.element_names.append(dep.sp_record_name + ' F')
+                            self.save_gen_tables.append((dep.sp_record_name, sp[0], result_table,'F'))
 
 
                         #print('Clasificados:', len(qual_teams))
@@ -114,7 +117,7 @@ class FullTournament():
 
                     result_table = [(team, stats) for team, stats in new_table.items()]
                     self.general_tables.append(result_table)
-                    self.save_gen_tables.append((dep.sp_record_name, sp[0], result_table))
+                    self.save_gen_tables.append((dep.sp_record_name, sp[0], result_table,'F'))
                     self.element_names.append(dep.sp_record_name)
                     #print(new_table)
                     medal_winners = list(new_table.items())[:3]
@@ -145,6 +148,7 @@ class FullTournament():
                             existing_log.team_result = eq[1]["score"]
                         existing_log.team_year = str(self.year)
                         existing_log.sp_record = sport
+                        existing_log.team_round = mt[3]
                         existing_log.save()
 
                     except Teamsimulationregister.DoesNotExist:
@@ -157,6 +161,7 @@ class FullTournament():
                             team_id = team_obj.team_id,
                             team_result = team_result,
                             team_year = str(self.year),
+                            team_round = mt[3],
                             sp_record = sport
                         )
                         tournament_element.save()
@@ -212,6 +217,7 @@ class FullTournament():
                             existing_log.ol_player_result = eq[1]["score"]
                         existing_log.ol_player_year = str(self.year)
                         existing_log.sp_record = sport
+                        existing_log.player_round = mt[3]
                         existing_log.save()
 
                     except Playersimulationregister.DoesNotExist:
@@ -223,6 +229,7 @@ class FullTournament():
                             ol_player_id = team_obj.ol_player_id,
                             ol_player_result = team_result,
                             ol_player_year = str(self.year),
+                            player_round = mt[3],
                             sp_record = sport
                         )
                         tournament_element.save()

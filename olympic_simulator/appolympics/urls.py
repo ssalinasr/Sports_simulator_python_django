@@ -7,7 +7,7 @@ from .views import pagina_registro_por_pais, pagina_registro_por_jugador_individ
 from .views import pagina_registro_por_club, consultar_por_pais, consultar_por_jugador, consultar_por_clubes, consultar_por_pais_mayor, consultar_por_torneo
 
 from .views import pagina_records, consultar_records, consultar_medallas_jugador, consultar_medallas_pais, consultar_medallas_pais_mayor, pagina_registro_por_torneo_olimpico, consultar_por_torneo_olimpico
-from .views import pagina_rankings, consultar_rankings, pagina_importar, importar_resultados
+from .views import pagina_rankings, consultar_rankings, pagina_importar, importar_resultados, pagina_registro_por_torneo_olimpico_importado, consultar_por_torneo_olimpico_importado
 
 urlpatterns = [
     path('', pagina_principal , name='pagina_principal'),
@@ -46,6 +46,7 @@ urlpatterns = [
     path('logs/register_by_major_country_olympic/', pagina_registro_por_pais_mayor_olimpico, name='pagina_registro_por_pais_mayor_olimpico'),
     path('logs/register_by_tournament',pagina_registro_por_torneo, name='pagina_registro_por_torneo'),
     path('logs/register_by_tournament_olympic',pagina_registro_por_torneo_olimpico, name='pagina_registro_por_torneo_olimpico'),
+    path('logs/register_by_tournament_olympic_imported',pagina_registro_por_torneo_olimpico_importado, name='pagina_registro_por_torneo_olimpico_importado'),
     #URLs Consultas de registros#
     path('logs/register_by_country/search', consultar_por_pais, name='consultar_por_pais'),
     path('logs/register_by_club/search', consultar_por_clubes, name='consultar_por_clubes'),
@@ -53,6 +54,7 @@ urlpatterns = [
     path('logs/register_by_major_country/search', consultar_por_pais_mayor, name='consultar_por_pais_mayor'),
     path('logs/register_by_tournament/search', consultar_por_torneo, name='consultar_por_torneo'),
     path('logs/register_by_tournament_olympic/search', consultar_por_torneo_olimpico, name='consultar_por_torneo_olimpico'),
+    path('logs/register_by_tournament_olympic_imported/search', consultar_por_torneo_olimpico_importado, name='consultar_por_torneo_olimpico_importado'),
     path('logs/register_by_country_olympic/search', consultar_medallas_pais, name='consultar_medallas_pais'),
     path('logs/register_by_individual_player_olympic/search', consultar_medallas_jugador, name='consultar_medallas_jugador'),
     path('logs/register_by_major_country_olympic/search', consultar_medallas_pais_mayor, name='consultar_medallas_pais_mayor'),
