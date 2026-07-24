@@ -9,6 +9,9 @@
         {% if clase == 3 %}
         <option value="{{ equipo.club_id }}">{{ equipo.club_name }}</option>
         {% endif %}
+        {% if clase == 6 %}
+        <option value="{{ equipo.ml_club_id }}">{{ equipo.ml_club_name }}</option>
+        {% endif %}
         {% if clase == 4 %}
         <option value="{{ equipo.ol_player_id }}">{{ equipo.ol_player_name }}</option>
         {% endif %}

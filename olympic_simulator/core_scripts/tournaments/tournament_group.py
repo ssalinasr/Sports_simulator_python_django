@@ -52,7 +52,7 @@ class Tournament():
 
     def simulate_tournament_match(self, local, away):
         winner = None
-        if self.match_class in [1,3,5]:
+        if self.match_class in [1,3,5,6]:
             if self.sport_name in ['Futbol Masculino', 'Futbol Femenino']:
                 sport_object = sports_by_time.TimeSport(self.sport_name, 2, 45, True, self.has_double_leg)
 

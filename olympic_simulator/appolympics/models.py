@@ -325,3 +325,54 @@ class Teammedalregister(models.Model):
         managed = False
         db_table = 'TeamMedalRegister'
 
+class Mlclubs(models.Model):
+    ml_club_id = models.BigAutoField(primary_key=True)
+    ml_club_name = models.CharField(max_length=300)
+    ml_club_value = models.IntegerField()
+    ml_club_type = models.CharField(max_length=3)
+    ml_club_shield = models.BinaryField()
+    ol_country = models.ForeignKey(Playercountry, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'MLClubs'
+
+class Mlclubtournamentregister(models.Model):
+    ml_club_tourn_id = models.BigAutoField(primary_key=True)
+    ml_club = models.ForeignKey('MLClubs', models.DO_NOTHING)
+    ml_club_wins = models.IntegerField()
+    ml_club_draws = models.IntegerField()
+    ml_club_loses = models.IntegerField()
+    ml_club_sc_points = models.IntegerField()
+    ml_club_ag_points = models.IntegerField()
+    ml_club_position = models.IntegerField()
+    ml_club_year = models.CharField(max_length=4)
+    ml_club_trn = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False
+        db_table = 'MLClubTournamentRegister'
+
+class MLclubmatchesregister(models.Model):
+    ml_club_match_id = models.BigAutoField(primary_key=True)
+    ml_club_local = models.ForeignKey('MLClubs', models.DO_NOTHING)
+    ml_club_local_score = models.IntegerField()
+    ml_club_away = models.ForeignKey('MLClubs', models.DO_NOTHING, related_name='ml_clubmatchesregister_club_away_set')
+    ml_club_away_score = models.IntegerField()
+    result_label = models.CharField(max_length=300)
+    match_year = models.CharField(max_length=4)
+    class Meta:
+        managed = False
+        db_table = 'MLClubMatchesRegister'
+
+class Mlclubtitleregister(models.Model):
+    ml_club_title_id = models.BigAutoField(primary_key=True)
+    ml_club = models.ForeignKey(Clubs, models.DO_NOTHING)      
+    title_label = models.CharField(max_length=300)  
+    title_year = models.CharField(max_length=4)
+    title_bracket = models.JSONField()
+    title_image = models.CharField(max_length=700)
+
+    class Meta:
+        managed = False
+        db_table = 'MLClubTitleRegister'

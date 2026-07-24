@@ -10,6 +10,7 @@ from openpyxl.styles import Font
 from django.http import HttpResponse
 from appolympics.models import Nationalteams, Olympicplayers, Teammatchesregister, Teamsports, Playertournamentsports, Teamtournamentregister, Playertournamentregister
 from appolympics.models import Playertitleregister, Teamtitleregister
+from appolympics.models import Mlclubs, Mlclubtournamentregister, MLclubmatchesregister, Mlclubtitleregister
 
 class FullTournament():
 
@@ -231,7 +232,90 @@ class FullTournament():
             self.general_matches = matches_dict
             '''
         else:
-            if "MK" not in self.sport and "GE" in self.sport: # Simula torneos de Goldeneye #
+            print('AQUI....')
+            print(self.sport)
+            if self.sport in ['Basketball Masculino','Beisbol Masculino']: # Simula torneos de NBA/MLB
+                self.prev_stages = self.subdivide_groups(self.num_groups, self.teams)
+                print(self.prev_stages)
+                #Simula los grupos de la fase previa#
+                index = 1
+                for stage_group in self.prev_stages:
+                    group = league_group.Group('Grupo '+str(index), stage_group, True, self.sport, self.match_class, self.ranks)
+                    index += 1
+                    group.generate_calendar()
+                    group.simulate_league()
+                    self.element_names.append(group.get_group_name())
+                    table = group.get_league_table()
+
+                    table_names = []
+                    table_values = []
+
+                    for k in table.items():
+                        table_names.append(k[0])
+                        table_values.append(k[1])
+
+                    table_dict = dict(zip(table_names, table_values))
+                    sorted_table = sorted(
+                        table_dict.items(),
+                        key= lambda item:(
+                            item[1]['pts'],
+                            item[1]['gd'],
+                            item[1]['gf']
+                        ),
+                        reverse=True
+                    )
+                    self.general_tables.append(sorted_table)
+                    self.general_matches.append(group.get_league_matches())
+                    self.prev_stages_tables.append(sorted_table)
+                    self.prev_stages_matches.append(group.get_league_matches())
+                    self.qualified_teams.append(group.get_qualified_teams(2))
+
+                merged_list = list(itertools.chain.from_iterable(self.qualified_teams))
+                self.qualified_teams = merged_list
+                print('Clasificados')
+                print(self.qualified_teams)
+                print(len(self.qualified_teams))
+                #Simula la fase final mundial
+                tipo_liga = ''
+                if self.sport == 'Basketball Masculino':
+                    tipo_liga = 'NBA'
+                else:
+                    tipo_liga = 'MLB'
+
+                tournament = tournament_group.Tournament('Final '+tipo_liga+'_'+str(self.year), self.sport, self.qualified_teams, self.ranks, False, True, self.match_class)
+                trn_result = tournament.simulate_tournament()
+                table = tournament.get_tournament_table()
+                matches = tournament.get_tournament_matches()
+                self.element_names.append(trn_result['tournament_name'])
+                table_names = []
+                table_values = []
+
+                for k in table.items():
+                    table_names.append(k[0])
+                    table_values.append(k[1])
+
+                table_dict = dict(zip(table_names, table_values))
+                sorted_table = sorted(
+                    table_dict.items(),
+                    key= lambda item:(
+                        item[1]['pts'],
+                        item[1]['gd'],
+                        item[1]['gf']
+                    ),
+                    reverse=True
+                )
+
+                img = tournament.generate_tournament_bracket(trn_result['bracket'])
+                self.champions.append((trn_result['champion'], trn_result['tournament_name'], trn_result['bracket'], img))
+                self.final_table = sorted_table
+                self.general_tables.append(sorted_table)
+                self.final_matches.append(matches)
+                self.general_matches.append(matches)
+                if self.saveres:   
+                    self.save_results()
+
+
+            elif "MK" not in self.sport and "GE" in self.sport: # Simula torneos de Goldeneye #
                 group_teams_sublist = []
                 single_sublist = []
                 for temp in self.teams:
@@ -665,7 +749,86 @@ class FullTournament():
                         title_bracket = dict(title[2]),
                         title_image = title[3]
                     )
+        
                     title_element.save()
+        elif self.match_class == 6:
+            merged_table = self.merge_tables(self.general_tables)
+            print(merged_table)
+            print(len(merged_table))
+            index = 1
+            for eq in merged_table:
+                player_obj = Mlclubs.objects.get(ml_club_name = eq[0])
+                try:
+                    existing_log = Mlclubtournamentregister.objects.get(ml_club_id = player_obj.ml_club_id, ml_club_year = str(self.year))
+                    existing_log.ml_club = player_obj
+                    existing_log.ml_club_wins = eq[1]['w']
+                    existing_log.ml_club_draws = eq[1]['d']
+                    existing_log.ml_club_loses = eq[1]['l']
+                    existing_log.ml_club_sc_points = eq[1]['gf']
+                    existing_log.ml_club_ag_points = eq[1]['gc']
+                    existing_log.ml_club_position = index
+                    existing_log.ml_club_year = str(self.year)
+                    existing_log.save()
+
+                except Mlclubtournamentregister.DoesNotExist:
+                    tournament_element = Mlclubtournamentregister(
+                        ml_club_id = player_obj.ml_club_id,
+                        ml_club_wins = eq[1]['w'],
+                        ml_club_draws = eq[1]['d'],
+                        ml_club_loses = eq[1]['l'],
+                        ml_club_sc_points = eq[1]['gf'],
+                        ml_club_ag_points = eq[1]['gc'],
+                        ml_club_position = index,
+                        ml_club_year = str(self.year)
+                    )
+                    tournament_element.save()
+                index += 1
+
+            for title in self.champions:
+                team_obj = Mlclubs.objects.get(ml_club_name = title[0])
+                try:
+                    existing_log = Mlclubtitleregister.objects.get(ml_club_id = team_obj.ml_club_id, title_year = str(self.year))
+                    existing_log.ml_club = team_obj.ml_club_id
+                    existing_log.title_label = title[1]
+                    existing_log.title_year = str(self.year)
+                    existing_log.title_bracket = dict(title[2])
+                    existing_log.title_image = title[3]
+                    existing_log.save()
+
+                except Mlclubtitleregister.DoesNotExist:
+                    title_element = Mlclubtitleregister(
+                        ml_club_id = team_obj.ml_club_id,
+                        title_label = title[1],
+                        title_year = str(self.year),
+                        title_bracket = dict(title[2]),
+                        title_image = title[3]
+                    )
+                    title_element.save()
+
+            for cont in self.general_matches:
+                for m in cont:
+                    #print(m['team1'], m['team2'])
+                    team1_obj = Mlclubs.objects.get(ml_club_name = m['team1'])
+                    team2_obj = Mlclubs.objects.get(ml_club_name = m['team2'])
+                    result_label = ''
+
+                    if int(m['score1']) > int(m['score2']):
+                        result_label = m['team1'] + ' W.'
+                    elif int(m['score2']) > int(m['score1']):
+                        result_label = m['team2'] + ' W.'
+                    else:
+                        result_label = 'D.'
+                
+
+                    match_element = MLclubmatchesregister(
+                        ml_club_local_id = team1_obj.ml_club_id,
+                        ml_club_local_score = m['score1'],
+                        ml_club_away_id = team2_obj.ml_club_id,
+                        ml_club_away_score = m['score2'],
+                        result_label = result_label,
+                        match_year = str(self.year)
+                    )
+                    match_element.save()
     pass
 
 

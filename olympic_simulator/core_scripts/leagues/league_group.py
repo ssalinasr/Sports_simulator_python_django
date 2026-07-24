@@ -38,7 +38,7 @@ class Group():
 
     def simulate_league(self):
 
-        if self.match_class in [1,5]:
+        if self.match_class in [1,5,6]:
             if self.sport_name in ['Futbol Masculino', 'Futbol Femenino']:
                 sport_object = sports_by_time.TimeSport(self.sport_name, 2, 45, False, False)
 
@@ -134,7 +134,7 @@ class Group():
 
         for matchweek in self.fixture:
             for local, away in matchweek:
-                if self.match_class in [1,3,5]:
+                if self.match_class in [1,3,5,6]:
                     sport_object.get_probability_list()
                     results = sport_object.simulate_match(tools.get_team_rank_by_list(local, self.ranks), tools.get_team_rank_by_list(away, self.ranks))
                     matches_element = [(local, results[0], away, results[1])]

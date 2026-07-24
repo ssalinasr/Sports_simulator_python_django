@@ -5,6 +5,7 @@ from django.db.models import Q, Sum, F, Case, When, IntegerField, Max, Min, Coun
 from django.db.models.functions import Coalesce
 from .models import Teamregion, Nationalteams, Olympicplayers, Teamsports, Clubleague, Clubs, Playercountry, Playertournamentsports, Teamranks, Sportsrecords, Clubmatchesregister, Teamtournamentregister
 from .models import Teammatchesregister, Teamtitleregister, Playertitleregister, Clubtitleregister, Playertournamentregister, Clubtournamentregister, Teamsimulationregister, Playersimulationregister, Teammedalregister, Playermedalregister
+from .models import Mlclubs, MLclubmatchesregister, Mlclubtitleregister, Mlclubtournamentregister
 from core_scripts.interfaces.olympic_sports_interfaces import simulated_sports
 import base64
 from core_scripts.interfaces.sports_interfaces import sports_by_time, sports_by_sets, sports_by_ends, sports_by_special_sets, sports_by_timed_points
@@ -60,6 +61,11 @@ def pagina_partido_individual(request, match_class):
         page_groups = Teamregion.objects.all()
         page_teams = Nationalteams.objects.filter(team_name__icontains='Fem').order_by('team_id')
         page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Femenino'))
+    elif match_class == 6:
+        page_groups = Mlclubs.objects.values_list('ml_club_type', flat=True).distinct()
+        page_teams = Mlclubs.objects.all()
+        page_sports.append('Beisbol Masculino')
+        page_sports.append('Basketball Masculino')
     else:
         page_groups = Teamregion.objects.all()
         page_teams = Nationalteams.objects.all().order_by('team_id')
@@ -91,6 +97,11 @@ def pagina_partidos_liga(request, match_class):
         page_groups = Clubleague.objects.all()
         page_teams = Clubs.objects.all().order_by('club_id')
         page_sports.append('Clubes')
+    elif match_class == 6:
+        page_groups = Mlclubs.objects.values_list('ml_club_type', flat=True).distinct()
+        page_teams = Mlclubs.objects.all()
+        page_sports.append('Beisbol Masculino')
+        page_sports.append('Basketball Masculino')
     elif match_class == 5:
         page_groups = Teamregion.objects.all()
         page_teams = Nationalteams.objects.filter(team_name__icontains='Fem').order_by('team_id')
@@ -128,6 +139,11 @@ def pagina_partidos_torneo(request, match_class):
         page_groups = Clubleague.objects.all()
         page_teams = Clubs.objects.all().order_by('club_id')
         page_sports.append('Clubes')
+    elif match_class == 6:
+        page_groups = Mlclubs.objects.values_list('ml_club_type', flat=True).distinct()
+        page_teams = Mlclubs.objects.all()
+        page_sports.append('Beisbol Masculino')
+        page_sports.append('Basketball Masculino')
     elif match_class == 4:
         page_groups = Playercountry.objects.all()
         page_teams = Olympicplayers.objects.filter(team_sport_id = id_munecos).order_by('ol_player_id')
@@ -149,6 +165,7 @@ def pagina_competencia(request, match_class):
     sports = []
     list_of_ex = list(range(39,47))
     list_of_ids = list(range(39,46))
+    list_of_ids.append(78)
     if match_class == 1:
         sports_categories = Teamsports.objects.filter(~Q(team_sport_id__in = list_of_ex ), team_sport_class = 'L')
     elif match_class == 2:
@@ -187,6 +204,8 @@ def cargar_equipos(request, match_class):
         page_teams = Olympicplayers.objects.filter(team_sport_id = id_munecos).filter(ol_country_id = agrupacion)
     elif match_class == 5:
         page_teams = Nationalteams.objects.filter(team_region_id = agrupacion).filter(team_name__icontains='Fem')
+    elif match_class == 6:
+        page_teams = Mlclubs.objects.filter(ml_club_type = agrupacion)
     else:
         page_teams = Nationalteams.objects.filter(team_region_id = agrupacion)
 
@@ -215,6 +234,9 @@ def mostrar_equipo(request, match_class):
     elif match_class == 5:
         page_team = Nationalteams.objects.get(team_id = equipo_id)
         img = page_team.team_shield
+    elif match_class == 6:
+        page_team = Mlclubs.objects.get(ml_club_id = equipo_id)
+        img = page_team.ml_club_shield
     else:
         page_team = Nationalteams.objects.get(team_id = equipo_id)
     
@@ -262,6 +284,13 @@ def generar_partido(request, match_class):
         rank_local = equipo_local.club_value
         rank_visitante = equipo_visitante.club_value
 
+    elif match_class == 6:
+        equipo_local = Mlclubs.objects.get(ml_club_name = valor_local)
+        equipo_visitante = Mlclubs.objects.get(ml_club_name = valor_visitante)
+        deporte = Teamsports.objects.get(team_sport_name = request.GET.get('deporte'))
+        rank_local = random.randint(1,3)
+        rank_visitante = random.randint(1,3)
+
     elif match_class == 4:
         equipo_local = Olympicplayers.objects.get(ol_player_name = valor_local)
         equipo_visitante = Olympicplayers.objects.get(ol_player_name = valor_visitante)
@@ -283,7 +312,7 @@ def generar_partido(request, match_class):
     print(hay_tiempo_extra)
     print(rank_local, rank_visitante)
 
-    if match_class in [1,3,5]:
+    if match_class in [1,3,5,6]:
         print('sport')
         if deporte.team_sport_name in ['Futbol Masculino', 'Futbol Femenino']:
             sport_object = sports_by_time.TimeSport(deporte.team_sport_name, 2, 45, hay_tiempo_extra, hay_doble_ronda)
@@ -433,6 +462,8 @@ def insertar_equipo(request, match_class):
         page_team = Olympicplayers.objects.get(ol_player_id = equipo_id)
     elif match_class == 5:
         page_team = Nationalteams.objects.get(team_id = equipo_id)
+    elif match_class == 6:
+        page_team = Mlclubs.objects.get(ml_club_id = equipo_id)
     else:
         page_team = Nationalteams.objects.get(team_id = equipo_id)
     return render(request, 'general/insert_league_team_template.html',{'equipo': page_team, 'clase': match_class})
@@ -488,6 +519,16 @@ def generar_liga(request, match_class):
             teams.append(eq.club_name)
             rank_tuple = (eq.club_name, rank)
             ranks.append(rank_tuple)
+
+    elif match_class == 6:
+        equipos = Mlclubs.objects.filter(ml_club_id__in = equipos_seleccionados)
+        deporte = Teamsports.objects.get(team_sport_name = request.GET.get('deporte'))
+        for eq in equipos:
+            rank = random.randint(1,3)
+            teams.append(eq.ml_club_name)
+            rank_tuple = (eq.ml_club_name, rank)
+            ranks.append(rank_tuple)
+
 
     else:
         equipos = Nationalteams.objects.filter(team_id__in = equipos_seleccionados)
@@ -578,6 +619,16 @@ def generar_torneo(request, match_class):
             rank_tuple = (eq.club_name, rank)
             ranks.append(rank_tuple)
 
+    elif match_class == 6:
+        equipos = Mlclubs.objects.filter(ml_club_id__in = equipos_seleccionados)
+        deporte = Teamsports.objects.get(team_sport_name = request.GET.get('deporte'))
+        for eq in equipos:
+            rank = random.randint(1,3)
+            teams.append(eq.ml_club_name)
+            rank_tuple = (eq.ml_club_name, rank)
+            ranks.append(rank_tuple)
+
+
     else:
         equipos = Nationalteams.objects.filter(team_id__in = equipos_seleccionados)
         deporte = Teamsports.objects.get(team_sport_name = request.GET.get('deporte'))
@@ -639,7 +690,7 @@ def pagina_simulacion_completa(request, match_class):
     page_teams = []
     page_sports = []
     name_mun = 'Munecos'
-    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart','Mario Tenis','Mario Party']
+    list_games = ['Super Smash', 'Goldeneye', 'Mario Kart','Mario Tenis','Mario Party','Pokemon Stadium']
     id_munecos = Teamsports.objects.get(team_sport_name = name_mun).team_sport_id
     id_games_query = Teamsports.objects.filter(team_sport_name__in = list_games)
     id_games = []
@@ -662,6 +713,11 @@ def pagina_simulacion_completa(request, match_class):
         page_groups = Teamregion.objects.all()
         page_teams = Nationalteams.objects.filter(team_name__icontains='Fem')
         page_sports = Teamsports.objects.filter(Q(team_sport_name__icontains='Femenino'))
+    elif match_class == 6:
+        page_groups = Mlclubs.objects.values_list('ml_club_type', flat=True).distinct()
+        page_teams = Mlclubs.objects.all()
+        page_sports.append('Beisbol Masculino')
+        page_sports.append('Basketball Masculino')
     else:
         page_groups = Teamregion.objects.all()
         page_teams = Nationalteams.objects.all()
@@ -727,7 +783,7 @@ def generar_simulacion_completa(request, match_class):
     elif match_class == 2 or match_class == 4:      
         deporte = Playertournamentsports.objects.get(player_trn_sport_name = request.GET.get('deporte'))
         equipos = Olympicplayers.objects.all()
-        list_games = ['Super Smash', 'Goldeneye', 'Mario Kart', 'Mario Tenis', 'Mario Party']
+        list_games = ['Super Smash', 'Goldeneye', 'Mario Kart', 'Mario Tenis', 'Mario Party','Pokemon Stadium']
         name_mun = 'Munecos'
         id_munecos = Teamsports.objects.get(team_sport_name = name_mun).team_sport_id
 
@@ -749,6 +805,10 @@ def generar_simulacion_completa(request, match_class):
             num_groups = 1
         elif "Mario Party" in deporte.player_trn_sport_name:
             id_games_query = Teamsports.objects.get(team_sport_name = list_games[4])
+            equipos = equipos.filter(team_sport_id = id_games_query)
+            num_groups = 1
+        elif "PKS" in deporte.player_trn_sport_name:
+            id_games_query = Teamsports.objects.get(team_sport_name = list_games[5])
             equipos = equipos.filter(team_sport_id = id_games_query)
             num_groups = 1
         else:
@@ -775,9 +835,33 @@ def generar_simulacion_completa(request, match_class):
             teams.append(eq.ol_player_name)
             rank_tuple = (eq.ol_player_name, rank)
             ranks.append(rank_tuple)
+            
 
         full_trn = full_tournament.FullTournament(teams, deporte.player_trn_sport_name, ranks, deporte.player_trn_sport_name, num_groups, match_class, valor_año, hay_guardado)
         file_name = f"simulacion_{deporte.player_trn_sport_name}_{valor_año}.xlsx"
+
+    elif match_class == 6:
+        tipo_liga = ''      
+        deporte = Teamsports.objects.get(team_sport_name = request.GET.get('deporte'))
+        if deporte.team_sport_name == 'Basketball Masculino':
+            equipos = Mlclubs.objects.filter(ml_club_type = 'NBA')
+            tipo_liga = 'NBA'
+        else:
+            equipos = Mlclubs.objects.filter(ml_club_type = 'MLB')
+            tipo_liga = 'MLB'
+
+        num_groups = 8
+
+        for eq in equipos:
+            rank = random.randint(1,3)
+            teams.append(eq.ml_club_name)
+            rank_tuple = (eq.ml_club_name, rank)
+            ranks.append(rank_tuple)
+            
+        full_trn = full_tournament.FullTournament(teams, deporte.team_sport_name, ranks, deporte.team_sport_name, num_groups, match_class, valor_año, hay_guardado)
+        file_name = f"simulacion_{tipo_liga}_{valor_año}.xlsx"
+
+
     else:
         equipos = Nationalteams.objects.all()
         deporte = Teamsports.objects.get(team_sport_name = request.GET.get('deporte'))
@@ -1141,6 +1225,7 @@ def pagina_registro_por_torneo(request):
 
 def pagina_registro_por_torneo_olimpico(request):
     list_of_ids = list(range(39,46))
+    list_of_ids.append(78)
     sports_categories = Teamsports.objects.filter(team_sport_id__in = list_of_ids)
     sports_mun = Teamsports.objects.filter(team_sport_id = 46)
     sports_general = sports_categories.union(sports_mun)
@@ -1469,11 +1554,11 @@ def consultar_por_torneo(request):
     if deporte != 'Clubes':
         #Archivo Excel con el torneo
         try:
+
             hojas = pd.read_excel(
             "media/simulacion_"+str(deporte)+"_"+str(año)+".xlsx",
             sheet_name=None
             )
-
             for elementos, df in hojas.items():
                 print("Hoja: ", elementos)
                 # Buscar inicio de partidos
@@ -1705,6 +1790,7 @@ def pagina_simulacion_completa_olimpica(request, match_class):
     sports = []
     list_of_ex = list(range(39,47))
     list_of_ids = list(range(39,46))
+    list_of_ids.append(78)
     if match_class == 1:
         sports_categories = Teamsports.objects.filter(~Q(team_sport_id__in = list_of_ex ), team_sport_class = 'L')
     elif match_class == 2:

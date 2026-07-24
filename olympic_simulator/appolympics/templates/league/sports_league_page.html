@@ -39,7 +39,7 @@
                                 {% if clase == 2 %}
                                 <option value="{{ dep.player_trn_sport_name }}">{{ dep.player_trn_sport_name }}</option>
                                 {% endif %}
-                                {% if clase == 3 %}
+                                {% if clase == 3 or clase == 6%}
                                 <option value="{{ dep }}">{{ dep }}</option>
                                 {% endif %}
                                 {% if clase == 4 %}
@@ -67,6 +67,9 @@
                                 {% endif %}
                                 {% if clase == 3 %}
                                 <option value="{{ agr.club_league_id }}">{{ agr.club_league_name }}</option>
+                                {% endif %}
+                                {% if clase == 6 %}
+                                <option value="{{ agr }}">{{ agr }}</option>
                                 {% endif %}
                                 {% if clase == 4 %}
                                 <option value="{{ agr.ol_country_id }}">{{ agr.ol_country_name }}</option>

@@ -3,14 +3,18 @@
 <input type="hidden" id="item-{{ equipo.team_id }}" name="equipos" value="{{ equipo.team_id }}">
 {% endif %}
 {% if clase == 2 %}
-<div class="tag" id="item-{{ equipo.ol_player_id }}" onclick="eliminarEquipo(this)" data-id="{{ equipo.team_id }}" value="{{ equipo.ol_player_id }}">{{ equipo.ol_player_name }}</div>
+<div class="tag" id="item-{{ equipo.ol_player_id }}" onclick="eliminarEquipo(this)" data-id="{{ equipo.ol_player_id }}" value="{{ equipo.ol_player_id }}">{{ equipo.ol_player_name }}</div>
 <input type="hidden" id="item-{{ equipo.ol_player_id }}" name="equipos" value="{{ equipo.ol_player_id }}">
 {% endif %}
 {% if clase == 3 %}
-<div class="tag" id="item-{{ equipo.club_id }}" onclick="eliminarEquipo(this)" data-id="{{ equipo.team_id }}" value="{{ equipo.club_id }}">{{ equipo.club_name }}</div>
+<div class="tag" id="item-{{ equipo.club_id }}" onclick="eliminarEquipo(this)" data-id="{{ equipo.club_id }}" value="{{ equipo.club_id }}">{{ equipo.club_name }}</div>
 <input type="hidden" id="item-{{ equipo.club_id }}" name="equipos" value="{{ equipo.club_id }}">
 {% endif %}
+{% if clase == 6 %}
+<div class="tag" id="item-{{ equipo.ml_club_id }}" onclick="eliminarEquipo(this)" data-id="{{ equipo.ml_club_id }}" value="{{ equipo.ml_club_id }}">{{ equipo.ml_club_name }}</div>
+<input type="hidden" id="item-{{ equipo.ml_club_id }}" name="equipos" value="{{ equipo.ml_club_id }}">
+{% endif %}
 {% if clase == 4 %}
-<div class="tag" id="item-{{ equipo.ol_player_id }}" onclick="eliminarEquipo(this)" data-id="{{ equipo.team_id }}" value="{{ equipo.ol_player_id }}">{{ equipo.ol_player_name }}</div>
+<div class="tag" id="item-{{ equipo.ol_player_id }}" onclick="eliminarEquipo(this)" data-id="{{ equipo.ol_player_id }}" value="{{ equipo.ol_player_id }}">{{ equipo.ol_player_name }}</div>
 <input type="hidden" id="item-{{ equipo.ol_player_id }}" name="equipos" value="{{ equipo.ol_player_id }}">
 {% endif %}

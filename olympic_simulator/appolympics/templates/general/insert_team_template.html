@@ -17,6 +17,12 @@
     <input type="hidden" id="equipo{{orientacion}}" name="equipo{{orientacion}}" value="{{ equipo.club_name }}">{{ equipo.club_name }}
     {% endif %}
 
+    {% if class == 6 %}
+    <img class="team-image" src="data:image/png;base64,{{ imagen }}" alt="{{ equipo.ml_club_name }}">
+    <h6 class="team-name" name="equipo{{orientacion}}" value="{{ equipo.ml_club_name }}">{{ equipo.ml_club_name }}</h6>
+    <input type="hidden" id="equipo{{orientacion}}" name="equipo{{orientacion}}" value="{{ equipo.ml_club_name }}">{{ equipo.ml_club_name }}
+    {% endif %}
+
     {% if class == 4 %}
     <img class="team-image" src="data:image/png;base64,{{ imagen }}" alt="{{ equipo.ol_player_name }}">
     <h6 class="team-name" name="equipo{{orientacion}}" value="{{ equipo.ol_player_name }}">{{ equipo.ol_player_name }}</h6>

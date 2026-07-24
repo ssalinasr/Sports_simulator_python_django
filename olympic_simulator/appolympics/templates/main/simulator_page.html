@@ -217,7 +217,7 @@
                                 {% csrf_token %}
                                 <button class="btn esports-btn w-100">
                                     <i class="bi bi-lightning-fill"></i>
-                                    Partido
+                                    Partido Clubes
                                 </button>
                             </form>
                         </div>
@@ -227,7 +227,7 @@
                                 {% csrf_token %}
                                 <button class="btn esports-btn w-100">
                                     <i class="bi bi-people-fill"></i>
-                                    Grupo
+                                    Grupo Clubes
                                 </button>
                             </form>
                         </div>
@@ -237,7 +237,7 @@
                                 {% csrf_token %}
                                 <button class="btn esports-btn w-100">
                                     <i class="bi bi-diagram-2-fill"></i>
-                                    Torneo
+                                    Torneo Clubes
                                 </button>
                             </form>
                         </div>
@@ -247,7 +247,47 @@
                                 {% csrf_token %}
                                 <button class="btn esports-btn w-100">
                                     <i class="bi bi-trophy-fill"></i>
-                                    Simulación
+                                    Simulación Clubes
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partido_individual' 6 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-lightning-fill"></i>
+                                    Partido MLB/NBA
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partidos_liga' 6 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-people-fill"></i>
+                                    Grupo MLB/NBA
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_partidos_torneo' 6 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-diagram-2-fill"></i>
+                                    Torneo MLB/NBA
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-6">
+                            <form method="POST" action="{% url 'pagina_simulacion_completa' 6 %}">
+                                {% csrf_token %}
+                                <button class="btn esports-btn w-100">
+                                    <i class="bi bi-trophy-fill"></i>
+                                    Simulación MLB/NBA
                                 </button>
                             </form>
                         </div>

@@ -9,7 +9,7 @@ Añadir a función Mario Tenis, Mario Party (DONE)
 Añadir Registro de Torneo por deportes importados. (DONE)
 
 Añadir Importación de resultados por únicamente campeones (Naruto, Copa de las Naciones, Ligas de Diamante)
-Añadir personajes de Naruto a BD
-Añadir NBA, MLB como deportes de torneo + sus equipos actualizados
-Ajustar Pokemon Stadium como deporte simulado, no como importado
-Añadir medallas de clubes a Medalleros generales
+Añadir personajes de Naruto a BD (DONE)
+Añadir NBA, MLB como deportes de torneo + sus equipos actualizados (DONE)
+Ajustar Pokemon Stadium como deporte simulado, no como importado (DONE)
+Añadir medallas de clubes a Medalleros generales + NBA y MLB (Añadir estos a registro por torneo) - ES LA MISMA FUNCIÓN DE REGISTRO POR TORNEO PERO INTEGRADA AL MEDALLERO GENERAL
