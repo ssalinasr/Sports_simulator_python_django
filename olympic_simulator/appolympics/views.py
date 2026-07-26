@@ -1241,6 +1241,10 @@ def pagina_registro_por_club(request):
     clubs = Clubs.objects.all()
     return render(request, 'logs/club_register_page.html', {'clubes': clubs})
 
+def pagina_registro_por_ml_club(request):
+    ml_clubs = Mlclubs.objects.all()
+    return render(request, 'logs/ml_club_register_page.html', {'clubes': ml_clubs})
+
 def consultar_por_pais(request):
     pais = request.GET.get('pais')
     deporte = request.GET.get('deporte')
@@ -1354,12 +1358,7 @@ def consultar_por_jugador(request):
                                                                 'titulos':titulos})
 
 def consultar_por_clubes(request):
-    deporte = request.GET.get('deporte')
     club = request.GET.get('club')
-
-    print(deporte, club)
-
-    sport = Teamsports.objects.get(team_sport_name = deporte)
     clubs = Clubs.objects.get(club_name = club)
 
     #Busqueda del pais
@@ -1431,6 +1430,75 @@ def consultar_por_clubes(request):
                                                                 'titulos':titulos})
 
 
+def consultar_por_ml_clubes(request):
+    club = request.GET.get('club')
+    clubs = Mlclubs.objects.get(ml_club_name = club)
+
+    #Busqueda del pais Mayor
+    major_country = Playercountry.objects.get(ol_country_id = clubs.ol_country.ol_country_id)
+
+    #Busqueda de la liga
+    club_league = Mlclubs.objects.get(ml_club_name = club)
+
+    #Victorias, derrotas y empates históricos
+    historic_values = Mlclubtournamentregister.objects.filter(
+        ml_club_id=clubs.ml_club_id
+    ).aggregate(
+        total_wins=Coalesce(Sum('ml_club_wins'), 0),
+        total_draws=Coalesce(Sum('ml_club_draws'), 0),
+        total_loses=Coalesce(Sum('ml_club_loses'), 0),
+        total_scored=Coalesce(Sum('ml_club_sc_points'), 0),
+        total_against=Coalesce(Sum('ml_club_ag_points'), 0)
+    )
+
+    qs = MLclubmatchesregister.objects.filter(
+        Q(ml_club_local_id=clubs.ml_club_id) | Q(ml_club_away_id=clubs.ml_club_id)
+    ).annotate(
+        goles_favor=Case(
+            When(ml_club_local_id=clubs.ml_club_id, then=F('ml_club_local_score')),
+            When(ml_club_away_id=clubs.ml_club_id, then=F('ml_club_away_score')),
+            output_field=IntegerField()
+        ),
+        goles_contra=Case(
+            When(ml_club_local_id=clubs.ml_club_id, then=F('ml_club_away_score')),
+            When(ml_club_away_id=clubs.ml_club_id, then=F('ml_club_local_score')),
+            output_field=IntegerField()
+        ),
+        rival=Case(
+        When(ml_club_local_id=clubs.ml_club_id, then=F('ml_club_away')),
+        When(ml_club_away_id=clubs.ml_club_id, then=F('ml_club_local')),
+        ),
+        diferencia=F('goles_favor') - F('goles_contra')
+    )
+
+    mejor = qs.order_by('-diferencia').first()
+    rival_mejor = []
+    rival_peor = []
+    if mejor == None:
+        rival_mejor = []
+    else:
+        rival_mejor = Mlclubs.objects.get(ml_club_id = mejor.rival)
+    peor = qs.order_by('diferencia').first()
+    if peor == None:
+        rival_peor = []
+    else:
+        rival_peor = Mlclubs.objects.get(ml_club_id = peor.rival)
+
+    titulos = None
+    try:
+        titulos = Mlclubtitleregister.objects.filter(ml_club_id = clubs.ml_club_id)
+    except Mlclubtitleregister.DoesNotExist:
+        titulos = []
+
+    print(titulos)
+
+
+
+    return render(request, 'logs/ml_club_search_results.html', {'pais_mayor': major_country, 'liga': club_league,
+                                                                'valores_historicos': historic_values, 'mejor_partido': mejor,
+                                                                'peor_partido': peor, 'rival_mejor': rival_mejor, 'rival_peor': rival_peor,
+                                                                'titulos':titulos})
+
 def consultar_por_pais_mayor(request):
 
     pais = request.GET.get('pais')
@@ -1455,6 +1523,12 @@ def consultar_por_pais_mayor(request):
     #Clubes
     clubs = Clubs.objects.filter(club_country__in = id_countries)
     id_clubs = [club.club_id for club in clubs]
+
+    #NBA/MLB
+    ml_clubs = Mlclubs.objects.filter(ol_country = major_country.ol_country_id)
+    id_ml_clubs = [ml_club.ml_club_id for ml_club in ml_clubs]
+
+    print(id_ml_clubs)
 
     #Victorias, derrotas y empates históricos por países
     for sport in sports:
@@ -1499,6 +1573,17 @@ def consultar_por_pais_mayor(request):
         total_against=Coalesce(Sum('club_ag_points'), 0)
     )
 
+    #Victorias, derrotas y empates históricos por NBA/MLB
+    historic_values_ml_clubs = Mlclubtournamentregister.objects.filter(
+        ml_club_id__in = id_ml_clubs
+    ).aggregate(
+        total_wins=Coalesce(Sum('ml_club_wins'), 0),
+        total_draws=Coalesce(Sum('ml_club_draws'), 0),
+        total_loses=Coalesce(Sum('ml_club_loses'), 0),
+        total_scored=Coalesce(Sum('ml_club_sc_points'), 0),
+        total_against=Coalesce(Sum('ml_club_ag_points'), 0)
+    )
+
 
     titulos_paises = None
     titulos_jugadores = None
@@ -1535,14 +1620,23 @@ def consultar_por_pais_mayor(request):
     except Clubtitleregister.DoesNotExist:
         titulos_clubes = []
 
-
+    #titulos por NBA/MLB
+    titulos_ml_clubes = None
+    try:
+        titulos_ml_clubes = Mlclubtitleregister.objects.filter(ml_club_id__in = id_ml_clubs).annotate(
+            ml_club_name=F('ml_club__ml_club_name')
+        )
+    except Mlclubtitleregister.DoesNotExist:
+        titulos_ml_clubes = []
 
     return render(request, 'logs/major_country_search_results.html', {'valores_historicos_paises': list_historic_values_countries,
                                                                       'valores_historicos_jugadores': list_historic_values_players,
                                                                       'valores_historicos_clubes': historic_values_clubs,
+                                                                      'valores_historicos_ml_clubes': historic_values_ml_clubs,
                                                                       'titulos_paises':titulos_paises,
                                                                       'titulos_jugadores':titulos_jugadores,
-                                                                      'titulos_clubes':titulos_clubes})
+                                                                      'titulos_clubes':titulos_clubes,
+                                                                      'titulos_ml_clubes':titulos_ml_clubes})
 
 def consultar_por_torneo(request):
     deporte = request.GET.get('deporte')
@@ -1615,21 +1709,38 @@ def consultar_por_torneo(request):
                     third_place = ti.title_bracket['Third Place'][0]['winner']
                     tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image))
             except ObjectDoesNotExist as e:
-                sport = Playertournamentsports.objects.get(player_trn_sport_name = deporte)
-                tourament_info = Playertitleregister.objects.filter(player_trn_sport_id = sport.player_trn_sport_id, title_year = str(año))
-                for ti in tourament_info:
-                    champion = ''
-                    not_champion = ''
-                    element = ti.title_bracket['Final'][0]
-                    print(element)
-                    if element['winner'] == element['team1']:
-                        champion = element['team1']
-                        not_champion = element['team2']
-                    else:
-                        champion = element['team2']
-                        not_champion = element['team1']
-                    third_place = ti.title_bracket['Third Place'][0]['winner']
-                    tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image))
+                try:
+                    sport = Playertournamentsports.objects.get(player_trn_sport_name = deporte)
+                    tourament_info = Playertitleregister.objects.filter(player_trn_sport_id = sport.player_trn_sport_id, title_year = str(año))
+                    for ti in tourament_info:
+                        champion = ''
+                        not_champion = ''
+                        element = ti.title_bracket['Final'][0]
+                        print(element)
+                        if element['winner'] == element['team1']:
+                            champion = element['team1']
+                            not_champion = element['team2']
+                        else:
+                            champion = element['team2']
+                            not_champion = element['team1']
+                        third_place = ti.title_bracket['Third Place'][0]['winner']
+                        tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image))
+                except ObjectDoesNotExist as e:
+                    tourament_info = Mlclubtitleregister.objects.filter(title_year = str(año))
+                    for ti in tourament_info:
+                        champion = ''
+                        not_champion = ''
+                        element = ti.title_bracket['Final'][0]
+                        print(element)
+                        if element['winner'] == element['team1']:
+                            champion = element['team1']
+                            not_champion = element['team2']
+                        else:
+                            champion = element['team2']
+                            not_champion = element['team1']
+                        third_place = ti.title_bracket['Third Place'][0]['winner']
+                        tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image))
+
         except FileNotFoundError as e:
             print(e)
     else:
@@ -1720,21 +1831,31 @@ def consultar_por_torneo(request):
             try:
                 country = Nationalteams.objects.get(team_name = champions[1])
             except:
-                country = Olympicplayers.objects.get(ol_player_name = champions[1])
+                try:
+                    country = Olympicplayers.objects.get(ol_player_name = champions[1])
+                except:
+                    country = Mlclubs.objects.get(ml_club_name = champions[1])
+
             nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
             medallero[nation.ol_country_name]["O"]+=1
 
             try:
                 country = Nationalteams.objects.get(team_name = champions[2])
             except:
-                country = Olympicplayers.objects.get(ol_player_name = champions[2])
+                try:
+                    country = Olympicplayers.objects.get(ol_player_name = champions[2])
+                except:
+                    country = Mlclubs.objects.get(ml_club_name = champions[2])
             nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
             medallero[nation.ol_country_name]["P"]+=1
 
             try:
                 country = Nationalteams.objects.get(team_name = champions[3])
             except:
-                country = Olympicplayers.objects.get(ol_player_name = champions[3])
+                try:
+                    country = Olympicplayers.objects.get(ol_player_name = champions[3])
+                except:
+                    country = Mlclubs.objects.get(ml_club_name = champions[3])
             nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
             medallero[nation.ol_country_name]["B"]+=1
         else:
@@ -2133,8 +2254,160 @@ def consultar_medallas_pais_mayor(request):
         )
         
     )
+    tournament_teams = []
+    #Obtener titulos por pais
+    tourament_info = Teamtitleregister.objects.all()
+    for ti in tourament_info:
+        champion = ''
+        not_champion = ''
+        element = ti.title_bracket['Final'][0]
+        print(element)
+        if element['winner'] == element['team1']:
+            champion = element['team1']
+            not_champion = element['team2']
+        else:
+            champion = element['team2']
+            not_champion = element['team1']
+        third_place = ti.title_bracket['Third Place'][0]['winner']
+        tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image, ti.team_sport.team_sport_name))
 
-    general_tot = [general, general_gm]
+    #Obtener titulos por jugadores
+    tourament_info = Playertitleregister.objects.all()
+    for ti in tourament_info:
+        champion = ''
+        not_champion = ''
+        element = ti.title_bracket['Final'][0]
+        print(element)
+        if element['winner'] == element['team1']:
+            champion = element['team1']
+            not_champion = element['team2']
+        else:
+            champion = element['team2']
+            not_champion = element['team1']
+        third_place = ti.title_bracket['Third Place'][0]['winner']
+        tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image,ti.player_trn_sport.player_trn_sport_name))
+
+    #Obtener titulos por clubes
+    tourament_info = Clubtitleregister.objects.exclude(title_bracket__isnull=True)
+    for ti in tourament_info:
+        champion = ''
+        not_champion = ''
+        element = ti.title_bracket['Final'][0]
+        print(element)
+        if element['winner'] == element['team1']:
+            champion = element['team1']
+            not_champion = element['team2']
+        else:
+            champion = element['team2']
+            not_champion = element['team1']
+        third_place = ti.title_bracket['Third Place'][0]['winner']
+        tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image,'Clubes'))
+
+    #Obtener titulos por NBA/MLB
+    tourament_info = Mlclubtitleregister.objects.all()
+    for ti in tourament_info:
+        champion = ''
+        not_champion = ''
+        element = ti.title_bracket['Final'][0]
+        print(element)
+        if element['winner'] == element['team1']:
+            champion = element['team1']
+            not_champion = element['team2']
+        else:
+            champion = element['team2']
+            not_champion = element['team1']
+        third_place = ti.title_bracket['Third Place'][0]['winner']
+        tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image,ti.ml_club.ml_club_type))
+
+    medallero_titulos = defaultdict(lambda: {
+        "oros": 0,
+        "platas": 0,
+        "bronces": 0,
+        "total": 0
+        }
+    )
+
+    print(tournament_teams)
+
+    for champions in tournament_teams:
+        if champions[5] != 'Clubes':
+            try:
+                country = Nationalteams.objects.get(team_name = champions[1])
+            except:
+                try:
+                    country = Olympicplayers.objects.get(ol_player_name = champions[1])
+                except:
+                    country = Mlclubs.objects.get(ml_club_name = champions[1])
+
+            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+            if nation.ol_country_name == pais:
+                medallero_titulos[nation.ol_country_name]["oros"]+=1
+
+            try:
+                country = Nationalteams.objects.get(team_name = champions[2])
+            except:
+                try:
+                    country = Olympicplayers.objects.get(ol_player_name = champions[2])
+                except:
+                    country = Mlclubs.objects.get(ml_club_name = champions[2])
+            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+            if nation.ol_country_name == pais:
+                medallero_titulos[nation.ol_country_name]["platas"]+=1
+
+            try:
+                country = Nationalteams.objects.get(team_name = champions[3])
+            except:
+                try:
+                    country = Olympicplayers.objects.get(ol_player_name = champions[3])
+                except:
+                    country = Mlclubs.objects.get(ml_club_name = champions[3])
+            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+            if nation.ol_country_name == pais:
+                medallero_titulos[nation.ol_country_name]["bronces"]+=1
+        else:
+            country = Clubs.objects.get(club_name = champions[1])
+            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
+            if nation.ol_country_name == pais:
+                medallero_titulos[nation.ol_country_name]["oros"]+=1
+
+            country = Clubs.objects.get(club_name = champions[2])
+            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
+            if nation.ol_country_name == pais:
+                medallero_titulos[nation.ol_country_name]["platas"]+=1
+
+            country = Clubs.objects.get(club_name = champions[3])
+            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
+            if nation.ol_country_name == pais:
+                medallero_titulos[nation.ol_country_name]["bronces"]+=1
+
+        
+    for pais, datos in medallero_titulos.items():
+        datos["total"] = datos["oros"] + datos["platas"] + datos["bronces"]
+
+    medallero_titulos_sorted = sorted(
+        medallero_titulos.items(),
+        key= lambda item:(
+            item[1]['oros'],
+            item[1]['platas'],
+            item[1]['bronces']
+        ),
+        reverse=True
+    )
+
+    resumen = {
+            "oros": sum(datos["oros"] for datos in medallero_titulos.values()),
+            "platas": sum(datos["platas"] for datos in medallero_titulos.values()),
+            "bronces": sum(datos["bronces"] for datos in medallero_titulos.values())
+        }
+
+    resumen["total"] = (
+            resumen["oros"] +
+            resumen["platas"] +
+            resumen["bronces"]
+        )
+
+    medallero_titulos_sorted.append(("TOTAL", resumen))
+    general_tot = [general, general_gm, medallero_titulos[pais]]
 
     general_res = {
         clave: sum(d[clave] for d in general_tot)
@@ -2184,7 +2457,128 @@ def consultar_medallas_pais_mayor(request):
     )
 
     medallero_tot = medallero.union(medallero_gm)
-    return render(request, 'logs/major_country_olympic_search_results.html', {'medallero': medallero_tot, 'nacion': major_country, 'general': general_res})
+    medallero_tot = {
+        fila["deporte"]: {
+            "oros": fila["oros"],
+            "platas": fila["platas"],
+            "bronces": fila["bronces"],
+            "total": fila["total"],
+        }
+        for fila in medallero_tot
+    }
+
+    medallero_deportes = defaultdict(lambda: {
+        "oros": 0,
+        "platas": 0,
+        "bronces": 0,
+        "total": 0
+        }
+    )
+
+    for champions in tournament_teams:
+        sport_name = ''
+        if champions[5] != 'Clubes':
+            try:
+                country = Nationalteams.objects.get(team_name = champions[1])
+                sport = Teamsports.objects.get(team_sport_name = champions[5])
+                sport_name = sport.team_sport_name
+            except:
+                try:
+                    country = Olympicplayers.objects.get(ol_player_name = champions[1])
+                    sport = Playertournamentsports.objects.get(player_trn_sport_name = champions[5])
+                    sport_name = sport.player_trn_sport_name
+                except:
+                    country = Mlclubs.objects.get(ml_club_name = champions[1])
+                    sport_name = country.ml_club_type
+
+            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+            if nation.ol_country_name == pais:
+                medallero_deportes[sport_name]["oros"]+=1
+
+            try:
+                country = Nationalteams.objects.get(team_name = champions[1])
+                sport = Teamsports.objects.get(team_sport_name = champions[5])
+                sport_name = sport.team_sport_name
+            except:
+                try:
+                    country = Olympicplayers.objects.get(ol_player_name = champions[1])
+                    sport = Playertournamentsports.objects.get(player_trn_sport_name = champions[5])
+                    sport_name = sport.player_trn_sport_name
+                except:
+                    country = Mlclubs.objects.get(ml_club_name = champions[1])
+                    sport_name = country.ml_club_type
+
+            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+            if nation.ol_country_name == pais:
+                medallero_deportes[sport_name]["platas"]+=1
+
+            try:
+                country = Nationalteams.objects.get(team_name = champions[1])
+                sport = Teamsports.objects.get(team_sport_name = champions[5])
+                sport_name = sport.team_sport_name
+            except:
+                try:
+                    country = Olympicplayers.objects.get(ol_player_name = champions[1])
+                    sport = Playertournamentsports.objects.get(player_trn_sport_name = champions[5])
+                    sport_name = sport.player_trn_sport_name
+                except:
+                    country = Mlclubs.objects.get(ml_club_name = champions[1])
+                    sport_name = country.ml_club_type
+
+            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+            if nation.ol_country_name == pais:
+                medallero_deportes[sport_name]["bronces"]+=1
+        else:
+            country = Clubs.objects.get(club_name = champions[1])
+            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
+            if nation.ol_country_name == pais:
+                medallero_deportes["Clubes"]["oros"]+=1
+
+            country = Clubs.objects.get(club_name = champions[2])
+            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
+            if nation.ol_country_name == pais:
+                medallero_deportes["Clubes"]["platas"]+=1
+
+            country = Clubs.objects.get(club_name = champions[3])
+            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
+            if nation.ol_country_name == pais:
+                medallero_deportes["Clubes"]["bronces"]+=1
+
+        
+    for pais, datos in medallero_deportes.items():
+        datos["total"] = datos["oros"] + datos["platas"] + datos["bronces"]
+
+    medallero_deportes_sorted = sorted(
+        medallero_deportes.items(),
+        key= lambda item:(
+            item[1]['oros'],
+            item[1]['platas'],
+            item[1]['bronces']
+        ),
+        reverse=True
+    )
+
+
+    medallero_deportes_sorted = dict(medallero_deportes_sorted)
+
+    resultado_final = {**medallero_tot, **medallero_deportes_sorted}
+    for f in resultado_final:
+        print(f)
+
+    resultado_ordenado = dict(
+        sorted(
+            resultado_final.items(),
+            key=lambda item: (
+                item[1]["oros"],
+                item[1]["platas"],
+                item[1]["bronces"]
+            ),
+            reverse=True
+        )
+    )
+
+    
+    return render(request, 'logs/major_country_olympic_search_results.html', {'medallero': resultado_ordenado, 'nacion': major_country, 'general': general_res})
 
 def consultar_por_torneo_olimpico(request):
     deporte = request.GET.get('deporte')
@@ -2371,52 +2765,77 @@ def consultar_rankings(request):
 
         #Si son jugadores
         except Teamsports.DoesNotExist:
-            sport = Playertournamentsports.objects.get(player_trn_sport_name=str(deporte))
-            if str(deporte) not in ['Jenga','Ajedrez','Domino','Parques','Horripicasa','Lucha','Futbol','Baloncesto','Hockey en Piso']:
-                
-                if 'GE-' in str(deporte):
-                    name_game = 'Goldeneye'
-                elif 'SSB-' in str(deporte):
-                    name_game = 'Super Smash'
-                elif 'MK-' in str(deporte):
-                    name_game = 'Mario Kart'
-                
-                id_games = Teamsports.objects.get(team_sport_name = name_game)
-                if name_game == 'Goldeneye':
-                    if 'Teams' in str(deporte):
-                        teams = Olympicplayers.objects.filter(team_sport_id = id_games).filter(ol_player_name__contains = '/').exclude(ol_player_name__contains = '_GE')
+            try:
+                sport = Playertournamentsports.objects.get(player_trn_sport_name=str(deporte))
+                if str(deporte) not in ['Jenga','Ajedrez','Domino','Parques','Horripicasa','Lucha','Futbol','Baloncesto','Hockey en Piso']:
+                    
+                    if 'GE-' in str(deporte):
+                        name_game = 'Goldeneye'
+                    elif 'SSB-' in str(deporte):
+                        name_game = 'Super Smash'
+                    elif 'MK-' in str(deporte):
+                        name_game = 'Mario Kart'
+                    
+                    id_games = Teamsports.objects.get(team_sport_name = name_game)
+                    if name_game == 'Goldeneye':
+                        if 'Teams' in str(deporte):
+                            teams = Olympicplayers.objects.filter(team_sport_id = id_games).filter(ol_player_name__contains = '/').exclude(ol_player_name__contains = '_GE')
+                        else:
+                            teams = Olympicplayers.objects.filter(team_sport_id = id_games).exclude(ol_player_name__contains = '/').exclude(ol_player_name__contains = '_GE')
                     else:
-                        teams = Olympicplayers.objects.filter(team_sport_id = id_games).exclude(ol_player_name__contains = '/').exclude(ol_player_name__contains = '_GE')
+                        teams = Olympicplayers.objects.filter(team_sport_id = id_games)
                 else:
-                    teams = Olympicplayers.objects.filter(team_sport_id = id_games)
-            else:
-                id_munecos = Teamsports.objects.get(team_sport_name = 'Munecos').team_sport_id
-                if str(deporte) in ['Futbol','Baloncesto']:
-                    teams = Olympicplayers.objects.filter(team_sport_id = id_munecos).filter(ol_player_name__contains = '_MN')
-                else:
-                    teams = Olympicplayers.objects.filter(team_sport_id = id_munecos).exclude(ol_player_name__contains = '_MN')
-            for tm in teams:
-                #Victorias, derrotas y empates históricos
-                historic_values = Playertournamentregister.objects.filter(
-                        ol_player_id=tm.ol_player_id,
-                        player_trn_sport_id=sport.player_trn_sport_id
-                    ).aggregate(
-                        total_wins=Coalesce(Sum('ol_player_wins'), 0),
-                        total_draws=Coalesce(Sum('ol_player_draws'), 0),
-                        total_loses=Coalesce(Sum('ol_player_loses'), 0)
-                    )
-                titulos = None
-                try:
-                    titulos = Playertitleregister.objects.filter(ol_player_id = tm.ol_player_id, player_trn_sport_id = sport.player_trn_sport_id)
-                except Playertitleregister.DoesNotExist:
-                    titulos = []
+                    id_munecos = Teamsports.objects.get(team_sport_name = 'Munecos').team_sport_id
+                    if str(deporte) in ['Futbol','Baloncesto']:
+                        teams = Olympicplayers.objects.filter(team_sport_id = id_munecos).filter(ol_player_name__contains = '_MN')
+                    else:
+                        teams = Olympicplayers.objects.filter(team_sport_id = id_munecos).exclude(ol_player_name__contains = '_MN')
+                for tm in teams:
+                    #Victorias, derrotas y empates históricos
+                    historic_values = Playertournamentregister.objects.filter(
+                            ol_player_id=tm.ol_player_id,
+                            player_trn_sport_id=sport.player_trn_sport_id
+                        ).aggregate(
+                            total_wins=Coalesce(Sum('ol_player_wins'), 0),
+                            total_draws=Coalesce(Sum('ol_player_draws'), 0),
+                            total_loses=Coalesce(Sum('ol_player_loses'), 0)
+                        )
+                    titulos = None
+                    try:
+                        titulos = Playertitleregister.objects.filter(ol_player_id = tm.ol_player_id, player_trn_sport_id = sport.player_trn_sport_id)
+                    except Playertitleregister.DoesNotExist:
+                        titulos = []
 
-                title_score = int(titulos.count())*50
-                historic_score = historic_values['total_wins']*15 + historic_values['total_draws']*2 - historic_values['total_loses']*0.5
-                if historic_score <= 0: historic_score = 0
-                final_score = title_score *0.35 + historic_score*0.65
-                table_ranking.append([pos_counter,tm.ol_player_name, tm.ol_country.ol_country_name, round(final_score, 2)])
-                pos_counter += 1
+                    title_score = int(titulos.count())*50
+                    historic_score = historic_values['total_wins']*15 + historic_values['total_draws']*2 - historic_values['total_loses']*0.5
+                    if historic_score <= 0: historic_score = 0
+                    final_score = title_score *0.35 + historic_score*0.65
+                    table_ranking.append([pos_counter,tm.ol_player_name, tm.ol_country.ol_country_name, round(final_score, 2)])
+                    pos_counter += 1
+            except Playertournamentsports.DoesNotExist:
+                teams = Mlclubs.objects.filter(ml_club_type = str(deporte))
+                for tm in teams:
+                    #Victorias, derrotas y empates históricos
+                    historic_values = Mlclubtournamentregister.objects.filter(
+                        ml_club_id=tm.ml_club_id,
+                    ).aggregate(
+                        total_wins=Coalesce(Sum('ml_club_wins'), 0),
+                        total_draws=Coalesce(Sum('ml_club_draws'), 0),
+                        total_loses=Coalesce(Sum('ml_club_loses'), 0)
+                    )
+
+                    titulos = None
+                    try:
+                        titulos = Mlclubtitleregister.objects.filter(ml_club_id = tm.ml_club_id)
+                    except Mlclubtitleregister.DoesNotExist:
+                        titulos = []
+
+                    title_score = int(titulos.count())*50
+                    historic_score = historic_values['total_wins']*15 + historic_values['total_draws']*2 - historic_values['total_loses']*0.5
+                    if historic_score <= 0: historic_score = 0
+                    final_score = title_score *0.35 + historic_score*0.65
+                    table_ranking.append([pos_counter, tm.ml_club_name, tm.ol_country.ol_country_name, round(final_score, 2)])
+                    pos_counter += 1
             
     else:
         teams = Clubs.objects.all()
@@ -2453,7 +2872,7 @@ def consultar_rankings(request):
     return render(request, 'logs/rankings_page_results.html', {'deporte': deporte, 'tabla_ranking': sorted_ranking})
 
 def pagina_importar(request):
-    deportes = Teamsports.objects.filter(team_sport_class__in = ['N'])
+    deportes = Teamsports.objects.filter(team_sport_class__in = ['N']).exclude(team_sport_name = 'Naruto')
     return render(request, 'import/import_page.html',{'deportes': deportes})
 
 def importar_resultados(request):
@@ -2475,7 +2894,7 @@ def importar_resultados(request):
 
     todos_los_resultados = []
 
-    list_games = ['Osu!','Need for Speed','Pokemon Stadium']
+    list_games = ['Osu!','Need for Speed']
     if deporte in list_games:
         if deporte != 'Osu!':
             for bloque in results:
@@ -2637,7 +3056,7 @@ def importar_resultados(request):
                     index += 1
             index = 1
             for r in todos_los_resultados:
-                if index > 174:
+                if index > 175:
                     index = 1
                 print(r)
                 if prueba != 'Osu! Total Score':

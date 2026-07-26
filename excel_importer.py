@@ -57,16 +57,3 @@ class ExcelImporter:
         )
 
         return ranking[:3]
-
-    def medallas_directas(self, tabla):
-        resultados = []
-        for prueba in tabla["headers"]:
-            resultados.append({
-                "year":tabla["year"],
-                "discipline":prueba,
-                "gold":tabla["rows"][0][prueba],
-                "silver":tabla["rows"][1][prueba],
-                "bronze":tabla["rows"][2][prueba]
-            })
-
-        return resultados

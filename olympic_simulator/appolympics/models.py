@@ -367,7 +367,7 @@ class MLclubmatchesregister(models.Model):
 
 class Mlclubtitleregister(models.Model):
     ml_club_title_id = models.BigAutoField(primary_key=True)
-    ml_club = models.ForeignKey(Clubs, models.DO_NOTHING)      
+    ml_club = models.ForeignKey(Mlclubs, models.DO_NOTHING)      
     title_label = models.CharField(max_length=300)  
     title_year = models.CharField(max_length=4)
     title_bracket = models.JSONField()

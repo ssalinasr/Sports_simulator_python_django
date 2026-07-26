@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Registro por Clubes</title>
+    <title>Registro por Clubes NBA/MLB</title>
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -18,6 +18,7 @@
 <body>
     {% include "navbar_template.html" %}
     <div class="container-fluid py-4">
+
         <!-- 2️⃣ EQUIPO -->
         <div class="row league-row">
             <div class="col-12 dashboard-item">
@@ -29,13 +30,13 @@
                             <select class="form-select esports-select" id="clubSelect" name="club">
                                 <option value="">Seleccionar club</option>
                                 {%for club in clubes %}
-                                <option value="{{club.club_name}}">{{club.club_name}}</option>
+                                <option value="{{club.ml_club_name}}">{{club.ml_club_name}}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-md-12 col-12">
-                            <button class="esports-btn justify-content-center" hx-get="{% url 'consultar_por_clubes' %}"
-                                hx-target="#searchResults" hx-include="#sportSelect, #clubSelect">
+                            <button class="esports-btn justify-content-center" hx-get="{% url 'consultar_por_ml_clubes' %}"
+                                hx-target="#searchResults" hx-include="#clubSelect">
                                 <i class="bi bi-people"></i>Consultar club
                             </button>
                         </div>
