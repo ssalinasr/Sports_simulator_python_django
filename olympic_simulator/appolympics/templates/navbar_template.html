@@ -190,9 +190,31 @@
                         <!-- Simulación -->
                         <li class="nav-item">
                             <a class="nav-link {% if request.path == '' %}active{% endif %}"
-                                href="{% url 'pagina_importar' %}">
+                                href="{% url 'pagina_importar_campeones' %}">
                                 <i class="bi bi-arrow-down-square-fill"></i>
                                 Importar Resultados Campeones
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                
+                <!-- ESTADÍSTICAS -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="estadisticasDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+
+                        <i class="bi bi-gem"></i>
+                        Ligas de Diamante
+                    </a>
+
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                        <!-- Simulación -->
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '' %}active{% endif %}"
+                                href="{% url 'pagina_liga_diamante' %}">
+                                <i class="bi bi-diamond-fill"></i>
+                                Importar Ligas de Diamante
                             </a>
                         </li>
                     </ul>

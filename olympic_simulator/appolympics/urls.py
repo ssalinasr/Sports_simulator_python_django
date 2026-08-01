@@ -8,6 +8,7 @@ from .views import pagina_registro_por_club, consultar_por_pais, consultar_por_j
 
 from .views import pagina_records, consultar_records, consultar_medallas_jugador, consultar_medallas_pais, consultar_medallas_pais_mayor, pagina_registro_por_torneo_olimpico, consultar_por_torneo_olimpico
 from .views import pagina_rankings, consultar_rankings, pagina_importar, importar_resultados, pagina_registro_por_torneo_olimpico_importado, consultar_por_torneo_olimpico_importado
+from .views import importar_campeones, pagina_importar_campeones, pagina_liga_diamante, importar_liga_diamante
 
 urlpatterns = [
     path('', pagina_principal , name='pagina_principal'),
@@ -70,7 +71,11 @@ urlpatterns = [
 
     #URLs Importación de resultados#
     path('import/results_import/', pagina_importar, name='pagina_importar'),
-    path('import/results_import/load', importar_resultados, name='importar_resultados')
+    path('import/results_import/load', importar_resultados, name='importar_resultados'),
+    path('import/results_import_champions/', pagina_importar_campeones, name='pagina_importar_campeones'),
+    path('import/results_import_champions/load', importar_campeones, name='importar_campeones'),
+    path('import/results_import_diamonds/', pagina_liga_diamante,  name='pagina_liga_diamante'),
+    path('import/results_import_diamonds/load', importar_liga_diamante, name='importar_liga_diamante')
     ]
 
 

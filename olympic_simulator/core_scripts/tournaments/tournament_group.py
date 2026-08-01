@@ -6,6 +6,7 @@ from core_scripts.interfaces.sports_interfaces import sports_by_ends, sports_by_
 from core_scripts.leagues import league_tools
 from PIL import Image, ImageDraw, ImageFont
 import itertools
+import re
 
 class Tournament():
     def __init__(self, trn_name,sport_name ,teams, ranks, has_double_leg, has_third_place, match_class):
@@ -516,8 +517,8 @@ class Tournament():
                 f"Campeón: {winner}",
                 font=font_title,
                 fill=GOLD)
-
-        path = "media/bracket_"+self.trn_name+".png"
+        year = re.findall(r'\d+', self.trn_name)
+        path = "media/"+str(year[0])+"/bracket_"+self.trn_name+".png"
         img.save(path)
 
         return path

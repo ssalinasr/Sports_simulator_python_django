@@ -70,3 +70,14 @@ class ExcelImporter:
             })
 
         return resultados
+
+    def campeones_directos(self, tabla):
+        resultados = []
+        for prueba in tabla["headers"]:
+            resultados.append({
+                "year":tabla["year"],
+                "discipline":prueba,
+                "champion":tabla["rows"][0][prueba]
+            })
+
+        return resultados

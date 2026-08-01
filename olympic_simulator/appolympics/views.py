@@ -874,13 +874,20 @@ def generar_simulacion_completa(request, match_class):
 
     full_trn.simulate_tournament()
     
-    file_path = os.path.join(settings.MEDIA_ROOT, file_name)
-        # Crear carpeta media si no existe
-    os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+    # Carpeta del año dentro de MEDIA
+    folder_path = os.path.join(settings.MEDIA_ROOT, str(valor_año))
 
+    # Crear la carpeta si no existe
+    os.makedirs(folder_path, exist_ok=True)
+
+    # Ruta completa del archivo
+    file_path = os.path.join(folder_path, file_name)
+
+    # Guardar el Excel
     full_trn.generate_tournament_excel(file_path)
 
-    download_url = settings.MEDIA_URL + file_name
+    # URL de descarga
+    download_url = f"{settings.MEDIA_URL}{valor_año}/{file_name}"
 
     return render(request, "general/generate_download_excel.html", {
         "download_url": download_url
@@ -977,7 +984,7 @@ def generar_simulacion_completa_clubes(request, match_class):
 
     exito = True
     try:
-        with pd.ExcelWriter("media/fase_ligas_"+valor_año+".xlsx") as writer:
+        with pd.ExcelWriter("media/"+valor_año+"/fase_ligas_"+valor_año+".xlsx") as writer:
             for f in rutas:
                 hojas = pd.read_excel(f, sheet_name=None)
                 f = os.path.basename(f)
@@ -993,7 +1000,18 @@ def generar_simulacion_completa_clubes(request, match_class):
         for f in rutas:
             os.remove(f)
 
-    download_url = settings.MEDIA_URL + "fase_ligas_"+valor_año+".xlsx"
+    # Carpeta del año dentro de MEDIA
+    folder_path = os.path.join(settings.MEDIA_ROOT, str(valor_año))
+
+    # Crear la carpeta si no existe
+    os.makedirs(folder_path, exist_ok=True)
+
+    # Ruta completa del archivo
+    file_path = os.path.join(folder_path, file_name)
+
+    # URL de descarga
+    file_name_lg = "fase_ligas_"+valor_año+".xlsx"
+    download_url = f"{settings.MEDIA_URL}{valor_año}/{file_name_lg}"
     download_links.append(download_url)   
     # inicializar 6 listas por continente
     agrupado = {
@@ -1112,10 +1130,20 @@ def generar_simulacion_completa_clubes(request, match_class):
                 full_trn.simulate_tournament()
                 world_qualified_total.extend(full_trn.get_world_qualified())
                 file_name = f"simulacion_{nombre_liga}_{valor_año}.xlsx"       
-                file_path = os.path.join(settings.MEDIA_ROOT, file_name)
-                    # Crear carpeta media si no existe
-                os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
-                download_url = settings.MEDIA_URL + file_name
+                # Carpeta del año dentro de MEDIA
+                folder_path = os.path.join(settings.MEDIA_ROOT, str(valor_año))
+
+                # Crear la carpeta si no existe
+                os.makedirs(folder_path, exist_ok=True)
+
+                # Ruta completa del archivo
+                file_path = os.path.join(folder_path, file_name)
+
+                # Guardar el Excel
+                full_trn.generate_tournament_excel(file_path)
+
+                # URL de descarga
+                download_url = f"{settings.MEDIA_URL}{valor_año}/{file_name}"
                 download_links.append(download_url)
                 full_trn.generate_tournament_excel(file_path)  
 
@@ -1127,12 +1155,20 @@ def generar_simulacion_completa_clubes(request, match_class):
     full_trn = full_tournament_clubs.FullTournamentClubs(world_qualified_total, 'Mundial de Clubes', ranks, 'Futbol Masculino', 8, match_class, valor_año, hay_guardado)
     full_trn.simulate_tournament()
     file_name = f"simulacion_Mundial de Clubes_{valor_año}.xlsx"       
-    file_path = os.path.join(settings.MEDIA_ROOT, file_name)
-        # Crear carpeta media si no existe
-    os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
-    full_trn.generate_tournament_excel(file_path)  
-    
-    download_url = settings.MEDIA_URL + file_name
+    # Carpeta del año dentro de MEDIA
+    folder_path = os.path.join(settings.MEDIA_ROOT, str(valor_año))
+
+    # Crear la carpeta si no existe
+    os.makedirs(folder_path, exist_ok=True)
+
+    # Ruta completa del archivo
+    file_path = os.path.join(folder_path, file_name)
+
+    # Guardar el Excel
+    full_trn.generate_tournament_excel(file_path)
+
+    # URL de descarga
+    download_url = f"{settings.MEDIA_URL}{valor_año}/{file_name}"
     download_links.append(download_url)
 
     download_links = [s.replace("/media/","") for s in download_links]
@@ -1307,7 +1343,12 @@ def consultar_por_pais(request):
 
     titulos = None
     try:
-        titulos = Teamtitleregister.objects.filter(team_id = country.team_id, team_sport_id = sport.team_sport_id)
+        if deporte == 'Futbol Masculino':
+            cn_sport = Teamsports.objects.get(team_sport_name = 'Copa de las Naciones')
+            titulos = Teamtitleregister.objects.filter(team_id = country.team_id, team_sport_id__in = [sport.team_sport_id, cn_sport.team_sport_id])
+
+        else:
+            titulos = Teamtitleregister.objects.filter(team_id = country.team_id, team_sport_id = sport.team_sport_id)
     except Teamtitleregister.DoesNotExist:
         titulos = []
 
@@ -1650,7 +1691,7 @@ def consultar_por_torneo(request):
         try:
 
             hojas = pd.read_excel(
-            "media/simulacion_"+str(deporte)+"_"+str(año)+".xlsx",
+            "media/"+str(año)+"/simulacion_"+str(deporte)+"_"+str(año)+".xlsx",
             sheet_name=None
             )
             for elementos, df in hojas.items():
@@ -1753,12 +1794,12 @@ def consultar_por_torneo(request):
                 hojas = None
                 if sub == 'fase_ligas':
                     hojas = pd.read_excel(
-                    "media/"+str(sub)+"_"+str(año)+".xlsx",
+                    "media/"+str(año)+"/"+str(sub)+"_"+str(año)+".xlsx",
                     sheet_name=None
                     )
                 else:
                     hojas = pd.read_excel(
-                    "media/simulacion_"+str(sub)+"_"+str(año)+".xlsx",
+                    "media/"+str(año)+"/simulacion_"+str(sub)+"_"+str(año)+".xlsx",
                     sheet_name=None
                     )
                 lista_excel.append(hojas)
@@ -2014,13 +2055,20 @@ def generar_simulacion_completa_olimpica(request, match_class):
         file_name = 'simulacion_Juegos_Olimpicos_Invierno_'+str(valor_año)+'.xlsx'
     else:
         file_name = 'simulacion_'+str(categoria)+'_'+str(valor_año)+'.xlsx'
-    file_path = os.path.join(settings.MEDIA_ROOT, file_name)
-        # Crear carpeta media si no existe
-    os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+    # Carpeta del año dentro de MEDIA
+    folder_path = os.path.join(settings.MEDIA_ROOT, str(valor_año))
 
+    # Crear la carpeta si no existe
+    os.makedirs(folder_path, exist_ok=True)
+
+    # Ruta completa del archivo
+    file_path = os.path.join(folder_path, file_name)
+
+    # Guardar el Excel
     full_trn.generate_tournament_excel(file_path)
 
-    download_url = settings.MEDIA_URL + file_name
+    # URL de descarga
+    download_url = f"{settings.MEDIA_URL}{valor_año}/{file_name}"
 
     return render(request, "general/generate_download_excel.html", {
         "download_url": download_url
@@ -2151,7 +2199,7 @@ def consultar_medallas_pais(request):
 
     general = (
         Teammedalregister.objects
-        .filter(team_id= country.team_id)
+        .filter(team_id = country.team_id)
         .aggregate(
             oros=Count('team_medal_id', filter=Q(medal_label='O')),
             platas=Count('team_medal_id', filter=Q(medal_label='P')),
@@ -2161,9 +2209,129 @@ def consultar_medallas_pais(request):
         
     )
 
+    tournament_teams = []
+    #Obtener titulos por pais
+    tourament_info = Teamtitleregister.objects.filter(team_id = country.team_id)
+    for ti in tourament_info:
+        champion = ''
+        not_champion = ''
+        if ti.title_bracket is not None:
+            element = ti.title_bracket['Final'][0]
+            if element['winner'] == element['team1']:
+                champion = element['team1']
+                not_champion = element['team2']
+            else:
+                champion = element['team2']
+                not_champion = element['team1']
+            third_place = ti.title_bracket['Third Place'][0]['winner']
+            tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image, ti.team_sport.team_sport_name))
+
+    #Obtener titulos por clubes
+    tourament_info = Clubtitleregister.objects.exclude(title_bracket__isnull=True).filter(club_id__club_country__team_id = country.team_id)
+    for ti in tourament_info:
+        champion = ''
+        not_champion = ''
+        element = ti.title_bracket['Final'][0]
+        print(element)
+        if element['winner'] == element['team1']:
+            champion = element['team1']
+            not_champion = element['team2']
+        else:
+            champion = element['team2']
+            not_champion = element['team1']
+        third_place = ti.title_bracket['Third Place'][0]['winner']
+        tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image,'Clubes'))
+
+    medallero_titulos = defaultdict(lambda: {
+        "oros": 0,
+        "platas": 0,
+        "bronces": 0,
+        "total": 0
+        }
+    )
+
+    for champions in tournament_teams:
+        if champions[5] != 'Clubes':
+            try:
+                country = Nationalteams.objects.get(team_name = champions[1])
+            except:
+                try:
+                    country = Olympicplayers.objects.get(ol_player_name = champions[1])
+                except:
+                    country = Mlclubs.objects.get(ml_club_name = champions[1])
+
+            if champions[1] == str(pais):
+                medallero_titulos[country.team_name]["oros"]+=1
+
+            try:
+                country = Nationalteams.objects.get(team_name = champions[2])
+            except:
+                try:
+                    country = Olympicplayers.objects.get(ol_player_name = champions[2])
+                except:
+                    country = Mlclubs.objects.get(ml_club_name = champions[2])
+            if champions[2] == str(pais):
+                medallero_titulos[country.team_name]["platas"]+=1
+
+            try:
+                country = Nationalteams.objects.get(team_name = champions[3])
+            except:
+                try:
+                    country = Olympicplayers.objects.get(ol_player_name = champions[3])
+                except:
+                    country = Mlclubs.objects.get(ml_club_name = champions[3])
+            if champions[3] == str(pais):
+                medallero_titulos[country.team_name]["bronces"]+=1
+        else:
+            club = Clubs.objects.get(club_name = champions[1])
+            if club.club_country.team_name == str(pais):
+                medallero_titulos[country.team_name]["oros"]+=1
+
+            club = Clubs.objects.get(club_name = champions[2])
+            if club.club_country.team_name == str(pais):
+                medallero_titulos[country.team_name]["platas"]+=1
+
+            club = Clubs.objects.get(club_name = champions[3])
+            if club.club_country.team_name == str(pais):
+                medallero_titulos[country.team_name]["bronces"]+=1
+
+        
+    for pais, datos in medallero_titulos.items():
+        datos["total"] = datos["oros"] + datos["platas"] + datos["bronces"]
+
+    medallero_titulos_sorted = sorted(
+        medallero_titulos.items(),
+        key= lambda item:(
+            item[1]['oros'],
+            item[1]['platas'],
+            item[1]['bronces']
+        ),
+        reverse=True
+    )
+
+    resumen = {
+            "oros": sum(datos["oros"] for datos in medallero_titulos.values()),
+            "platas": sum(datos["platas"] for datos in medallero_titulos.values()),
+            "bronces": sum(datos["bronces"] for datos in medallero_titulos.values())
+        }
+
+    resumen["total"] = (
+            resumen["oros"] +
+            resumen["platas"] +
+            resumen["bronces"]
+        )
+
+    medallero_titulos_sorted.append(("TOTAL", resumen))
+    general_tot = [general, medallero_titulos[pais]]
+
+    general_res = {
+        clave: sum(d[clave] for d in general_tot)
+        for clave in general_tot[0]
+    }
+
     medallero = (
         Teammedalregister.objects
-        .filter(team_id= country.team_id)
+        .filter(team_id__team_name = str(pais))
         .annotate(deporte=F('sp_record__team_sport__team_sport_name'))
         .values(
             'deporte'
@@ -2182,8 +2350,132 @@ def consultar_medallas_pais(request):
         )
     )
 
-    return render(request, 'logs/country_search_olympic_results.html', {'medallero': medallero, 'pais': country, 'region': region,
-                                                                         'nacion': major_country, 'general': general})
+    medallero_tot = medallero
+    medallero_tot = {
+        fila["deporte"]: {
+            "oros": fila["oros"],
+            "platas": fila["platas"],
+            "bronces": fila["bronces"],
+            "total": fila["total"],
+        }
+        for fila in medallero_tot
+    }
+
+    medallero_deportes = defaultdict(lambda: {
+        "oros": 0,
+        "platas": 0,
+        "bronces": 0,
+        "total": 0
+        }
+    )
+
+    for champions in tournament_teams:
+        sport_name = ''
+        if champions[5] != 'Clubes':
+            try:
+                country = Nationalteams.objects.get(team_name = champions[1])
+                sport = Teamsports.objects.get(team_sport_name = champions[5])
+                sport_name = sport.team_sport_name
+            except:
+                try:
+                    country = Olympicplayers.objects.get(ol_player_name = champions[1])
+                    sport = Playertournamentsports.objects.get(player_trn_sport_name = champions[5])
+                    sport_name = sport.player_trn_sport_name
+                except:
+                    country = Mlclubs.objects.get(ml_club_name = champions[1])
+                    sport_name = country.ml_club_type
+
+            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+            if champions[1] == str(pais):
+                print('here oro')
+                medallero_deportes[sport_name]["oros"]+=1
+
+            try:
+                country = Nationalteams.objects.get(team_name = champions[2])
+                sport = Teamsports.objects.get(team_sport_name = champions[5])
+                sport_name = sport.team_sport_name
+            except:
+                try:
+                    country = Olympicplayers.objects.get(ol_player_name = champions[2])
+                    sport = Playertournamentsports.objects.get(player_trn_sport_name = champions[5])
+                    sport_name = sport.player_trn_sport_name
+                except:
+                    country = Mlclubs.objects.get(ml_club_name = champions[2])
+                    sport_name = country.ml_club_type
+
+            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+            if champions[2] == str(pais):
+                print('here plata')
+                medallero_deportes[sport_name]["platas"]+=1
+
+            try:
+                country = Nationalteams.objects.get(team_name = champions[3])
+                sport = Teamsports.objects.get(team_sport_name = champions[5])
+                sport_name = sport.team_sport_name
+            except:
+                try:
+                    country = Olympicplayers.objects.get(ol_player_name = champions[3])
+                    sport = Playertournamentsports.objects.get(player_trn_sport_name = champions[5])
+                    sport_name = sport.player_trn_sport_name
+                except:
+                    country = Mlclubs.objects.get(ml_club_name = champions[3])
+                    sport_name = country.ml_club_type
+
+            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
+            if champions[3] == str(pais):
+                print('here bronce')
+                medallero_deportes[sport_name]["bronces"]+=1
+        else:
+            country = Clubs.objects.get(club_name = champions[1])
+            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
+            if club.club_country.team_name == str(pais):
+                medallero_deportes["Clubes"]["oros"]+=1
+
+            country = Clubs.objects.get(club_name = champions[2])
+            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
+            if club.club_country.team_name == str(pais):
+                medallero_deportes["Clubes"]["platas"]+=1
+
+            country = Clubs.objects.get(club_name = champions[3])
+            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
+            if club.club_country.team_name == str(pais):
+                medallero_deportes["Clubes"]["bronces"]+=1
+
+    for pais, datos in medallero_deportes.items():
+        datos["total"] = datos["oros"] + datos["platas"] + datos["bronces"]
+
+    
+    medallero_deportes_sorted = sorted(
+        medallero_deportes.items(),
+        key= lambda item:(
+            item[1]['oros'],
+            item[1]['platas'],
+            item[1]['bronces']
+        ),
+        reverse=True
+    )
+    medallero_deportes_sorted = dict(medallero_deportes_sorted)
+
+    resultado_final = {**medallero_tot, **medallero_deportes_sorted}
+    print('Resultado_final')
+    print(resultado_final)
+    for f in resultado_final:
+        print(f)
+
+    resultado_ordenado = dict(
+        sorted(
+            resultado_final.items(),
+            key=lambda item: (
+                item[1]["oros"],
+                item[1]["platas"],
+                item[1]["bronces"]
+            ),
+            reverse=True
+        )
+    )
+
+    return render(request, 'logs/country_search_olympic_results.html', {'medallero': resultado_ordenado, 'pais': country, 'region': region,
+                                                                         'nacion': major_country, 'general': general_res})
 
 def consultar_medallas_jugador(request):
     jugador = request.GET.get('jugador')
@@ -2260,16 +2552,17 @@ def consultar_medallas_pais_mayor(request):
     for ti in tourament_info:
         champion = ''
         not_champion = ''
-        element = ti.title_bracket['Final'][0]
-        print(element)
-        if element['winner'] == element['team1']:
-            champion = element['team1']
-            not_champion = element['team2']
-        else:
-            champion = element['team2']
-            not_champion = element['team1']
-        third_place = ti.title_bracket['Third Place'][0]['winner']
-        tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image, ti.team_sport.team_sport_name))
+        if ti.title_bracket is not None:
+            element = ti.title_bracket['Final'][0]
+            print(element)
+            if element['winner'] == element['team1']:
+                champion = element['team1']
+                not_champion = element['team2']
+            else:
+                champion = element['team2']
+                not_champion = element['team1']
+            third_place = ti.title_bracket['Third Place'][0]['winner']
+            tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image, ti.team_sport.team_sport_name))
 
     #Obtener titulos por jugadores
     tourament_info = Playertitleregister.objects.all()
@@ -2496,16 +2789,16 @@ def consultar_medallas_pais_mayor(request):
                 medallero_deportes[sport_name]["oros"]+=1
 
             try:
-                country = Nationalteams.objects.get(team_name = champions[1])
+                country = Nationalteams.objects.get(team_name = champions[2])
                 sport = Teamsports.objects.get(team_sport_name = champions[5])
                 sport_name = sport.team_sport_name
             except:
                 try:
-                    country = Olympicplayers.objects.get(ol_player_name = champions[1])
+                    country = Olympicplayers.objects.get(ol_player_name = champions[2])
                     sport = Playertournamentsports.objects.get(player_trn_sport_name = champions[5])
                     sport_name = sport.player_trn_sport_name
                 except:
-                    country = Mlclubs.objects.get(ml_club_name = champions[1])
+                    country = Mlclubs.objects.get(ml_club_name = champions[2])
                     sport_name = country.ml_club_type
 
             nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
@@ -2513,16 +2806,16 @@ def consultar_medallas_pais_mayor(request):
                 medallero_deportes[sport_name]["platas"]+=1
 
             try:
-                country = Nationalteams.objects.get(team_name = champions[1])
+                country = Nationalteams.objects.get(team_name = champions[3])
                 sport = Teamsports.objects.get(team_sport_name = champions[5])
                 sport_name = sport.team_sport_name
             except:
                 try:
-                    country = Olympicplayers.objects.get(ol_player_name = champions[1])
+                    country = Olympicplayers.objects.get(ol_player_name = champions[3])
                     sport = Playertournamentsports.objects.get(player_trn_sport_name = champions[5])
                     sport_name = sport.player_trn_sport_name
                 except:
-                    country = Mlclubs.objects.get(ml_club_name = champions[1])
+                    country = Mlclubs.objects.get(ml_club_name = champions[3])
                     sport_name = country.ml_club_type
 
             nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
@@ -2592,7 +2885,7 @@ def consultar_por_torneo_olimpico(request):
     try:
         if str(deporte) == 'jo_verano':
             hojas = pd.read_excel(
-            "media/simulacion_Juegos_Olimpicos_Verano_"+str(año)+".xlsx",
+            "media/"+str(año)+"/simulacion_Juegos_Olimpicos_Verano_"+str(año)+".xlsx",
             sheet_name=None
             )
         elif str(deporte) == 'jo_invierno':
@@ -2875,6 +3168,129 @@ def pagina_importar(request):
     deportes = Teamsports.objects.filter(team_sport_class__in = ['N']).exclude(team_sport_name = 'Naruto')
     return render(request, 'import/import_page.html',{'deportes': deportes})
 
+def pagina_importar_campeones(request):
+    deportes = Teamsports.objects.filter(team_sport_class__in = ['N'], team_sport_name__in = ['Naruto','Copa de las Naciones'])
+    return render(request, 'import/import_champions_page.html',{'deportes': deportes})
+
+def importar_campeones(request):
+    deporte = request.GET.get('deporte')
+    filepath = "media/resultados_"+str(deporte)+".xlsx"
+    print(deporte)
+    importer = None
+    try:
+        sport_check = Teamsports.objects.get(team_sport_name = deporte)
+    except:
+        sport_check = Playertournamentsports.objects.get (player_trn_sport_name = deporte)
+    try:
+        importer = excel_importer.ExcelImporter(filepath)
+    except FileNotFoundError:
+        message = 'No existe archivo para el deporte '+str(deporte)
+        return render(request, "general/import_response.html", {
+        "message": message
+        })
+    results = importer.read()
+    #direct_medals = importer.medallas_directas(results)
+    champions_by_year = []
+
+    if deporte == 'Naruto':
+        print('NARUTO')
+        for bloque in results:
+            direct_medals = importer.medallas_directas(bloque)
+            champions_by_year.append(direct_medals)
+        
+        for cy in champions_by_year:
+                for individual_trn in cy:
+                    print(individual_trn)
+                    team_obj = Olympicplayers.objects.get(ol_player_name = individual_trn['gold'])
+                    sport = Sportsrecords.objects.get(sp_record_name = individual_trn['discipline'])
+                    try:
+                        existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = str(individual_trn['year']))
+                        existing_log.ol_player_id = team_obj.ol_player_id
+                        existing_log.medal_label = 'O'
+                        existing_log.medal_year = individual_trn['year']
+                        existing_log.sp_record = sport
+                        existing_log.save()
+                    except Playermedalregister.DoesNotExist:
+                        title_label = 'O'
+                        title_element = Playermedalregister(
+                            ol_player_id = team_obj.ol_player_id,
+                            medal_label = title_label,
+                            medal_year = individual_trn['year'],
+                            sp_record_id = sport.sp_record_id
+                        )
+                        title_element.save()
+
+                    team_obj = Olympicplayers.objects.get(ol_player_name = individual_trn['silver'])
+                    sport = Sportsrecords.objects.get(sp_record_name = individual_trn['discipline'])
+                    try:
+                        existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = str(individual_trn['year']))
+                        existing_log.ol_player_id = team_obj.ol_player_id
+                        existing_log.medal_label = 'P'
+                        existing_log.medal_year = individual_trn['year']
+                        existing_log.sp_record = sport
+                        existing_log.save()
+                    except Playermedalregister.DoesNotExist:
+                        title_label = 'P'
+                        title_element = Playermedalregister(
+                            ol_player_id = team_obj.ol_player_id,
+                            medal_label = title_label,
+                            medal_year = individual_trn['year'],
+                            sp_record_id = sport.sp_record_id
+                        )
+                        title_element.save()
+
+                    team_obj = Olympicplayers.objects.get(ol_player_name = individual_trn['bronze'])
+                    sport = Sportsrecords.objects.get(sp_record_name = individual_trn['discipline'])
+                    try:
+                        existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = str(individual_trn['year']))
+                        existing_log.ol_player_id = team_obj.ol_player_id
+                        existing_log.medal_label = 'B'
+                        existing_log.medal_year = individual_trn['year']
+                        existing_log.sp_record = sport
+                        existing_log.save()
+                    except Playermedalregister.DoesNotExist:
+                        title_label = 'B'
+                        title_element = Playermedalregister(
+                            ol_player_id = team_obj.ol_player_id,
+                            medal_label = title_label,
+                            medal_year = individual_trn['year'],
+                            sp_record_id = sport.sp_record_id
+                        )
+                        title_element.save()
+    else:
+        print('HERE')
+        for bloque in results:
+            direct_champions = importer.campeones_directos(bloque)
+            champions_by_year.append(direct_champions)
+
+        for cy in champions_by_year:
+                for individual_trn in cy:
+                    print(individual_trn)
+                    team_obj = Nationalteams.objects.get(team_name = individual_trn['champion'])
+                    sport = Teamsports.objects.get(team_sport_name = str(deporte))
+                    try:
+                        existing_log = Teamtitleregister.objects.get(team_id = team_obj.team_id, team_sport_id = sport.team_sport_id, title_year = str(individual_trn['year']))
+                        existing_log.team_id = team_obj.team_id
+                        existing_log.title_label = individual_trn['discipline']
+                        existing_log.title_year = individual_trn['year']
+                        existing_log.team_sport = sport
+                        existing_log.save()
+                    except Teamtitleregister.DoesNotExist:
+                        title_label = individual_trn['discipline']
+                        title_element = Teamtitleregister(
+                            team_id = team_obj.team_id,
+                            title_label = title_label,
+                            title_year = individual_trn['year'],
+                            team_sport_id = sport.team_sport_id
+                        )
+                        title_element.save()
+
+    message = 'Los resultados para el deporte '+str(deporte)+' han sido guardados correctamente.'
+    return render(request, "import/import_champions_response.html", {
+        "message": message
+    })
+
+
 def importar_resultados(request):
     deporte = request.GET.get('deporte')
     filepath = "media/resultados_"+str(deporte)+".xlsx"
@@ -3010,6 +3426,7 @@ def importar_resultados(request):
                 for prueba in pruebas:
                     if prueba != 'Osu! Total Score':
                         sport = Sportsrecords.objects.get(sp_record_name = 'Osu! Song '+str(index))
+                        index += 1
                     else: 
                         sport = Sportsrecords.objects.get(sp_record_name = prueba)
                     if sport.sport_sort == 'D':
@@ -3053,7 +3470,6 @@ def importar_resultados(request):
                                 sp_record = sport
                             )
                             tournament_element.save()
-                    index += 1
             index = 1
             for r in todos_los_resultados:
                 if index > 175:
@@ -3061,6 +3477,7 @@ def importar_resultados(request):
                 print(r)
                 if prueba != 'Osu! Total Score':
                     sport = Sportsrecords.objects.get(sp_record_name = 'Osu! Song '+str(index))
+                    index += 1
                 else: 
                     sport = Sportsrecords.objects.get(sp_record_name = r['discipline'])
                 team_obj = Olympicplayers.objects.filter(ol_player_name = r['gold']['participant']).first()
@@ -3116,7 +3533,7 @@ def importar_resultados(request):
                         sp_record_id = sport.sp_record_id
                     )
                     title_element.save()
-                index += 1
+               
     else:
         for bloque in results:
             year = bloque["year"]
@@ -3223,7 +3640,7 @@ def importar_resultados(request):
 
         
     message = 'Los resultados para el deporte '+str(deporte)+' han sido guardados correctamente.'
-    return render(request, "general/import_response.html", {
+    return render(request, "import/import_response.html", {
         "message": message
     })
 
@@ -3242,6 +3659,8 @@ def consultar_por_torneo_olimpico_importado(request):
         tournament_ids.append(d.sp_record_id)
 
     results = Playersimulationregister.objects.filter(sp_record_id__in = tournament_ids, ol_player_year=str(valor_anio)).order_by('sp_record_id')
+    if deporte == 'Naruto':
+        results = Playermedalregister.objects.filter(sp_record_id__in = tournament_ids, medal_year=str(valor_anio)).order_by('sp_record_id')
     print(results)
 
     for d in disciplines:
@@ -3252,7 +3671,10 @@ def consultar_por_torneo_olimpico_importado(request):
             rule = False
         for res in results:
             if d.sp_record_id == res.sp_record.sp_record_id:
-                tournament_disc.append((res.ol_player.ol_player_name, float(res.ol_player_result)))
+                if deporte == 'Naruto':
+                    tournament_disc.append((res.ol_player.ol_player_name, 0.0))
+                else:
+                    tournament_disc.append((res.ol_player.ol_player_name, float(res.ol_player_result)))
     
         tournament_disc.sort(
             key=lambda x: x[1],
@@ -3314,3 +3736,10 @@ def consultar_por_torneo_olimpico_importado(request):
     return render(request, 'logs/tournament_olympic_imported_search_results.html', {'tablas_torneo': tournament_data, 'disciplinas_torneo': tournament_disciplines, 
                                                                            'cant_equipos': range(len(tournament_disciplines)),
                                                                           'medallero': medallero_sorted})
+
+
+def pagina_liga_diamante(request):
+    HttpResponse("")
+
+def importar_liga_diamante(request):
+    HttpResponse("")                                                            
