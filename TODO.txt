@@ -13,5 +13,8 @@ Añadir NBA, MLB como deportes de torneo + sus equipos actualizados (DONE)
 Ajustar Pokemon Stadium como deporte simulado, no como importado (DONE)
 Añadir medallas de clubes a Medalleros generales + NBA y MLB (Añadir estos a registro por torneo) - ES LA MISMA FUNCIÓN DE REGISTRO POR TORNEO PERO INTEGRADA AL MEDALLERO GENERAL (DONE)
 
-Añadir Importación de resultados por únicamente campeones (Naruto, Copa de las Naciones, Ligas de Diamante) -> Hace Falta
+Añadir Importación de resultados por únicamente campeones (Naruto, Copa de las Naciones, Ligas de Diamante) -> (NARUTO DONE, CN DONE, DIAMOND DONE)
+
+
 Añadir Exportación a Archivo Word (Junta torneo + ligas por deporte)
+

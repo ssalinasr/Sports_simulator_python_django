@@ -3739,7 +3739,202 @@ def consultar_por_torneo_olimpico_importado(request):
 
 
 def pagina_liga_diamante(request):
-    HttpResponse("")
+    years = range(1880,3100,4*12)
+    return render(request, 'logs/diamond_register_page.html',{'years': years})
 
 def importar_liga_diamante(request):
-    HttpResponse("")                                                            
+    valor_anio = request.GET.get('valoryear')
+    filepath = "media/resultados_ligas_diamante_"+str(valor_anio)+".xlsx"
+    importer = None
+    try:
+        importer = excel_importer.ExcelImporter(filepath)
+    except FileNotFoundError:
+        message = 'No existe archivo para las ligas de diamante.'
+        return render(request, "import/import_response.html", {
+        "message": message
+        })
+    results = importer.read()
+    #direct_medals = importer.medallas_directas(results)
+    champions_by_year = []
+
+    for bloque in results:
+        direct_medals = importer.campeones_directos(bloque)
+        champions_by_year.append(direct_medals)
+
+    sport_flag = 'T' #T:Torneo, L:Liga
+    player_flag = 'P' #P:Paises, J:Jugadores, C:CLubes, M:NBA/MLB
+
+    print(champions_by_year)
+
+    
+    for cy in champions_by_year:
+            for individual_trn in cy:
+                print(individual_trn)
+                try:
+                    team_obj = Nationalteams.objects.get(team_name = individual_trn['champion'])
+                    player_flag = 'P'
+                except ObjectDoesNotExist:
+                    try:
+                        team_obj = Olympicplayers.objects.get(ol_player_name = individual_trn['champion'])
+                        player_flag = 'J'
+                    except ObjectDoesNotExist:
+                        try:
+                            team_obj = Clubs.objects.get(club_name = individual_trn['champion'])
+                            player_flag = 'C'
+                        except ObjectDoesNotExist:
+                            team_obj = Mlclubs.objects.get(ml_club_name = individual_trn['champion'])
+                            player_flag = 'M'
+
+                try:
+                    sport = Teamsports.objects.get(team_sport_name = individual_trn['discipline'])
+                    sport_flag = 'T'
+                except ObjectDoesNotExist:
+                    try:
+                        sport = Playertournamentsports.objects.get(player_trn_sport_name = individual_trn['discipline'])
+                        sport_flag = 'T'
+                    except ObjectDoesNotExist:
+                        try:
+                            sport = Sportsrecords.objects.get(sp_record_name = individual_trn['discipline'])
+                            sport_flag = 'L'
+                        except ObjectDoesNotExist:
+                            sport_flag = 'T' # Clubes o MLB/NBA      
+
+                if player_flag == 'P':
+                    if sport_flag == 'L':
+                        try:
+                            existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = str(individual_trn['year']))
+                            existing_log.team_id = team_obj.team_id
+                            existing_log.medal_label = 'D'
+                            existing_log.medal_year = individual_trn['year']
+                            existing_log.sp_record = sport
+                            existing_log.save()
+                        except Teammedalregister.DoesNotExist:
+                            title_label = 'D'
+                            title_element = Teammedalregister(
+                                team_id = team_obj.team_id,
+                                medal_label = title_label,
+                                medal_year = individual_trn['year'],
+                                sp_record_id = sport.sp_record_id
+                            )
+                            title_element.save()
+                    else:
+                        try:
+                            existing_log = Teamtitleregister.objects.get(team_id = team_obj.team_id, team_sport = sport.team_sport_id, title_year = str(individual_trn['year']))
+                            existing_log.team_id = team_obj.team_id
+                            existing_log.title_label = 'Liga de diamante '+str(valor_anio)
+                            existing_log.title_year = individual_trn['year']
+                            existing_log.team_sport = sport
+                            existing_log.save()
+                        except Teamtitleregister.DoesNotExist:
+                            title_label = 'Liga de diamante '+str(valor_anio)
+                            title_element = Teamtitleregister(
+                                team_id = team_obj.team_id,
+                                title_label = title_label,
+                                title_year = individual_trn['year'],
+                                team_sport_id = sport.team_sport_id
+                            )
+                            title_element.save()
+                elif player_flag == 'J':
+                    if sport_flag == 'L':
+                        try:
+                            existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = str(individual_trn['year']))
+                            existing_log.ol_player_id = team_obj.ol_player_id
+                            existing_log.medal_label = 'D'
+                            existing_log.medal_year = individual_trn['year']
+                            existing_log.sp_record = sport
+                            existing_log.save()
+                        except Playermedalregister.DoesNotExist:
+                            title_label = 'D'
+                            title_element = Playermedalregister(
+                                ol_player_id = team_obj.ol_player_id,
+                                medal_label = title_label,
+                                medal_year = individual_trn['year'],
+                                sp_record_id = sport.sp_record_id
+                            )
+                            title_element.save()
+                    else:
+                        try:
+                            existing_log = Playertitleregister.objects.get(ol_player_id = team_obj.ol_player_id, player_trn_sport = sport.player_trn_sport_id, title_year = str(individual_trn['year']))
+                            existing_log.ol_player_id = team_obj.ol_player_id
+                            existing_log.title_label = 'Liga de diamante '+str(valor_anio)
+                            existing_log.title_year = individual_trn['year']
+                            existing_log.player_trn_sport = sport
+                            existing_log.save()
+                        except Playertitleregister.DoesNotExist:
+                            title_label = 'Liga de diamante '+str(valor_anio)
+                            title_element = Playertitleregister(
+                                ol_player_id = team_obj.ol_player_id,
+                                title_label = title_label,
+                                title_year = individual_trn['year'],
+                                player_trn_sport_id = sport.player_trn_sport_id
+                            )
+                            title_element.save()
+
+                    pass
+                elif player_flag == 'C':
+                    try:
+                        existing_log = Clubtitleregister.objects.get(club_id = team_obj.club_id, title_year = str(individual_trn['year']))
+                        existing_log.club_id = team_obj.club_id
+                        existing_log.title_label ='Liga de diamante '+str(valor_anio)
+                        existing_log.title_year = individual_trn['year']
+                        existing_log.save()
+                    except Clubtitleregister.DoesNotExist:
+                        title_label = 'Liga de diamante '+str(valor_anio)
+                        title_element = Clubtitleregister(
+                            club_id = team_obj.club_id,
+                            title_label = title_label,
+                            title_year = individual_trn['year']
+                        )
+                        title_element.save()
+                elif player_flag == 'M':
+                    try:
+                        existing_log = Mlclubtitleregister.objects.get(ml_club_id = team_obj.ml_club_id, title_year = str(individual_trn['year']))
+                        existing_log.ml_club_id = team_obj.ml_club_id
+                        existing_log.title_label = 'Liga de diamante '+str(valor_anio)
+                        existing_log.title_year = individual_trn['year']
+                        existing_log.save()
+                    except Mlclubtitleregister.DoesNotExist:
+                        title_label = 'Liga de diamante '+str(valor_anio)
+                        title_element = Mlclubtitleregister(
+                            ml_club_id = team_obj.ml_club_id,
+                            title_label = title_label,
+                            title_year = individual_trn['year']
+                        )
+                        title_element.save()
+                    pass
+    
+    message = 'Los resultados para la liga de diamante del año '+str(valor_anio)+' han sido guardados correctamente.'
+    return render(request, "import/import_response.html", {
+        "message": message
+    })                                                          
+
+
+def pagina_exportar_word(request):
+    years = range(1880,3100,4)
+    return render(request, 'export/export_olympic_word.html',{'years': years})
+
+def exportar_word(request):
+    year = request.GET.get('valoryear')
+    print(year)
+    all_tournaments = Teamsports.objects.all()
+    all_play_tournaments = Playertournamentsports.objects.all()
+    all_sports_records = Sportsrecords.objects.all()
+
+    print([at.team_sport_name for at in all_tournaments])
+    print()
+    print([ap.player_trn_sport_name for ap in all_play_tournaments])
+    print()
+    print([ar.sp_record_name for ar in all_sports_records])
+
+    sports_dict = defaultdict(
+        lambda:{
+            "nombre_deporte": '',
+            "torneos_deporte": [],
+            "ligas_deporte": [],
+            "color_deporte": ''
+        }
+    )
+
+    return HttpResponse("")
+
+    

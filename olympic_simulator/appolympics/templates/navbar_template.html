@@ -220,6 +220,14 @@
                     </ul>
                 </li>
 
+            <!-- Exportación Word -->
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '' %}active{% endif %}"
+                        href="{% url 'pagina_exportar_word' %}">
+                        <i class="bi bi-file-earmark-arrow-up"></i>
+                        Exportar a Word
+                    </a>
+                </li>
 
             </ul>
         </div>
