@@ -685,7 +685,7 @@ def generar_torneo(request, match_class):
 
 def pagina_simulacion_completa(request, match_class):
     request.session.flush()
-    years = range(1880,2400,4)
+    years = range(1880,3100,4)
     page_groups = []
     page_teams = []
     page_sports = []
@@ -788,11 +788,11 @@ def generar_simulacion_completa(request, match_class):
         id_munecos = Teamsports.objects.get(team_sport_name = name_mun).team_sport_id
 
         if "GE" in deporte.player_trn_sport_name:
-            id_games_query = Teamsports.objects.get(team_sport_name = list_games[0])
+            id_games_query = Teamsports.objects.get(team_sport_name = list_games[1])
             equipos = equipos.filter(team_sport_id = id_games_query)
             num_groups = 2
         elif "SSB" in deporte.player_trn_sport_name:
-            id_games_query = Teamsports.objects.get(team_sport_name = list_games[1])
+            id_games_query = Teamsports.objects.get(team_sport_name = list_games[0])
             equipos = equipos.filter(team_sport_id = id_games_query)
             num_groups = 8
         elif "MK" in deporte.player_trn_sport_name:
@@ -872,13 +872,13 @@ def generar_simulacion_completa(request, match_class):
             rank_tuple = (eq.team_name, rank.team_rank)
             ranks.append(rank_tuple)
 
-    full_trn.simulate_tournament()
-    
     # Carpeta del año dentro de MEDIA
     folder_path = os.path.join(settings.MEDIA_ROOT, str(valor_año))
-
     # Crear la carpeta si no existe
     os.makedirs(folder_path, exist_ok=True)
+    full_trn.simulate_tournament()
+    
+
 
     # Ruta completa del archivo
     file_path = os.path.join(folder_path, file_name)
@@ -896,7 +896,7 @@ def generar_simulacion_completa(request, match_class):
 def pagina_simulacion_completa_clubes(request, match_class):
     request.session.flush()
 
-    years = range(1880,2400,4)
+    years = range(1880,3100,4)
     page_groups = []
     page_teams = []
     page_sports = []
@@ -1256,7 +1256,7 @@ def pagina_registro_por_pais_mayor(request):
 def pagina_registro_por_torneo(request):
     sports = Teamsports.objects.filter(~Q(team_sport_name__icontains = 'Mario'), team_sport_class = 'T')
     sports_players = Playertournamentsports.objects.all()
-    years = range(1880,2400,4)
+    years = range(1880,3100,4)
     return render(request, 'logs/tournament_register_page.html', {'years': years, 'deportes': sports, 'deportes_jug': sports_players})
 
 def pagina_registro_por_torneo_olimpico(request):
@@ -1265,12 +1265,12 @@ def pagina_registro_por_torneo_olimpico(request):
     sports_categories = Teamsports.objects.filter(team_sport_id__in = list_of_ids)
     sports_mun = Teamsports.objects.filter(team_sport_id = 46)
     sports_general = sports_categories.union(sports_mun)
-    years = range(1880,2400,4)
+    years = range(1880,3100,4)
     return render(request, 'logs/tournament_olympic_register_page.html', {'years': years, 'deportes': sports_general})
 
 def pagina_registro_por_torneo_olimpico_importado(request):
-    sports_general = Teamsports.objects.filter(team_sport_class='N')
-    years = range(1880,2400,4)
+    sports_general = Teamsports.objects.filter(team_sport_class='N').exclude(team_sport_name = 'Copa de las Naciones')
+    years = range(1880,3100,4)
     return render(request, 'logs/tournament_olympic_register_imported_page.html', {'years': years, 'deportes': sports_general})
 
 def pagina_registro_por_club(request):
@@ -1947,7 +1947,7 @@ def consultar_por_torneo(request):
 
 def pagina_simulacion_completa_olimpica(request, match_class):
     request.session.flush()
-    years = range(1880,2400,4)
+    years = range(1880,3100,4)
     sports_categories = []
     sports = []
     list_of_ex = list(range(39,47))
@@ -3165,11 +3165,11 @@ def consultar_rankings(request):
     return render(request, 'logs/rankings_page_results.html', {'deporte': deporte, 'tabla_ranking': sorted_ranking})
 
 def pagina_importar(request):
-    deportes = Teamsports.objects.filter(team_sport_class__in = ['N']).exclude(team_sport_name = 'Naruto')
+    deportes = Teamsports.objects.filter(team_sport_class__in = ['N']).exclude(team_sport_name = 'Naruto').exclude(team_sport_name = 'Pro Cycling Manager')
     return render(request, 'import/import_page.html',{'deportes': deportes})
 
 def pagina_importar_campeones(request):
-    deportes = Teamsports.objects.filter(team_sport_class__in = ['N'], team_sport_name__in = ['Naruto','Copa de las Naciones'])
+    deportes = Teamsports.objects.filter(team_sport_class__in = ['N'], team_sport_name__in = ['Naruto','Pro Cycling Manager','Copa de las Naciones'])
     return render(request, 'import/import_champions_page.html',{'deportes': deportes})
 
 def importar_campeones(request):
@@ -3192,8 +3192,7 @@ def importar_campeones(request):
     #direct_medals = importer.medallas_directas(results)
     champions_by_year = []
 
-    if deporte == 'Naruto':
-        print('NARUTO')
+    if deporte in ['Naruto','Pro Cycling Manager']:
         for bloque in results:
             direct_medals = importer.medallas_directas(bloque)
             champions_by_year.append(direct_medals)
@@ -3659,7 +3658,7 @@ def consultar_por_torneo_olimpico_importado(request):
         tournament_ids.append(d.sp_record_id)
 
     results = Playersimulationregister.objects.filter(sp_record_id__in = tournament_ids, ol_player_year=str(valor_anio)).order_by('sp_record_id')
-    if deporte == 'Naruto':
+    if deporte in ['Naruto','Pro Cycling Manager']:
         results = Playermedalregister.objects.filter(sp_record_id__in = tournament_ids, medal_year=str(valor_anio)).order_by('sp_record_id')
     print(results)
 
@@ -3671,8 +3670,8 @@ def consultar_por_torneo_olimpico_importado(request):
             rule = False
         for res in results:
             if d.sp_record_id == res.sp_record.sp_record_id:
-                if deporte == 'Naruto':
-                    tournament_disc.append((res.ol_player.ol_player_name, 0.0))
+                if deporte in ['Naruto','Pro Cycling Manager']:
+                    tournament_disc.append((res.ol_player.ol_player_name, '---'))
                 else:
                     tournament_disc.append((res.ol_player.ol_player_name, float(res.ol_player_result)))
     
@@ -3698,11 +3697,11 @@ def consultar_por_torneo_olimpico_importado(request):
         medals_table = Playermedalregister.objects.filter(sp_record = d.sp_record_id, medal_year = str(valor_anio))
         for m in medals_table:
             if m.medal_label == 'O':
-                medallero[m.ol_player.ol_player_name]["O"]+=1
+                medallero[m.ol_player.ol_country.ol_country_name]["O"]+=1
             elif m.medal_label == 'P':
-                medallero[m.ol_player.ol_player_name]["P"]+=1
+                medallero[m.ol_player.ol_country.ol_country_name]["P"]+=1
             elif m.medal_label == 'B':
-                medallero[m.ol_player.ol_player_name]["B"]+=1
+                medallero[m.ol_player.ol_country.ol_country_name]["B"]+=1
     
     for pais, datos in medallero.items():
         datos["Total"] = datos["O"] + datos["P"] + datos["B"]
@@ -3920,11 +3919,6 @@ def exportar_word(request):
     all_play_tournaments = Playertournamentsports.objects.all()
     all_sports_records = Sportsrecords.objects.all()
 
-    print([at.team_sport_name for at in all_tournaments])
-    print()
-    print([ap.player_trn_sport_name for ap in all_play_tournaments])
-    print()
-    print([ar.sp_record_name for ar in all_sports_records])
 
     sports_dict = defaultdict(
         lambda:{
@@ -3934,6 +3928,27 @@ def exportar_word(request):
             "color_deporte": ''
         }
     )
+
+    for at in all_tournaments:
+        sports_dict[at.team_sport_name]["nombre_deporte"]=at.team_sport_name
+        sports_dict[at.team_sport_name]["torneos_deporte"]=[at]
+        sports_dict[at.team_sport_name]["color_deporte"]=at.team_sport_color
+        try:
+            at_curr_sports = all_sports_records.filter(team_sport_id = at.team_sport_id)
+            sports_dict[at.team_sport_name]["ligas_deporte"]=[atc for atc in at_curr_sports]
+        except ObjectDoesNotExist:
+            sports_dict[at.team_sport_name]["ligas_deporte"]=[]
+
+        try:
+            play_trn_curr_sports = all_play_tournaments.filter(team_sport_id = at.team_sport_id)
+            sports_dict[at.team_sport_name]["torneos_deporte"].extend([ptc for ptc in play_trn_curr_sports])
+        except ObjectDoesNotExist:
+            sports_dict[at.team_sport_name]["torneos_deporte"] = [at]
+
+    for sd, itm in sports_dict.items():
+        print(itm)
+
+    
 
     return HttpResponse("")
 

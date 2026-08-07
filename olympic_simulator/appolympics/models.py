@@ -99,6 +99,7 @@ class Olympicplayers(models.Model):
     ol_player_image = models.BinaryField()
     ol_country = models.ForeignKey('Playercountry', models.DO_NOTHING)
     team_sport = models.ForeignKey('Teamsports', models.DO_NOTHING)
+    team = models.ForeignKey('NationalTeams', models.DO_NOTHING)
 
     class Meta:
         managed = False
@@ -148,6 +149,7 @@ class Playertournamentregister(models.Model):
 class Playertournamentsports(models.Model):
     player_trn_sport_id = models.BigAutoField(primary_key=True)
     player_trn_sport_name = models.CharField(max_length=50)
+    team_sport = models.ForeignKey('TeamSports', models.DO_NOTHING)
 
     class Meta:
         managed = False
@@ -259,6 +261,7 @@ class Teamsports(models.Model):
     team_sport_name = models.CharField(max_length=50)
     team_sport_class = models.CharField(max_length=2)
     team_sport_rules = models.JSONField()
+    team_sport_color = models.CharField(max_length=50)
 
     class Meta:
         managed = False

@@ -18,3 +18,5 @@ Añadir Importación de resultados por únicamente campeones (Naruto, Copa de la
 
 Añadir Exportación a Archivo Word (Junta torneo + ligas por deporte)
 
+Añadir deportes faltantes (Hockey sobre Hielo, Waterpolo)
+Añadir a importación (Rocket League)

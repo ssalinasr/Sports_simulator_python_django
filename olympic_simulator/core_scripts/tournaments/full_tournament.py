@@ -559,6 +559,43 @@ class FullTournament():
                 self.general_matches.append(matches)  
                 if self.saveres:   
                     self.save_results()           
+            elif "MK" not in self.sport and "PKS" in self.sport: #Simula torneos de Pokemon Stadium
+                trn_list = ['Pokeball','Superball','Ultraball','Masterball']
+                for t in trn_list:
+                    print(self.teams)
+                    #Simula la fase final mundial
+                    tournament = tournament_group.Tournament('Final '+self.sport+'_'+t+'_'+str(self.year), self.sport, self.teams, self.ranks, False, True, self.match_class)
+                    trn_result = tournament.simulate_tournament()
+                    table = tournament.get_tournament_table()
+                    matches = tournament.get_tournament_matches()
+                    self.element_names.append(trn_result['tournament_name'])
+                    table_names = []
+                    table_values = []
+
+                    for k in table.items():
+                        table_names.append(k[0])
+                        table_values.append(k[1])
+
+                    table_dict = dict(zip(table_names, table_values))
+                    sorted_table = sorted(
+                        table_dict.items(),
+                        key= lambda item:(
+                            item[1]['pts'],
+                            item[1]['gd'],
+                            item[1]['gf']
+                        ),
+                        reverse=True
+                    )
+
+                    img = tournament.generate_tournament_bracket(trn_result['bracket'])
+                    self.champions.append((trn_result['champion'], trn_result['tournament_name'], trn_result['bracket'], img))
+                    self.final_table = sorted_table
+                    self.general_tables.append(sorted_table)
+                    self.final_matches.append(matches)
+                    self.general_matches.append(matches)
+                    if self.saveres:   
+                        self.save_results()
+
             else: # Simula torneos de Mario Kart y Muñecos #
                 print(self.teams)
                 #Simula la fase final mundial
