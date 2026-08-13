@@ -323,13 +323,16 @@ def generar_partido(request, match_class):
         elif deporte.team_sport_name in ['Balonmano Masculino', 'Balonmano Femenino']:
             sport_object = sports_by_time.TimeSport(deporte.team_sport_name, 2, 30, hay_tiempo_extra, hay_doble_ronda)
             sport_class = 'tiempo'
+        elif deporte.team_sport_name in ['Waterpolo Masculino', 'Waterpolo Femenino']:
+            sport_object = sports_by_time.TimeSport(deporte.team_sport_name, 4, 26, hay_tiempo_extra, hay_doble_ronda)
+            sport_class = 'tiempo'
         elif deporte.team_sport_name in ['Rugby Masculino', 'Rugby Femenino']:
             sport_object = sports_by_time.TimeSport(deporte.team_sport_name, 2, 40, hay_tiempo_extra, hay_doble_ronda)
             sport_class = 'tiempo'
         elif deporte.team_sport_name in ['Futsal Masculino', 'Futsal Femenino']:
             sport_object = sports_by_time.TimeSport(deporte.team_sport_name, 2, 20, hay_tiempo_extra, hay_doble_ronda)
             sport_class = 'tiempo'
-        elif deporte.team_sport_name in ['Hockey Masculino', 'Hockey Femenino']:
+        elif deporte.team_sport_name in ['Hockey Masculino', 'Hockey Femenino', 'Hockey sobre Hielo Masculino', 'Hockey sobre Hielo Femenino']:
             sport_object = sports_by_time.TimeSport(deporte.team_sport_name, 3, 20, hay_tiempo_extra, hay_doble_ronda)
             sport_class = 'tiempo'
         elif deporte.team_sport_name in ['Volleyball Masculino', 'Volleyball Femenino']:
@@ -787,15 +790,15 @@ def generar_simulacion_completa(request, match_class):
         name_mun = 'Munecos'
         id_munecos = Teamsports.objects.get(team_sport_name = name_mun).team_sport_id
 
-        if "GE" in deporte.player_trn_sport_name:
+        if "Goldeneye" in deporte.player_trn_sport_name:
             id_games_query = Teamsports.objects.get(team_sport_name = list_games[1])
             equipos = equipos.filter(team_sport_id = id_games_query)
             num_groups = 2
-        elif "SSB" in deporte.player_trn_sport_name:
+        elif "Super Smash" in deporte.player_trn_sport_name:
             id_games_query = Teamsports.objects.get(team_sport_name = list_games[0])
             equipos = equipos.filter(team_sport_id = id_games_query)
             num_groups = 8
-        elif "MK" in deporte.player_trn_sport_name:
+        elif "Mario Kart" in deporte.player_trn_sport_name:
             id_games_query = Teamsports.objects.get(team_sport_name = list_games[2])
             equipos = equipos.filter(team_sport_id = id_games_query)
             num_groups = 1
@@ -807,12 +810,12 @@ def generar_simulacion_completa(request, match_class):
             id_games_query = Teamsports.objects.get(team_sport_name = list_games[4])
             equipos = equipos.filter(team_sport_id = id_games_query)
             num_groups = 1
-        elif "PKS" in deporte.player_trn_sport_name:
+        elif "Pokemon Stadium" in deporte.player_trn_sport_name:
             id_games_query = Teamsports.objects.get(team_sport_name = list_games[5])
             equipos = equipos.filter(team_sport_id = id_games_query)
             num_groups = 1
         else:
-            if deporte.player_trn_sport_name not in ['Futbol', 'Baloncesto', 'Hockey en Piso']:
+            if deporte.player_trn_sport_name not in ['Munecos - Futbol', 'Munecos - Baloncesto', 'Munecos - Hockey en Piso']:
                 countries = Playercountry.objects.all()
                 selected_players = []
                 temp_equipos = None
@@ -823,6 +826,8 @@ def generar_simulacion_completa(request, match_class):
                         if not '_MN' in e.ol_player_name:
                             player_list.append(e.ol_player_name)
                     rand = random.randint(0, len(player_list))
+                    if rand == len(player_list):
+                        rand -= 1
                     selected_players.append(player_list[rand])
                 equipos = equipos.filter(ol_player_name__in = selected_players)
                 num_groups = 1

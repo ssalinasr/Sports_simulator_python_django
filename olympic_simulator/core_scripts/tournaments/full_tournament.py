@@ -9,8 +9,9 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 from django.http import HttpResponse
 from appolympics.models import Nationalteams, Olympicplayers, Teammatchesregister, Teamsports, Playertournamentsports, Teamtournamentregister, Playertournamentregister
-from appolympics.models import Playertitleregister, Teamtitleregister
-from appolympics.models import Mlclubs, Mlclubtournamentregister, MLclubmatchesregister, Mlclubtitleregister
+from appolympics.models import Playertitleregister, Teamtitleregister, Playermedalregister, Teammedalregister, Sportsrecords
+from appolympics.models import Mlclubs, Mlclubtournamentregister, MLclubmatchesregister, Mlclubtitleregister, Clubmedalregister, Mlclubmedalregister
+import difflib
 
 class FullTournament():
 
@@ -220,6 +221,7 @@ class FullTournament():
             if self.saveres:   
                 self.save_results()
 
+            
             '''
             merged_list = list(itertools.chain.from_iterable(self.general_matches))
             ultra_merged = list(itertools.chain.from_iterable(merged_list))
@@ -234,6 +236,7 @@ class FullTournament():
         else:
             print('AQUI....')
             print(self.sport)
+            print(self.teams)
             if self.sport in ['Basketball Masculino','Beisbol Masculino']: # Simula torneos de NBA/MLB
                 self.prev_stages = self.subdivide_groups(self.num_groups, self.teams)
                 print(self.prev_stages)
@@ -315,7 +318,7 @@ class FullTournament():
                     self.save_results()
 
 
-            elif "MK" not in self.sport and "GE" in self.sport: # Simula torneos de Goldeneye #
+            elif "Mario Kart" not in self.sport and "Goldeneye" in self.sport: # Simula torneos de Goldeneye #
                 group_teams_sublist = []
                 single_sublist = []
                 for temp in self.teams:
@@ -324,7 +327,7 @@ class FullTournament():
                     elif 'GE' not in temp:
                         single_sublist.append(temp)
                 #Individual
-                if self.sport != 'GE-Teams':
+                if self.sport != 'Goldeneye - Teams':
                     self.prev_stages = self.subdivide_groups(self.num_groups, single_sublist)
                 else:
                     self.prev_stages = self.subdivide_groups(self.num_groups, group_teams_sublist)
@@ -398,7 +401,7 @@ class FullTournament():
                 if self.saveres:   
                     self.save_results()
 
-            elif "MK" not in self.sport and "SSB" in self.sport: #Simula Torneos de Super Smash#
+            elif "Mario Kart" not in self.sport and "Super Smash" in self.sport: #Simula Torneos de Super Smash#
                 group_teams_sublist = []
                 single_sublist = []
                 for temp in self.teams:
@@ -558,46 +561,57 @@ class FullTournament():
                 self.final_matches.append(matches)
                 self.general_matches.append(matches)  
                 if self.saveres:   
-                    self.save_results()           
-            elif "MK" not in self.sport and "PKS" in self.sport: #Simula torneos de Pokemon Stadium
-                trn_list = ['Pokeball','Superball','Ultraball','Masterball']
-                for t in trn_list:
-                    print(self.teams)
-                    #Simula la fase final mundial
-                    tournament = tournament_group.Tournament('Final '+self.sport+'_'+t+'_'+str(self.year), self.sport, self.teams, self.ranks, False, True, self.match_class)
-                    trn_result = tournament.simulate_tournament()
-                    table = tournament.get_tournament_table()
-                    matches = tournament.get_tournament_matches()
-                    self.element_names.append(trn_result['tournament_name'])
-                    table_names = []
-                    table_values = []
+                    self.save_results()          
 
-                    for k in table.items():
-                        table_names.append(k[0])
-                        table_values.append(k[1])
-
-                    table_dict = dict(zip(table_names, table_values))
-                    sorted_table = sorted(
-                        table_dict.items(),
-                        key= lambda item:(
-                            item[1]['pts'],
-                            item[1]['gd'],
-                            item[1]['gf']
-                        ),
-                        reverse=True
-                    )
-
-                    img = tournament.generate_tournament_bracket(trn_result['bracket'])
-                    self.champions.append((trn_result['champion'], trn_result['tournament_name'], trn_result['bracket'], img))
-                    self.final_table = sorted_table
-                    self.general_tables.append(sorted_table)
-                    self.final_matches.append(matches)
-                    self.general_matches.append(matches)
-                    if self.saveres:   
-                        self.save_results()
-
-            else: # Simula torneos de Mario Kart y Muñecos #
+            elif "Mario Tenis" in self.sport: # Simula torneos de Mario Tenis
+                print('ESTE ES MARIO TENIS')
+                group_teams_sublist = []
+                single_sublist = []
+                for temp in self.teams:
+                    if '/' in temp:
+                        group_teams_sublist.append(temp)
+                    else:
+                        single_sublist.append(temp)
+                #Individual
+                if "Doubles" not in self.sport:
+                    self.teams = single_sublist
+                else:
+                    self.teams = group_teams_sublist
                 print(self.teams)
+                #Simula la fase final mundial
+                tournament = tournament_group.Tournament('Final '+self.sport+'_'+str(self.year), self.sport, self.teams, self.ranks, False, True, self.match_class)
+                trn_result = tournament.simulate_tournament()
+                table = tournament.get_tournament_table()
+                matches = tournament.get_tournament_matches()
+                self.element_names.append(trn_result['tournament_name'])
+                table_names = []
+                table_values = []
+
+                for k in table.items():
+                    table_names.append(k[0])
+                    table_values.append(k[1])
+
+                table_dict = dict(zip(table_names, table_values))
+                sorted_table = sorted(
+                    table_dict.items(),
+                    key= lambda item:(
+                        item[1]['pts'],
+                        item[1]['gd'],
+                        item[1]['gf']
+                    ),
+                    reverse=True
+                )
+
+                img = tournament.generate_tournament_bracket(trn_result['bracket'])
+                self.champions.append((trn_result['champion'], trn_result['tournament_name'], trn_result['bracket'], img))
+                self.final_table = sorted_table
+                self.general_tables.append(sorted_table)
+                self.final_matches.append(matches)
+                self.general_matches.append(matches)
+                if self.saveres:   
+                    self.save_results()
+
+            else: # Simula torneos de Mario Kart, Mario Tenis, Mario Party, Pokemon Stadium y Muñecos #
                 #Simula la fase final mundial
                 tournament = tournament_group.Tournament('Final '+self.sport+'_'+str(self.year), self.sport, self.teams, self.ranks, False, True, self.match_class)
                 trn_result = tournament.simulate_tournament()
@@ -696,9 +710,78 @@ class FullTournament():
                         title_bracket = dict(title[2]),
                         title_image = title[3]
                     )
-                    title_element.save()
+                    title_element.save()                 
+                    champion = ''
+                    not_champion = ''
+                    element = title[2]['Final'][0]
+                    print(element)
+                    if element['winner'] == element['team1']:
+                        champion = element['team1']
+                        not_champion = element['team2']
+                    else:
+                        champion = element['team2']
+                        not_champion = element['team1']
+                    third_place = title[2]['Third Place'][0]['winner']
 
+                    name_sp = str(self.sport) + " - " + title[1].replace(self.year, '').replace(self.sport,'').replace('Final ','').rstrip()
+                    print(name_sp)    
+                    team_obj = Nationalteams.objects.get(team_name = champion)
+                    print(name_sp == 'Futbol Masculino - Copa de Africa')
 
+                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)                
+                    try:
+                        existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                        existing_log.team_id = team_obj.team_id
+                        existing_log.medal_label = 'O'
+                        existing_log.medal_year = self.year
+                        existing_log.sp_record = sport
+                        existing_log.save()
+                    except Teammedalregister.DoesNotExist:
+                        title_label = 'O'
+                        title_element = Teammedalregister(
+                            team_id = team_obj.team_id,
+                            medal_label = title_label,
+                            medal_year = self.year,
+                            sp_record_id = sport.sp_record_id
+                        )
+                        title_element.save()
+                    team_obj = Nationalteams.objects.get(team_name = not_champion)
+                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
+                    try:
+                        existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                        existing_log.team_id = team_obj.team_id
+                        existing_log.medal_label = 'P'
+                        existing_log.medal_year = self.year
+                        existing_log.sp_record = sport
+                        existing_log.save()
+                    except Teammedalregister.DoesNotExist:
+                        title_label = 'P'
+                        title_element = Teammedalregister(
+                            team_id = team_obj.team_id,
+                            medal_label = title_label,
+                            medal_year = self.year,
+                            sp_record_id = sport.sp_record_id
+                        )
+                        title_element.save()
+                    team_obj = Nationalteams.objects.get(team_name = third_place)
+                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
+                    try:
+                        existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                        existing_log.team_id = team_obj.team_id
+                        existing_log.medal_label = 'B'
+                        existing_log.medal_year = self.year
+                        existing_log.sp_record = sport
+                        existing_log.save()
+                    except Teammedalregister.DoesNotExist:
+                        title_label = 'B'
+                        title_element = Teammedalregister(
+                            team_id = team_obj.team_id,
+                            medal_label = title_label,
+                            medal_year = self.year,
+                            sp_record_id = sport.sp_record_id
+                        )
+                        title_element.save()
+                    
             for cont in self.general_matches:
                 for m in cont:
                     #print(m['team1'], m['team2'])
@@ -788,6 +871,74 @@ class FullTournament():
                     )
         
                     title_element.save()
+
+                    champion = ''
+                    not_champion = ''
+                    element = title[2]['Final'][0]
+                    print(element)
+                    if element['winner'] == element['team1']:
+                        champion = element['team1']
+                        not_champion = element['team2']
+                    else:
+                        champion = element['team2']
+                        not_champion = element['team1']
+                    third_place = title[2]['Third Place'][0]['winner']
+
+                    name_sp = str(self.sport)
+                    team_obj = Olympicplayers.objects.get(ol_player_name = champion)
+                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)                
+                    try:
+                        existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                        existing_log.ol_player_id = team_obj.ol_player_id
+                        existing_log.medal_label = 'O'
+                        existing_log.medal_year = self.year
+                        existing_log.sp_record = sport
+                        existing_log.save()
+                    except Playermedalregister.DoesNotExist:
+                        title_label = 'O'
+                        title_element = Playermedalregister(
+                            ol_player_id = team_obj.ol_player_id,
+                            medal_label = title_label,
+                            medal_year = self.year,
+                            sp_record_id = sport.sp_record_id
+                        )
+                        title_element.save()
+                    team_obj = Olympicplayers.objects.get(ol_player_name = not_champion)
+                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
+                    try:
+                        existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                        existing_log.ol_player_id = team_obj.ol_player_id
+                        existing_log.medal_label = 'P'
+                        existing_log.medal_year = self.year
+                        existing_log.sp_record = sport
+                        existing_log.save()
+                    except Playermedalregister.DoesNotExist:
+                        title_label = 'P'
+                        title_element = Playermedalregister(
+                            ol_player_id = team_obj.ol_player_id,
+                            medal_label = title_label,
+                            medal_year = self.year,
+                            sp_record_id = sport.sp_record_id
+                        )
+                        title_element.save()
+                    team_obj = Olympicplayers.objects.get(ol_player_name = third_place)
+                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
+                    try:
+                        existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                        existing_log.ol_player_id = team_obj.ol_player_id
+                        existing_log.medal_label = 'B'
+                        existing_log.medal_year = self.year
+                        existing_log.sp_record = sport
+                        existing_log.save()
+                    except Playermedalregister.DoesNotExist:
+                        title_label = 'B'
+                        title_element = Playermedalregister(
+                            ol_player_id = team_obj.ol_player_id,
+                            medal_label = title_label,
+                            medal_year = self.year,
+                            sp_record_id = sport.sp_record_id
+                        )
+                        title_element.save()
         elif self.match_class == 6:
             merged_table = self.merge_tables(self.general_tables)
             print(merged_table)
@@ -866,6 +1017,75 @@ class FullTournament():
                         match_year = str(self.year)
                     )
                     match_element.save()
+
+                    champion = ''
+                    not_champion = ''
+                    element = title[2]['Final'][0]
+                    print(element)
+                    if element['winner'] == element['team1']:
+                        champion = element['team1']
+                        not_champion = element['team2']
+                    else:
+                        champion = element['team2']
+                        not_champion = element['team1']
+                    third_place = title[2]['Third Place'][0]['winner']
+
+                    name_sp = title[1].replace(str(self.year),'').replace('_','').rstrip()
+                    team_obj = Mlclubs.objects.get(ml_club_name = champion)
+                    print(name_sp)
+                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)                
+                    try:
+                        existing_log = Mlclubmedalregister.objects.get(ml_club_id = team_obj.ml_club_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                        existing_log.ml_club_id = team_obj.ml_club_id
+                        existing_log.medal_label = 'O'
+                        existing_log.medal_year = self.year
+                        existing_log.sp_record = sport
+                        existing_log.save()
+                    except Mlclubmedalregister.DoesNotExist:
+                        title_label = 'O'
+                        title_element = Mlclubmedalregister(
+                            ml_club_id = team_obj.ml_club_id,
+                            medal_label = title_label,
+                            medal_year = self.year,
+                            sp_record_id = sport.sp_record_id
+                        )
+                        title_element.save()
+                    team_obj = Mlclubs.objects.get(ml_club_name = not_champion)
+                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
+                    try:
+                        existing_log = Mlclubmedalregister.objects.get(ml_club_id = team_obj.ml_club_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                        existing_log.ml_club_id = team_obj.ml_club_id
+                        existing_log.medal_label = 'P'
+                        existing_log.medal_year = self.year
+                        existing_log.sp_record = sport
+                        existing_log.save()
+                    except Mlclubmedalregister.DoesNotExist:
+                        title_label = 'P'
+                        title_element = Mlclubmedalregister(
+                            ml_club_id = team_obj.ml_club_id,
+                            medal_label = title_label,
+                            medal_year = self.year,
+                            sp_record_id = sport.sp_record_id
+                        )
+                        title_element.save()
+                    team_obj = Mlclubs.objects.get(ml_club_name = third_place)
+                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
+                    try:
+                        existing_log = Mlclubmedalregister.objects.get(ml_club_id = team_obj.ml_club_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                        existing_log.ml_club_id = team_obj.ml_club_id
+                        existing_log.medal_label = 'B'
+                        existing_log.medal_year = self.year
+                        existing_log.sp_record = sport
+                        existing_log.save()
+                    except Mlclubmedalregister.DoesNotExist:
+                        title_label = 'B'
+                        title_element = Mlclubmedalregister(
+                            ml_club_id = team_obj.ml_club_id,
+                            medal_label = title_label,
+                            medal_year = self.year,
+                            sp_record_id = sport.sp_record_id
+                        )
+                        title_element.save()
     pass
 
 

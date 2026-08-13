@@ -379,3 +379,25 @@ class Mlclubtitleregister(models.Model):
     class Meta:
         managed = False
         db_table = 'MLClubTitleRegister'
+
+class Clubmedalregister(models.Model):
+    club_medal_id = models.BigAutoField(primary_key=True)
+    club = models.ForeignKey(Clubs, models.DO_NOTHING)
+    medal_label = models.CharField(max_length=2)
+    medal_year = models.CharField(max_length=4)
+    sp_record = models.ForeignKey(Sportsrecords, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'ClubMedalRegister'
+
+class Mlclubmedalregister(models.Model):
+    ml_club_medal_id = models.BigAutoField(primary_key=True)
+    ml_club = models.ForeignKey(Mlclubs, models.DO_NOTHING)
+    medal_label = models.CharField(max_length=2)
+    medal_year = models.CharField(max_length=4)
+    sp_record = models.ForeignKey(Sportsrecords, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'MLClubMedalRegister'

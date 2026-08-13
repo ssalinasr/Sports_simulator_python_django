@@ -1,0 +1,52 @@
+team_sport_id;team_sport_name;team_sport_class;team_sport_rules;team_sport_color
+21;Futbol Masculino;T;NULL;dark_green
+22;Futbol Femenino;T;NULL;dark_green
+23;Futsal Masculino;T;NULL;dark_green
+24;Futsal Femenino;T;NULL;dark_green
+25;Volleyball Masculino;T;NULL;blue
+26;Basketball Masculino;T;NULL;orange
+27;Beisbol Masculino;T;NULL;brown
+28;Badminton Masculino Individual;T;NULL;dark_red
+29;Curling Masculino;T;NULL;light_blue
+30;Tenis Masculino Individual;T;NULL;green
+31;Rugby Masculino;T;NULL;gray
+32;Squash Masculino;T;NULL;dark_green
+33;Voley Playa Masculino;T;NULL;dark_blue
+34;Tenis de Mesa Masculino Individual;T;NULL;dark_green
+35;Balonmano Masculino;T;NULL;dark_yellow
+36;Hockey Masculino;T;NULL;light_blue
+37;Tiro con Arco Masculino Individual;T;NULL;light_purple
+38;Esgrima Masculino Espada;T;NULL;red
+47;Volleyball Femenino;T;NULL;blue
+48;Basketball Femenino;T;NULL;orange
+49;Beisbol Femenino;T;NULL;brown
+50;Badminton Femenino Individual;T;NULL;dark_red
+51;Curling Femenino;T;NULL;light_blue
+52;Tenis Femenino Individual;T;NULL;green
+53;Rugby Femenino;T;NULL;gray
+54;Squash Femenino;T;NULL;dark_green
+55;Voley Playa Femenino;T;NULL;dark_blue
+56;Tenis de Mesa Femenino Individual;T;NULL;dark_green
+57;Balonmano Femenino;T;NULL;dark_yellow
+58;Hockey Femenino;T;NULL;light_blue
+59;Tiro con Arco Femenino Individual;T;NULL;light_purple
+60;Esgrima Femenino Espada;T;NULL;red
+79;Badminton Masculino Dobles;T;NULL;dark_red
+80;Badminton Femenino Dobles;T;NULL;dark_red
+81;Badminton Mixto;T;NULL;dark_red
+82;Tenis Masculino Dobles;T;NULL;green
+83;Tenis Femenino Dobles;T;NULL;green
+84;Tenis Mixto;T;NULL;green
+85;Tenis de Mesa Masculino Dobles;T;NULL;dark_green
+86;Tenis de Mesa Femenino Dobles;T;NULL;dark_green
+87;Tiro con Arco Masculino Dobles;T;NULL;light_purple
+88;Tiro con Arco Femenino Dobles;T;NULL;light_purple
+89;Tiro con Arco Mixto;T;NULL;light_purple
+90;Esgrima Masculino Sable;T;NULL;red
+91;Esgrima Femenino Sable;T;NULL;red
+92;Esgrima Masculino Florete;T;NULL;red
+93;Esgrima Femenino Florete;T;NULL;red
+96;Hockey sobre Hielo Masculino;T;NULL;NULL
+97;Hockey sobre Hielo Femenino;T;NULL;NULL
+98;Waterpolo Masculino;T;NULL;NULL
+99;Waterpolo Femenino;T;NULL;NULL

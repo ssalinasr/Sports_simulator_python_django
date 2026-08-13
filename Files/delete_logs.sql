@@ -18,6 +18,8 @@ truncate table "PlayerSimulationRegister";
 
 truncate table "TeamMedalRegister";
 truncate table "PlayerMedalRegister";
+truncate table "ClubMedalRegister";
+truncate table "MLClubMedalRegister";
 
 
 

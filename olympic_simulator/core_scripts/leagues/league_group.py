@@ -48,13 +48,16 @@ class Group():
             elif self.sport_name in ['Balonmano Masculino', 'Balonmano Femenino']:
                 sport_object = sports_by_time.TimeSport(self.sport_name, 2, 30, False, False)
 
+            elif self.sport_name in ['Waterpolo Masculino', 'Waterpolo Femenino']:
+                sport_object = sports_by_time.TimeSport(self.sport_name, 4, 26, False, False)
+
             elif self.sport_name in ['Rugby Masculino', 'Rugby Femenino']:
                 sport_object = sports_by_time.TimeSport(self.sport_name, 2, 40, False, False)
 
             elif self.sport_name in ['Futsal Masculino', 'Futsal Femenino']:
                 sport_object = sports_by_time.TimeSport(self.sport_name, 2, 20, False, False)
 
-            elif self.sport_name in ['Hockey Masculino', 'Hockey Femenino']:
+            elif self.sport_name in ['Hockey Masculino', 'Hockey Femenino', 'Hockey sobre Hielo Masculino', 'Hockey sobre Hielo Femenino']:
                 sport_object = sports_by_time.TimeSport(self.sport_name, 3, 20, False, False)
 
             elif self.sport_name in ['Volleyball Masculino', 'Volleyball Femenino']:
@@ -97,36 +100,36 @@ class Group():
                 sport_object = sports_by_time.TimeSport(self.sport_name, 2, 45, False, False) 
 
         elif self.match_class == 2:
-            if self.sport_name == 'SSB-Time':
+            if self.sport_name == 'Super Smash - Time':
                 sport_object = supersmash_interface.SuperSmashInterface(self.sport_name, 'Tiempo', 3, 0)
 
-            elif self.sport_name == 'SSB-Lives':
+            elif self.sport_name == 'Super Smash - Lives':
                 sport_object = supersmash_interface.SuperSmashInterface(self.sport_name, 'Vidas Reversa', 0, 5)
 
-            elif self.sport_name == 'SSB-Coins':
+            elif self.sport_name == 'Super Smash - Coins':
                 sport_object = supersmash_interface.SuperSmashInterface(self.sport_name, 'Cumulativo', 3, 0)
 
-            elif self.sport_name == 'SSB-Stamina':
+            elif self.sport_name == 'Super Smash - Stamina':
                 sport_object = supersmash_interface.SuperSmashInterface(self.sport_name, 'Stamina', 0, 150)
 
-            elif self.sport_name == 'SSB-Lightning':
+            elif self.sport_name == 'Super Smash - Lightning':
                 sport_object = supersmash_interface.SuperSmashInterface(self.sport_name, 'Tiempo', 2, 0)
 
-            elif self.sport_name == 'SSB-Single':
+            elif self.sport_name == 'Super Smash - Single':
                 sport_object = supersmash_interface.SuperSmashInterface(self.sport_name, 'Tiempo', 3, 0)
 
-            elif self.sport_name == 'SSB-Sudden':
+            elif self.sport_name == 'Super Smash - Sudden':
                 sport_object = supersmash_interface.SuperSmashInterface(self.sport_name, 'Tiempo', 1, 0)
 
-            elif self.sport_name == 'GE-Time':
+            elif self.sport_name == 'Goldeneye - Time':
                 sport_object = goldeneye_interface.GoldeneyeInterface(self.sport_name ,'Tiempo', 3, 0)
-            elif self.sport_name  == 'GE-Kills':
+            elif self.sport_name  == 'Goldeneye - Kills':
                 sport_object = goldeneye_interface.GoldeneyeInterface(self.sport_name ,'Vidas', 0, 10)
-            elif self.sport_name  == 'GE-SSDV':
+            elif self.sport_name  == 'Goldeneye - SSDV':
                 sport_object = goldeneye_interface.GoldeneyeInterface(self.sport_name ,'Vidas Reversa', 0, 2)
-            elif self.sport_name  == 'GE-License to Kill':
+            elif self.sport_name  == 'Goldeneye - License to Kill':
                 sport_object = goldeneye_interface.GoldeneyeInterface(self.sport_name ,'Vidas', 0, 20)
-            elif self.sport_name  == 'GE-Teams':
+            elif self.sport_name  == 'Goldeneye - Teams':
                 sport_object = goldeneye_interface.GoldeneyeInterface(self.sport_name ,'Vidas', 0, 15)
         
         tools = league_tools.LeagueTools(self.teams)
