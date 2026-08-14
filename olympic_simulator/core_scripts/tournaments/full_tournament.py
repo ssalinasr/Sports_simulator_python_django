@@ -4,6 +4,7 @@ from core_scripts.leagues import league_tools
 import random
 import itertools
 from collections import defaultdict
+from django.db import transaction
 
 from openpyxl import Workbook
 from openpyxl.styles import Font
@@ -647,7 +648,7 @@ class FullTournament():
 
         pass
 
-
+    @transaction.atomic
     def save_results(self):
         if self.match_class in [1,5]:
             merged_table = self.merge_tables(self.general_tables)
@@ -685,14 +686,11 @@ class FullTournament():
                     tournament_element.save()
                 index += 1
 
-            sport = Teamsports.objects.get(team_sport_name = self.sport)
-            Teammatchesregister.objects.filter(match_year = str(self.year), team_sport_id = sport.team_sport_id).delete()
-
             for title in self.champions:
                 team_obj = Nationalteams.objects.get(team_name = title[0])
                 sport = Teamsports.objects.get(team_sport_name = self.sport)
                 try:
-                    existing_log = Teamtitleregister.objects.get(team_id = team_obj.team_id, team_sport_id = sport.team_sport_id, title_year = str(self.year))
+                    existing_log = Teamtitleregister.objects.get(team_id = team_obj.team_id, team_sport_id = sport.team_sport_id, title_label = title[1], title_year = str(self.year))
                     existing_log.team_id = team_obj.team_id
                     existing_log.title_label = title[1]
                     existing_log.title_year = str(self.year)
@@ -710,77 +708,80 @@ class FullTournament():
                         title_bracket = dict(title[2]),
                         title_image = title[3]
                     )
-                    title_element.save()                 
-                    champion = ''
-                    not_champion = ''
-                    element = title[2]['Final'][0]
-                    print(element)
-                    if element['winner'] == element['team1']:
-                        champion = element['team1']
-                        not_champion = element['team2']
-                    else:
-                        champion = element['team2']
-                        not_champion = element['team1']
-                    third_place = title[2]['Third Place'][0]['winner']
+                    title_element.save()
 
-                    name_sp = str(self.sport) + " - " + title[1].replace(self.year, '').replace(self.sport,'').replace('Final ','').rstrip()
-                    print(name_sp)    
-                    team_obj = Nationalteams.objects.get(team_name = champion)
-                    print(name_sp == 'Futbol Masculino - Copa de Africa')
+                champion = ''
+                not_champion = ''
+                element = title[2]['Final'][0]
+                print(element)
+                if element['winner'] == element['team1']:
+                    champion = element['team1']
+                    not_champion = element['team2']
+                else:
+                    champion = element['team2']
+                    not_champion = element['team1']
+                third_place = title[2]['Third Place'][0]['winner']
 
-                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)                
-                    try:
-                        existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
-                        existing_log.team_id = team_obj.team_id
-                        existing_log.medal_label = 'O'
-                        existing_log.medal_year = self.year
-                        existing_log.sp_record = sport
-                        existing_log.save()
-                    except Teammedalregister.DoesNotExist:
-                        title_label = 'O'
-                        title_element = Teammedalregister(
-                            team_id = team_obj.team_id,
-                            medal_label = title_label,
-                            medal_year = self.year,
-                            sp_record_id = sport.sp_record_id
-                        )
-                        title_element.save()
-                    team_obj = Nationalteams.objects.get(team_name = not_champion)
-                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
-                    try:
-                        existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
-                        existing_log.team_id = team_obj.team_id
-                        existing_log.medal_label = 'P'
-                        existing_log.medal_year = self.year
-                        existing_log.sp_record = sport
-                        existing_log.save()
-                    except Teammedalregister.DoesNotExist:
-                        title_label = 'P'
-                        title_element = Teammedalregister(
-                            team_id = team_obj.team_id,
-                            medal_label = title_label,
-                            medal_year = self.year,
-                            sp_record_id = sport.sp_record_id
-                        )
-                        title_element.save()
-                    team_obj = Nationalteams.objects.get(team_name = third_place)
-                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
-                    try:
-                        existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
-                        existing_log.team_id = team_obj.team_id
-                        existing_log.medal_label = 'B'
-                        existing_log.medal_year = self.year
-                        existing_log.sp_record = sport
-                        existing_log.save()
-                    except Teammedalregister.DoesNotExist:
-                        title_label = 'B'
-                        title_element = Teammedalregister(
-                            team_id = team_obj.team_id,
-                            medal_label = title_label,
-                            medal_year = self.year,
-                            sp_record_id = sport.sp_record_id
-                        )
-                        title_element.save()
+                replaced_text = title[1].replace(self.year, '').replace(self.sport,'').replace('Final ','').rstrip()
+                name_sp = str(self.sport) + " - " + replaced_text
+                if len(replaced_text) == 0:
+                    replaced_text = 'Final'
+                    name_sp = str(self.sport) + " - " + replaced_text 
+                team_obj = Nationalteams.objects.get(team_name = champion)
+
+                sport = Sportsrecords.objects.get(sp_record_name = name_sp)                
+                try:
+                    existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                    existing_log.team_id = team_obj.team_id
+                    existing_log.medal_label = 'O'
+                    existing_log.medal_year = self.year
+                    existing_log.sp_record = sport
+                    existing_log.save()
+                except Teammedalregister.DoesNotExist:
+                    title_label = 'O'
+                    title_element = Teammedalregister(
+                        team_id = team_obj.team_id,
+                        medal_label = title_label,
+                        medal_year = self.year,
+                        sp_record_id = sport.sp_record_id
+                    )
+                    title_element.save()
+                team_obj = Nationalteams.objects.get(team_name = not_champion)
+                sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
+                try:
+                    existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                    existing_log.team_id = team_obj.team_id
+                    existing_log.medal_label = 'P'
+                    existing_log.medal_year = self.year
+                    existing_log.sp_record = sport
+                    existing_log.save()
+                except Teammedalregister.DoesNotExist:
+                    title_label = 'P'
+                    title_element = Teammedalregister(
+                        team_id = team_obj.team_id,
+                        medal_label = title_label,
+                        medal_year = self.year,
+                        sp_record_id = sport.sp_record_id
+                    )
+                    title_element.save()
+                team_obj = Nationalteams.objects.get(team_name = third_place)
+                sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
+                try:
+                    existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                    existing_log.team_id = team_obj.team_id
+                    existing_log.medal_label = 'B'
+                    existing_log.medal_year = self.year
+                    existing_log.sp_record = sport
+                    existing_log.save()
+                except Teammedalregister.DoesNotExist:
+                    title_label = 'B'
+                    title_element = Teammedalregister(
+                        team_id = team_obj.team_id,
+                        medal_label = title_label,
+                        medal_year = self.year,
+                        sp_record_id = sport.sp_record_id
+                    )
+                    title_element.save()
                     
             for cont in self.general_matches:
                 for m in cont:
@@ -851,7 +852,7 @@ class FullTournament():
                 team_obj = Olympicplayers.objects.get(ol_player_name = title[0])
                 sport = Playertournamentsports.objects.get(player_trn_sport_name = self.sport)
                 try:
-                    existing_log = Playertitleregister.objects.get(ol_player_id = team_obj.ol_player_id, player_trn_sport_id = sport.player_trn_sport_id, title_year = str(self.year))
+                    existing_log = Playertitleregister.objects.get(ol_player_id = team_obj.ol_player_id, player_trn_sport_id = sport.player_trn_sport_id, title_label = title[1], title_year = str(self.year))
                     existing_log.ol_player_id = team_obj.ol_player_id
                     existing_log.title_label = title[1]
                     existing_log.title_year = str(self.year)
@@ -872,73 +873,73 @@ class FullTournament():
         
                     title_element.save()
 
-                    champion = ''
-                    not_champion = ''
-                    element = title[2]['Final'][0]
-                    print(element)
-                    if element['winner'] == element['team1']:
-                        champion = element['team1']
-                        not_champion = element['team2']
-                    else:
-                        champion = element['team2']
-                        not_champion = element['team1']
-                    third_place = title[2]['Third Place'][0]['winner']
+                champion = ''
+                not_champion = ''
+                element = title[2]['Final'][0]
+                print(element)
+                if element['winner'] == element['team1']:
+                    champion = element['team1']
+                    not_champion = element['team2']
+                else:
+                    champion = element['team2']
+                    not_champion = element['team1']
+                third_place = title[2]['Third Place'][0]['winner']
 
-                    name_sp = str(self.sport)
-                    team_obj = Olympicplayers.objects.get(ol_player_name = champion)
-                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)                
-                    try:
-                        existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
-                        existing_log.ol_player_id = team_obj.ol_player_id
-                        existing_log.medal_label = 'O'
-                        existing_log.medal_year = self.year
-                        existing_log.sp_record = sport
-                        existing_log.save()
-                    except Playermedalregister.DoesNotExist:
-                        title_label = 'O'
-                        title_element = Playermedalregister(
-                            ol_player_id = team_obj.ol_player_id,
-                            medal_label = title_label,
-                            medal_year = self.year,
-                            sp_record_id = sport.sp_record_id
-                        )
-                        title_element.save()
-                    team_obj = Olympicplayers.objects.get(ol_player_name = not_champion)
-                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
-                    try:
-                        existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
-                        existing_log.ol_player_id = team_obj.ol_player_id
-                        existing_log.medal_label = 'P'
-                        existing_log.medal_year = self.year
-                        existing_log.sp_record = sport
-                        existing_log.save()
-                    except Playermedalregister.DoesNotExist:
-                        title_label = 'P'
-                        title_element = Playermedalregister(
-                            ol_player_id = team_obj.ol_player_id,
-                            medal_label = title_label,
-                            medal_year = self.year,
-                            sp_record_id = sport.sp_record_id
-                        )
-                        title_element.save()
-                    team_obj = Olympicplayers.objects.get(ol_player_name = third_place)
-                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
-                    try:
-                        existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
-                        existing_log.ol_player_id = team_obj.ol_player_id
-                        existing_log.medal_label = 'B'
-                        existing_log.medal_year = self.year
-                        existing_log.sp_record = sport
-                        existing_log.save()
-                    except Playermedalregister.DoesNotExist:
-                        title_label = 'B'
-                        title_element = Playermedalregister(
-                            ol_player_id = team_obj.ol_player_id,
-                            medal_label = title_label,
-                            medal_year = self.year,
-                            sp_record_id = sport.sp_record_id
-                        )
-                        title_element.save()
+                name_sp = str(self.sport)
+                team_obj = Olympicplayers.objects.get(ol_player_name = champion)
+                sport = Sportsrecords.objects.get(sp_record_name = name_sp)                
+                try:
+                    existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                    existing_log.ol_player_id = team_obj.ol_player_id
+                    existing_log.medal_label = 'O'
+                    existing_log.medal_year = self.year
+                    existing_log.sp_record = sport
+                    existing_log.save()
+                except Playermedalregister.DoesNotExist:
+                    title_label = 'O'
+                    title_element = Playermedalregister(
+                        ol_player_id = team_obj.ol_player_id,
+                        medal_label = title_label,
+                        medal_year = self.year,
+                        sp_record_id = sport.sp_record_id
+                    )
+                    title_element.save()
+                team_obj = Olympicplayers.objects.get(ol_player_name = not_champion)
+                sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
+                try:
+                    existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                    existing_log.ol_player_id = team_obj.ol_player_id
+                    existing_log.medal_label = 'P'
+                    existing_log.medal_year = self.year
+                    existing_log.sp_record = sport
+                    existing_log.save()
+                except Playermedalregister.DoesNotExist:
+                    title_label = 'P'
+                    title_element = Playermedalregister(
+                        ol_player_id = team_obj.ol_player_id,
+                        medal_label = title_label,
+                        medal_year = self.year,
+                        sp_record_id = sport.sp_record_id
+                    )
+                    title_element.save()
+                team_obj = Olympicplayers.objects.get(ol_player_name = third_place)
+                sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
+                try:
+                    existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                    existing_log.ol_player_id = team_obj.ol_player_id
+                    existing_log.medal_label = 'B'
+                    existing_log.medal_year = self.year
+                    existing_log.sp_record = sport
+                    existing_log.save()
+                except Playermedalregister.DoesNotExist:
+                    title_label = 'B'
+                    title_element = Playermedalregister(
+                        ol_player_id = team_obj.ol_player_id,
+                        medal_label = title_label,
+                        medal_year = self.year,
+                        sp_record_id = sport.sp_record_id
+                    )
+                    title_element.save()
         elif self.match_class == 6:
             merged_table = self.merge_tables(self.general_tables)
             print(merged_table)
@@ -975,7 +976,7 @@ class FullTournament():
             for title in self.champions:
                 team_obj = Mlclubs.objects.get(ml_club_name = title[0])
                 try:
-                    existing_log = Mlclubtitleregister.objects.get(ml_club_id = team_obj.ml_club_id, title_year = str(self.year))
+                    existing_log = Mlclubtitleregister.objects.get(ml_club_id = team_obj.ml_club_id, title_year = str(self.year), title_label = title[1])
                     existing_log.ml_club = team_obj.ml_club_id
                     existing_log.title_label = title[1]
                     existing_log.title_year = str(self.year)
@@ -1018,74 +1019,74 @@ class FullTournament():
                     )
                     match_element.save()
 
-                    champion = ''
-                    not_champion = ''
-                    element = title[2]['Final'][0]
-                    print(element)
-                    if element['winner'] == element['team1']:
-                        champion = element['team1']
-                        not_champion = element['team2']
-                    else:
-                        champion = element['team2']
-                        not_champion = element['team1']
-                    third_place = title[2]['Third Place'][0]['winner']
+                champion = ''
+                not_champion = ''
+                element = title[2]['Final'][0]
+                print(element)
+                if element['winner'] == element['team1']:
+                    champion = element['team1']
+                    not_champion = element['team2']
+                else:
+                    champion = element['team2']
+                    not_champion = element['team1']
+                third_place = title[2]['Third Place'][0]['winner']
 
-                    name_sp = title[1].replace(str(self.year),'').replace('_','').rstrip()
-                    team_obj = Mlclubs.objects.get(ml_club_name = champion)
-                    print(name_sp)
-                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)                
-                    try:
-                        existing_log = Mlclubmedalregister.objects.get(ml_club_id = team_obj.ml_club_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
-                        existing_log.ml_club_id = team_obj.ml_club_id
-                        existing_log.medal_label = 'O'
-                        existing_log.medal_year = self.year
-                        existing_log.sp_record = sport
-                        existing_log.save()
-                    except Mlclubmedalregister.DoesNotExist:
-                        title_label = 'O'
-                        title_element = Mlclubmedalregister(
-                            ml_club_id = team_obj.ml_club_id,
-                            medal_label = title_label,
-                            medal_year = self.year,
-                            sp_record_id = sport.sp_record_id
-                        )
-                        title_element.save()
-                    team_obj = Mlclubs.objects.get(ml_club_name = not_champion)
-                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
-                    try:
-                        existing_log = Mlclubmedalregister.objects.get(ml_club_id = team_obj.ml_club_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
-                        existing_log.ml_club_id = team_obj.ml_club_id
-                        existing_log.medal_label = 'P'
-                        existing_log.medal_year = self.year
-                        existing_log.sp_record = sport
-                        existing_log.save()
-                    except Mlclubmedalregister.DoesNotExist:
-                        title_label = 'P'
-                        title_element = Mlclubmedalregister(
-                            ml_club_id = team_obj.ml_club_id,
-                            medal_label = title_label,
-                            medal_year = self.year,
-                            sp_record_id = sport.sp_record_id
-                        )
-                        title_element.save()
-                    team_obj = Mlclubs.objects.get(ml_club_name = third_place)
-                    sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
-                    try:
-                        existing_log = Mlclubmedalregister.objects.get(ml_club_id = team_obj.ml_club_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
-                        existing_log.ml_club_id = team_obj.ml_club_id
-                        existing_log.medal_label = 'B'
-                        existing_log.medal_year = self.year
-                        existing_log.sp_record = sport
-                        existing_log.save()
-                    except Mlclubmedalregister.DoesNotExist:
-                        title_label = 'B'
-                        title_element = Mlclubmedalregister(
-                            ml_club_id = team_obj.ml_club_id,
-                            medal_label = title_label,
-                            medal_year = self.year,
-                            sp_record_id = sport.sp_record_id
-                        )
-                        title_element.save()
+                name_sp = title[1].replace(str(self.year),'').replace('_','').rstrip()
+                team_obj = Mlclubs.objects.get(ml_club_name = champion)
+                print(name_sp)
+                sport = Sportsrecords.objects.get(sp_record_name = name_sp)                
+                try:
+                    existing_log = Mlclubmedalregister.objects.get(ml_club_id = team_obj.ml_club_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                    existing_log.ml_club_id = team_obj.ml_club_id
+                    existing_log.medal_label = 'O'
+                    existing_log.medal_year = self.year
+                    existing_log.sp_record = sport
+                    existing_log.save()
+                except Mlclubmedalregister.DoesNotExist:
+                    title_label = 'O'
+                    title_element = Mlclubmedalregister(
+                        ml_club_id = team_obj.ml_club_id,
+                        medal_label = title_label,
+                        medal_year = self.year,
+                        sp_record_id = sport.sp_record_id
+                    )
+                    title_element.save()
+                team_obj = Mlclubs.objects.get(ml_club_name = not_champion)
+                sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
+                try:
+                    existing_log = Mlclubmedalregister.objects.get(ml_club_id = team_obj.ml_club_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                    existing_log.ml_club_id = team_obj.ml_club_id
+                    existing_log.medal_label = 'P'
+                    existing_log.medal_year = self.year
+                    existing_log.sp_record = sport
+                    existing_log.save()
+                except Mlclubmedalregister.DoesNotExist:
+                    title_label = 'P'
+                    title_element = Mlclubmedalregister(
+                        ml_club_id = team_obj.ml_club_id,
+                        medal_label = title_label,
+                        medal_year = self.year,
+                        sp_record_id = sport.sp_record_id
+                    )
+                    title_element.save()
+                team_obj = Mlclubs.objects.get(ml_club_name = third_place)
+                sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
+                try:
+                    existing_log = Mlclubmedalregister.objects.get(ml_club_id = team_obj.ml_club_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
+                    existing_log.ml_club_id = team_obj.ml_club_id
+                    existing_log.medal_label = 'B'
+                    existing_log.medal_year = self.year
+                    existing_log.sp_record = sport
+                    existing_log.save()
+                except Mlclubmedalregister.DoesNotExist:
+                    title_label = 'B'
+                    title_element = Mlclubmedalregister(
+                        ml_club_id = team_obj.ml_club_id,
+                        medal_label = title_label,
+                        medal_year = self.year,
+                        sp_record_id = sport.sp_record_id
+                    )
+                    title_element.save()
     pass
 
 

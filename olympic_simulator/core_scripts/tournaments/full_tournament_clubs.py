@@ -4,6 +4,7 @@ from core_scripts.leagues import league_tools
 import random
 import itertools
 from collections import defaultdict
+from django.db import transaction
 
 from openpyxl import Workbook
 from openpyxl.styles import Font
@@ -140,6 +141,7 @@ class FullTournamentClubs():
     def get_world_qualified(self):
         return self.world_qualified
 
+    @transaction.atomic
     def save_results(self):
         merged_table = self.merge_tables(self.general_tables)
         index = 1
@@ -195,12 +197,6 @@ class FullTournamentClubs():
                     )
                     title_element.save()
 
-                    print(
-                        "¿Existe después del save?:",
-                        Clubtitleregister.objects.filter(
-                            club_title_id = title_element.club_title_id
-                        ).exists()
-                    )
 
                 champion = ''
                 not_champion = ''
@@ -268,63 +264,7 @@ class FullTournamentClubs():
                         sp_record_id = sport.sp_record_id
                     )
                     title_element.save()
-                club_obj = Clubs.objects.get(club_name = champion)
-                team_obj = Nationalteams.objects.get(team_name = club_obj.club_country.team_name)
-                sport = Sportsrecords.objects.get(sp_record_name = name_sp)                
-                try:
-                    existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
-                    existing_log.team_id = team_obj.team_id
-                    existing_log.medal_label = 'O'
-                    existing_log.medal_year = self.year
-                    existing_log.sp_record = sport
-                    existing_log.save()
-                except Teammedalregister.DoesNotExist:
-                    title_label = 'O'
-                    title_element = Teammedalregister(
-                        team_id = team_obj.team_id,
-                        medal_label = title_label,
-                        medal_year = self.year,
-                        sp_record_id = sport.sp_record_id
-                    )
-                    title_element.save()
-                club_obj = Clubs.objects.get(club_name = not_champion)
-                team_obj = Nationalteams.objects.get(team_name = club_obj.club_country.team_name)
-                sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
-                try:
-                    existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
-                    existing_log.team_id = team_obj.team_id
-                    existing_log.medal_label = 'P'
-                    existing_log.medal_year = self.year
-                    existing_log.sp_record = sport
-                    existing_log.save()
-                except Teammedalregister.DoesNotExist:
-                    title_label = 'P'
-                    title_element = Teammedalregister(
-                        team_id = team_obj.team_id,
-                        medal_label = title_label,
-                        medal_year = self.year,
-                        sp_record_id = sport.sp_record_id
-                    )
-                    title_element.save()
-                club_obj = Clubs.objects.get(club_name = third_place)
-                team_obj = Nationalteams.objects.get(team_name = club_obj.club_country.team_name)
-                sport = Sportsrecords.objects.get(sp_record_name = name_sp)      
-                try:
-                    existing_log = Teammedalregister.objects.get(team_id = team_obj.team_id, sp_record_id = sport.sp_record_id, medal_year = self.year)
-                    existing_log.team_id = team_obj.team_id
-                    existing_log.medal_label = 'B'
-                    existing_log.medal_year = self.year
-                    existing_log.sp_record = sport
-                    existing_log.save()
-                except Teammedalregister.DoesNotExist:
-                    title_label = 'B'
-                    title_element = Teammedalregister(
-                        team_id = team_obj.team_id,
-                        medal_label = title_label,
-                        medal_year = self.year,
-                        sp_record_id = sport.sp_record_id
-                    )
-                    title_element.save()
+
             except Exception as e:
                 import traceback
 
@@ -334,23 +274,6 @@ class FullTournamentClubs():
                 traceback.print_exc()
 
                 raise
-
-
-        registros = Clubtitleregister.objects.filter(
-            title_year=str(self.year)
-        )
-        print("\n========== VERIFICACIÓN FINAL ==========")
-
-        for registro in registros:
-            print(
-                f"ID={registro.club_title_id} | "
-                f"Club={registro.club_id} | "
-                f"Año={registro.title_year} | "
-                f"Label={registro.title_label}"
-            )
-
-        print("TOTAL:", registros.count())
-        print("CHAMPIONS GENERADOS:", len(self.champions))
 
         for cont in self.general_matches:
             for m in cont:
@@ -375,9 +298,6 @@ class FullTournamentClubs():
                     match_year = str(self.year)
                 )
                 match_element.save()
-
-
-
 
     def merge_tables(self, tables):
         merged = defaultdict(lambda: {

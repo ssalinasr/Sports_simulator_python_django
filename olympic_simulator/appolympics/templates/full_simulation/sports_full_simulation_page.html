@@ -64,7 +64,9 @@
                         <div class="col-md-12 col-12 mb-3 mb-md-0 text-center text-md-start">
                             <button class="esports-btn" hx-get="{% url 'generar_simulacion_completa_olimpica' clase %}"
                                 hx-target="#resultsSimulation"
-                                hx-include="#categoriasSelect, #tournamentYear, #selectSave">
+                                hx-include="#categoriasSelect, #tournamentYear, #selectSave"
+                                hx-disabled-elt="this, #categoriasSelect, #tournamentYear, #selectSave"
+                                >
                                 <i class="bi bi-play-fill"></i>
                                 Simular
                             </button>

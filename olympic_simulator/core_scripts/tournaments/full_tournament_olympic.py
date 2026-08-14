@@ -4,6 +4,7 @@ from core_scripts.leagues import league_tools
 import random, re
 import itertools
 from collections import defaultdict
+from django.db import transaction
 
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment
@@ -133,6 +134,7 @@ class FullTournament():
         pass
 
 
+    @transaction.atomic
     def save_results(self):
         if self.match_class in [1,5]:
             for mt in self.save_gen_tables:

@@ -89,6 +89,7 @@ DATABASES = {
         'PASSWORD': 'postgres',
         'HOST': 'localhost',  # o IP del servidor
         'PORT': '5433',
+        'ATOMIC REQUESTS': True,
     }
 }
 

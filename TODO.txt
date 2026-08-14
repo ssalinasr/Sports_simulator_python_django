@@ -16,7 +16,7 @@ Añadir medallas de clubes a Medalleros generales + NBA y MLB (Añadir estos a r
 Añadir Importación de resultados por únicamente campeones (Naruto, Copa de las Naciones, Ligas de Diamante) -> (NARUTO DONE, CN DONE, DIAMOND DONE)
 
 
-Añadir Exportación a Archivo Word (Junta torneo + ligas por deporte)
+Añadir Exportación a Archivo Word (Junta torneo + ligas por deporte) -> Falta la exportación a Word + el medallero general por el año completo
 
-Añadir deportes faltantes (Hockey sobre Hielo, Waterpolo)
-Añadir a importación (Rocket League)
+Añadir deportes faltantes (Hockey sobre Hielo, Waterpolo) -> Done
+Añadir a importación (Rocket League) -> Not done

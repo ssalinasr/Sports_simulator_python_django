@@ -5,7 +5,7 @@ from django.db.models import Q, Sum, F, Case, When, IntegerField, Max, Min, Coun
 from django.db.models.functions import Coalesce
 from .models import Teamregion, Nationalteams, Olympicplayers, Teamsports, Clubleague, Clubs, Playercountry, Playertournamentsports, Teamranks, Sportsrecords, Clubmatchesregister, Teamtournamentregister
 from .models import Teammatchesregister, Teamtitleregister, Playertitleregister, Clubtitleregister, Playertournamentregister, Clubtournamentregister, Teamsimulationregister, Playersimulationregister, Teammedalregister, Playermedalregister
-from .models import Mlclubs, MLclubmatchesregister, Mlclubtitleregister, Mlclubtournamentregister
+from .models import Mlclubs, MLclubmatchesregister, Mlclubtitleregister, Mlclubtournamentregister, Mlclubmedalregister, Clubmedalregister
 from core_scripts.interfaces.olympic_sports_interfaces import simulated_sports
 import base64
 from core_scripts.interfaces.sports_interfaces import sports_by_time, sports_by_sets, sports_by_ends, sports_by_special_sets, sports_by_timed_points
@@ -25,6 +25,7 @@ import pandas as pd
 import re
 import json
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 
 def pagina_principal(request):
     return render(request, 'main/simulator_page.html')
@@ -2206,6 +2207,7 @@ def consultar_medallas_pais(request):
         Teammedalregister.objects
         .filter(team_id = country.team_id)
         .aggregate(
+            diamantes=Count('team_medal_id',filter=Q(medal_label='D')),
             oros=Count('team_medal_id', filter=Q(medal_label='O')),
             platas=Count('team_medal_id', filter=Q(medal_label='P')),
             bronces=Count('team_medal_id', filter=Q(medal_label='B')),
@@ -2213,126 +2215,6 @@ def consultar_medallas_pais(request):
         )
         
     )
-
-    tournament_teams = []
-    #Obtener titulos por pais
-    tourament_info = Teamtitleregister.objects.filter(team_id = country.team_id)
-    for ti in tourament_info:
-        champion = ''
-        not_champion = ''
-        if ti.title_bracket is not None:
-            element = ti.title_bracket['Final'][0]
-            if element['winner'] == element['team1']:
-                champion = element['team1']
-                not_champion = element['team2']
-            else:
-                champion = element['team2']
-                not_champion = element['team1']
-            third_place = ti.title_bracket['Third Place'][0]['winner']
-            tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image, ti.team_sport.team_sport_name))
-
-    #Obtener titulos por clubes
-    tourament_info = Clubtitleregister.objects.exclude(title_bracket__isnull=True).filter(club_id__club_country__team_id = country.team_id)
-    for ti in tourament_info:
-        champion = ''
-        not_champion = ''
-        element = ti.title_bracket['Final'][0]
-        print(element)
-        if element['winner'] == element['team1']:
-            champion = element['team1']
-            not_champion = element['team2']
-        else:
-            champion = element['team2']
-            not_champion = element['team1']
-        third_place = ti.title_bracket['Third Place'][0]['winner']
-        tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image,'Clubes'))
-
-    medallero_titulos = defaultdict(lambda: {
-        "oros": 0,
-        "platas": 0,
-        "bronces": 0,
-        "total": 0
-        }
-    )
-
-    for champions in tournament_teams:
-        if champions[5] != 'Clubes':
-            try:
-                country = Nationalteams.objects.get(team_name = champions[1])
-            except:
-                try:
-                    country = Olympicplayers.objects.get(ol_player_name = champions[1])
-                except:
-                    country = Mlclubs.objects.get(ml_club_name = champions[1])
-
-            if champions[1] == str(pais):
-                medallero_titulos[country.team_name]["oros"]+=1
-
-            try:
-                country = Nationalteams.objects.get(team_name = champions[2])
-            except:
-                try:
-                    country = Olympicplayers.objects.get(ol_player_name = champions[2])
-                except:
-                    country = Mlclubs.objects.get(ml_club_name = champions[2])
-            if champions[2] == str(pais):
-                medallero_titulos[country.team_name]["platas"]+=1
-
-            try:
-                country = Nationalteams.objects.get(team_name = champions[3])
-            except:
-                try:
-                    country = Olympicplayers.objects.get(ol_player_name = champions[3])
-                except:
-                    country = Mlclubs.objects.get(ml_club_name = champions[3])
-            if champions[3] == str(pais):
-                medallero_titulos[country.team_name]["bronces"]+=1
-        else:
-            club = Clubs.objects.get(club_name = champions[1])
-            if club.club_country.team_name == str(pais):
-                medallero_titulos[country.team_name]["oros"]+=1
-
-            club = Clubs.objects.get(club_name = champions[2])
-            if club.club_country.team_name == str(pais):
-                medallero_titulos[country.team_name]["platas"]+=1
-
-            club = Clubs.objects.get(club_name = champions[3])
-            if club.club_country.team_name == str(pais):
-                medallero_titulos[country.team_name]["bronces"]+=1
-
-        
-    for pais, datos in medallero_titulos.items():
-        datos["total"] = datos["oros"] + datos["platas"] + datos["bronces"]
-
-    medallero_titulos_sorted = sorted(
-        medallero_titulos.items(),
-        key= lambda item:(
-            item[1]['oros'],
-            item[1]['platas'],
-            item[1]['bronces']
-        ),
-        reverse=True
-    )
-
-    resumen = {
-            "oros": sum(datos["oros"] for datos in medallero_titulos.values()),
-            "platas": sum(datos["platas"] for datos in medallero_titulos.values()),
-            "bronces": sum(datos["bronces"] for datos in medallero_titulos.values())
-        }
-
-    resumen["total"] = (
-            resumen["oros"] +
-            resumen["platas"] +
-            resumen["bronces"]
-        )
-
-    medallero_titulos_sorted.append(("TOTAL", resumen))
-    general_tot = [general, medallero_titulos[pais]]
-
-    general_res = {
-        clave: sum(d[clave] for d in general_tot)
-        for clave in general_tot[0]
-    }
 
     medallero = (
         Teammedalregister.objects
@@ -2342,12 +2224,14 @@ def consultar_medallas_pais(request):
             'deporte'
         )
         .annotate(
+            diamantes=Count('team_medal_id',filter=Q(medal_label='D')),
             oros=Count('team_medal_id', filter=Q(medal_label='O')),
             platas=Count('team_medal_id', filter=Q(medal_label='P')),
             bronces=Count('team_medal_id', filter=Q(medal_label='B')),
             total=Count('team_medal_id')
         )
         .order_by(
+        '-diamantes',
         '-oros',
         '-platas',
         '-bronces',
@@ -2358,6 +2242,7 @@ def consultar_medallas_pais(request):
     medallero_tot = medallero
     medallero_tot = {
         fila["deporte"]: {
+            "diamantes":fila["diamantes"],
             "oros": fila["oros"],
             "platas": fila["platas"],
             "bronces": fila["bronces"],
@@ -2366,111 +2251,11 @@ def consultar_medallas_pais(request):
         for fila in medallero_tot
     }
 
-    medallero_deportes = defaultdict(lambda: {
-        "oros": 0,
-        "platas": 0,
-        "bronces": 0,
-        "total": 0
-        }
-    )
-
-    for champions in tournament_teams:
-        sport_name = ''
-        if champions[5] != 'Clubes':
-            try:
-                country = Nationalteams.objects.get(team_name = champions[1])
-                sport = Teamsports.objects.get(team_sport_name = champions[5])
-                sport_name = sport.team_sport_name
-            except:
-                try:
-                    country = Olympicplayers.objects.get(ol_player_name = champions[1])
-                    sport = Playertournamentsports.objects.get(player_trn_sport_name = champions[5])
-                    sport_name = sport.player_trn_sport_name
-                except:
-                    country = Mlclubs.objects.get(ml_club_name = champions[1])
-                    sport_name = country.ml_club_type
-
-            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
-            if champions[1] == str(pais):
-                print('here oro')
-                medallero_deportes[sport_name]["oros"]+=1
-
-            try:
-                country = Nationalteams.objects.get(team_name = champions[2])
-                sport = Teamsports.objects.get(team_sport_name = champions[5])
-                sport_name = sport.team_sport_name
-            except:
-                try:
-                    country = Olympicplayers.objects.get(ol_player_name = champions[2])
-                    sport = Playertournamentsports.objects.get(player_trn_sport_name = champions[5])
-                    sport_name = sport.player_trn_sport_name
-                except:
-                    country = Mlclubs.objects.get(ml_club_name = champions[2])
-                    sport_name = country.ml_club_type
-
-            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
-            if champions[2] == str(pais):
-                print('here plata')
-                medallero_deportes[sport_name]["platas"]+=1
-
-            try:
-                country = Nationalteams.objects.get(team_name = champions[3])
-                sport = Teamsports.objects.get(team_sport_name = champions[5])
-                sport_name = sport.team_sport_name
-            except:
-                try:
-                    country = Olympicplayers.objects.get(ol_player_name = champions[3])
-                    sport = Playertournamentsports.objects.get(player_trn_sport_name = champions[5])
-                    sport_name = sport.player_trn_sport_name
-                except:
-                    country = Mlclubs.objects.get(ml_club_name = champions[3])
-                    sport_name = country.ml_club_type
-
-            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
-            if champions[3] == str(pais):
-                print('here bronce')
-                medallero_deportes[sport_name]["bronces"]+=1
-        else:
-            country = Clubs.objects.get(club_name = champions[1])
-            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
-            if club.club_country.team_name == str(pais):
-                medallero_deportes["Clubes"]["oros"]+=1
-
-            country = Clubs.objects.get(club_name = champions[2])
-            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
-            if club.club_country.team_name == str(pais):
-                medallero_deportes["Clubes"]["platas"]+=1
-
-            country = Clubs.objects.get(club_name = champions[3])
-            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
-            if club.club_country.team_name == str(pais):
-                medallero_deportes["Clubes"]["bronces"]+=1
-
-    for pais, datos in medallero_deportes.items():
-        datos["total"] = datos["oros"] + datos["platas"] + datos["bronces"]
-
-    
-    medallero_deportes_sorted = sorted(
-        medallero_deportes.items(),
-        key= lambda item:(
-            item[1]['oros'],
-            item[1]['platas'],
-            item[1]['bronces']
-        ),
-        reverse=True
-    )
-    medallero_deportes_sorted = dict(medallero_deportes_sorted)
-
-    resultado_final = {**medallero_tot, **medallero_deportes_sorted}
-    print('Resultado_final')
-    print(resultado_final)
-    for f in resultado_final:
-        print(f)
-
     resultado_ordenado = dict(
         sorted(
-            resultado_final.items(),
+            medallero_tot.items(),
             key=lambda item: (
+                item[1]["diamantes"],
                 item[1]["oros"],
                 item[1]["platas"],
                 item[1]["bronces"]
@@ -2480,7 +2265,7 @@ def consultar_medallas_pais(request):
     )
 
     return render(request, 'logs/country_search_olympic_results.html', {'medallero': resultado_ordenado, 'pais': country, 'region': region,
-                                                                         'nacion': major_country, 'general': general_res})
+                                                                         'nacion': major_country, 'general': general})
 
 def consultar_medallas_jugador(request):
     jugador = request.GET.get('jugador')
@@ -2492,6 +2277,7 @@ def consultar_medallas_jugador(request):
         Playermedalregister.objects
         .filter(ol_player_id= player.ol_player_id)
         .aggregate(
+            diamantes=Count('player_medal_id', filter=Q(medal_label='D')),
             oros=Count('player_medal_id', filter=Q(medal_label='O')),
             platas=Count('player_medal_id', filter=Q(medal_label='P')),
             bronces=Count('player_medal_id', filter=Q(medal_label='B')),
@@ -2507,12 +2293,14 @@ def consultar_medallas_jugador(request):
             'deporte'
         )
         .annotate(
+            diamantes=Count('player_medal_id', filter=Q(medal_label='D')),
             oros=Count('player_medal_id', filter=Q(medal_label='O')),
             platas=Count('player_medal_id', filter=Q(medal_label='P')),
             bronces=Count('player_medal_id', filter=Q(medal_label='B')),
             total=Count('player_medal_id')
         )
         .order_by(
+        '-diamantes',
         '-oros',
         '-platas',
         '-bronces',
@@ -2532,6 +2320,7 @@ def consultar_medallas_pais_mayor(request):
         Teammedalregister.objects
         .filter(team_id__ol_country__ol_country_name = str(pais))
         .aggregate(
+            diamantes=Count('team_medal_id', filter=Q(medal_label='D')),
             oros=Count('team_medal_id', filter=Q(medal_label='O')),
             platas=Count('team_medal_id', filter=Q(medal_label='P')),
             bronces=Count('team_medal_id', filter=Q(medal_label='B')),
@@ -2544,6 +2333,7 @@ def consultar_medallas_pais_mayor(request):
         Playermedalregister.objects
         .filter(ol_player_id__ol_country__ol_country_name = str(pais))
         .aggregate(
+            diamantes=Count('player_medal_id', filter=Q(medal_label='D')),
             oros=Count('player_medal_id', filter=Q(medal_label='O')),
             platas=Count('player_medal_id', filter=Q(medal_label='P')),
             bronces=Count('player_medal_id', filter=Q(medal_label='B')),
@@ -2551,161 +2341,23 @@ def consultar_medallas_pais_mayor(request):
         )
         
     )
-    tournament_teams = []
-    #Obtener titulos por pais
-    tourament_info = Teamtitleregister.objects.all()
-    for ti in tourament_info:
-        champion = ''
-        not_champion = ''
-        if ti.title_bracket is not None:
-            element = ti.title_bracket['Final'][0]
-            print(element)
-            if element['winner'] == element['team1']:
-                champion = element['team1']
-                not_champion = element['team2']
-            else:
-                champion = element['team2']
-                not_champion = element['team1']
-            third_place = ti.title_bracket['Third Place'][0]['winner']
-            tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image, ti.team_sport.team_sport_name))
 
-    #Obtener titulos por jugadores
-    tourament_info = Playertitleregister.objects.all()
-    for ti in tourament_info:
-        champion = ''
-        not_champion = ''
-        element = ti.title_bracket['Final'][0]
-        print(element)
-        if element['winner'] == element['team1']:
-            champion = element['team1']
-            not_champion = element['team2']
-        else:
-            champion = element['team2']
-            not_champion = element['team1']
-        third_place = ti.title_bracket['Third Place'][0]['winner']
-        tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image,ti.player_trn_sport.player_trn_sport_name))
-
-    #Obtener titulos por clubes
-    tourament_info = Clubtitleregister.objects.exclude(title_bracket__isnull=True)
-    for ti in tourament_info:
-        champion = ''
-        not_champion = ''
-        element = ti.title_bracket['Final'][0]
-        print(element)
-        if element['winner'] == element['team1']:
-            champion = element['team1']
-            not_champion = element['team2']
-        else:
-            champion = element['team2']
-            not_champion = element['team1']
-        third_place = ti.title_bracket['Third Place'][0]['winner']
-        tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image,'Clubes'))
-
-    #Obtener titulos por NBA/MLB
-    tourament_info = Mlclubtitleregister.objects.all()
-    for ti in tourament_info:
-        champion = ''
-        not_champion = ''
-        element = ti.title_bracket['Final'][0]
-        print(element)
-        if element['winner'] == element['team1']:
-            champion = element['team1']
-            not_champion = element['team2']
-        else:
-            champion = element['team2']
-            not_champion = element['team1']
-        third_place = ti.title_bracket['Third Place'][0]['winner']
-        tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image,ti.ml_club.ml_club_type))
-
-    medallero_titulos = defaultdict(lambda: {
-        "oros": 0,
-        "platas": 0,
-        "bronces": 0,
-        "total": 0
-        }
-    )
-
-    print(tournament_teams)
-
-    for champions in tournament_teams:
-        if champions[5] != 'Clubes':
-            try:
-                country = Nationalteams.objects.get(team_name = champions[1])
-            except:
-                try:
-                    country = Olympicplayers.objects.get(ol_player_name = champions[1])
-                except:
-                    country = Mlclubs.objects.get(ml_club_name = champions[1])
-
-            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
-            if nation.ol_country_name == pais:
-                medallero_titulos[nation.ol_country_name]["oros"]+=1
-
-            try:
-                country = Nationalteams.objects.get(team_name = champions[2])
-            except:
-                try:
-                    country = Olympicplayers.objects.get(ol_player_name = champions[2])
-                except:
-                    country = Mlclubs.objects.get(ml_club_name = champions[2])
-            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
-            if nation.ol_country_name == pais:
-                medallero_titulos[nation.ol_country_name]["platas"]+=1
-
-            try:
-                country = Nationalteams.objects.get(team_name = champions[3])
-            except:
-                try:
-                    country = Olympicplayers.objects.get(ol_player_name = champions[3])
-                except:
-                    country = Mlclubs.objects.get(ml_club_name = champions[3])
-            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
-            if nation.ol_country_name == pais:
-                medallero_titulos[nation.ol_country_name]["bronces"]+=1
-        else:
-            country = Clubs.objects.get(club_name = champions[1])
-            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
-            if nation.ol_country_name == pais:
-                medallero_titulos[nation.ol_country_name]["oros"]+=1
-
-            country = Clubs.objects.get(club_name = champions[2])
-            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
-            if nation.ol_country_name == pais:
-                medallero_titulos[nation.ol_country_name]["platas"]+=1
-
-            country = Clubs.objects.get(club_name = champions[3])
-            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
-            if nation.ol_country_name == pais:
-                medallero_titulos[nation.ol_country_name]["bronces"]+=1
-
-        
-    for pais, datos in medallero_titulos.items():
-        datos["total"] = datos["oros"] + datos["platas"] + datos["bronces"]
-
-    medallero_titulos_sorted = sorted(
-        medallero_titulos.items(),
-        key= lambda item:(
-            item[1]['oros'],
-            item[1]['platas'],
-            item[1]['bronces']
-        ),
-        reverse=True
-    )
-
-    resumen = {
-            "oros": sum(datos["oros"] for datos in medallero_titulos.values()),
-            "platas": sum(datos["platas"] for datos in medallero_titulos.values()),
-            "bronces": sum(datos["bronces"] for datos in medallero_titulos.values())
-        }
-
-    resumen["total"] = (
-            resumen["oros"] +
-            resumen["platas"] +
-            resumen["bronces"]
+    general_ml = (
+        Mlclubmedalregister.objects
+        .filter(ml_club__ol_country__ol_country_name = str(pais))
+        .aggregate(
+            diamantes=Count('ml_club_medal_id', filter=Q(medal_label='D')),
+            oros=Count('ml_club_medal_id', filter=Q(medal_label='O')),
+            platas=Count('ml_club_medal_id', filter=Q(medal_label='P')),
+            bronces=Count('ml_club_medal_id', filter=Q(medal_label='B')),
+            total=Count('ml_club_medal_id')
         )
+    )
+        
+    
 
-    medallero_titulos_sorted.append(("TOTAL", resumen))
-    general_tot = [general, general_gm, medallero_titulos[pais]]
+
+    general_tot = [general, general_gm, general_ml]
 
     general_res = {
         clave: sum(d[clave] for d in general_tot)
@@ -2720,12 +2372,14 @@ def consultar_medallas_pais_mayor(request):
             'deporte'
         )
         .annotate(
+            diamantes=Count('team_medal_id', filter=Q(medal_label='D')),
             oros=Count('team_medal_id', filter=Q(medal_label='O')),
             platas=Count('team_medal_id', filter=Q(medal_label='P')),
             bronces=Count('team_medal_id', filter=Q(medal_label='B')),
             total=Count('team_medal_id')
         )
         .order_by(
+        '-diamantes',
         '-oros',
         '-platas',
         '-bronces',
@@ -2741,12 +2395,14 @@ def consultar_medallas_pais_mayor(request):
             'deporte'
         )
         .annotate(
+            diamantes=Count('player_medal_id', filter=Q(medal_label='D')),
             oros=Count('player_medal_id', filter=Q(medal_label='O')),
             platas=Count('player_medal_id', filter=Q(medal_label='P')),
             bronces=Count('player_medal_id', filter=Q(medal_label='B')),
             total=Count('player_medal_id')
         )
         .order_by(
+        '-diamantes',
         '-oros',
         '-platas',
         '-bronces',
@@ -2754,9 +2410,33 @@ def consultar_medallas_pais_mayor(request):
         )
     )
 
-    medallero_tot = medallero.union(medallero_gm)
+    medallero_gl = (
+        Mlclubmedalregister.objects
+        .filter(ml_club__ol_country__ol_country_name = str(pais))
+        .annotate(deporte=F('sp_record__team_sport__team_sport_name'))
+        .values(
+            'deporte'
+        )
+        .annotate(
+            diamantes=Count('ml_club_medal_id', filter=Q(medal_label='D')),
+            oros=Count('ml_club_medal_id', filter=Q(medal_label='O')),
+            platas=Count('ml_club_medal_id', filter=Q(medal_label='P')),
+            bronces=Count('ml_club_medal_id', filter=Q(medal_label='B')),
+            total=Count('ml_club_medal_id')
+        )
+        .order_by(
+        '-diamantes',
+        '-oros',
+        '-platas',
+        '-bronces',
+        'sp_record__team_sport__team_sport_name'
+        )
+    )
+
+    medallero_tot = medallero.union(medallero_gm).union(medallero_gl)
     medallero_tot = {
         fila["deporte"]: {
+            "diamantes":fila["diamantes"],
             "oros": fila["oros"],
             "platas": fila["platas"],
             "bronces": fila["bronces"],
@@ -2765,108 +2445,11 @@ def consultar_medallas_pais_mayor(request):
         for fila in medallero_tot
     }
 
-    medallero_deportes = defaultdict(lambda: {
-        "oros": 0,
-        "platas": 0,
-        "bronces": 0,
-        "total": 0
-        }
-    )
-
-    for champions in tournament_teams:
-        sport_name = ''
-        if champions[5] != 'Clubes':
-            try:
-                country = Nationalteams.objects.get(team_name = champions[1])
-                sport = Teamsports.objects.get(team_sport_name = champions[5])
-                sport_name = sport.team_sport_name
-            except:
-                try:
-                    country = Olympicplayers.objects.get(ol_player_name = champions[1])
-                    sport = Playertournamentsports.objects.get(player_trn_sport_name = champions[5])
-                    sport_name = sport.player_trn_sport_name
-                except:
-                    country = Mlclubs.objects.get(ml_club_name = champions[1])
-                    sport_name = country.ml_club_type
-
-            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
-            if nation.ol_country_name == pais:
-                medallero_deportes[sport_name]["oros"]+=1
-
-            try:
-                country = Nationalteams.objects.get(team_name = champions[2])
-                sport = Teamsports.objects.get(team_sport_name = champions[5])
-                sport_name = sport.team_sport_name
-            except:
-                try:
-                    country = Olympicplayers.objects.get(ol_player_name = champions[2])
-                    sport = Playertournamentsports.objects.get(player_trn_sport_name = champions[5])
-                    sport_name = sport.player_trn_sport_name
-                except:
-                    country = Mlclubs.objects.get(ml_club_name = champions[2])
-                    sport_name = country.ml_club_type
-
-            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
-            if nation.ol_country_name == pais:
-                medallero_deportes[sport_name]["platas"]+=1
-
-            try:
-                country = Nationalteams.objects.get(team_name = champions[3])
-                sport = Teamsports.objects.get(team_sport_name = champions[5])
-                sport_name = sport.team_sport_name
-            except:
-                try:
-                    country = Olympicplayers.objects.get(ol_player_name = champions[3])
-                    sport = Playertournamentsports.objects.get(player_trn_sport_name = champions[5])
-                    sport_name = sport.player_trn_sport_name
-                except:
-                    country = Mlclubs.objects.get(ml_club_name = champions[3])
-                    sport_name = country.ml_club_type
-
-            nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
-            if nation.ol_country_name == pais:
-                medallero_deportes[sport_name]["bronces"]+=1
-        else:
-            country = Clubs.objects.get(club_name = champions[1])
-            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
-            if nation.ol_country_name == pais:
-                medallero_deportes["Clubes"]["oros"]+=1
-
-            country = Clubs.objects.get(club_name = champions[2])
-            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
-            if nation.ol_country_name == pais:
-                medallero_deportes["Clubes"]["platas"]+=1
-
-            country = Clubs.objects.get(club_name = champions[3])
-            nation = Playercountry.objects.get(ol_country_id = country.club_country.ol_country_id)
-            if nation.ol_country_name == pais:
-                medallero_deportes["Clubes"]["bronces"]+=1
-
-        
-    for pais, datos in medallero_deportes.items():
-        datos["total"] = datos["oros"] + datos["platas"] + datos["bronces"]
-
-    medallero_deportes_sorted = sorted(
-        medallero_deportes.items(),
-        key= lambda item:(
-            item[1]['oros'],
-            item[1]['platas'],
-            item[1]['bronces']
-        ),
-        reverse=True
-    )
-
-
-    medallero_deportes_sorted = dict(medallero_deportes_sorted)
-
-    resultado_final = {**medallero_tot, **medallero_deportes_sorted}
-    for f in resultado_final:
-        print(f)
-
     resultado_ordenado = dict(
         sorted(
-            resultado_final.items(),
+            medallero_tot.items(),
             key=lambda item: (
+                item[1]["diamantes"],
                 item[1]["oros"],
                 item[1]["platas"],
                 item[1]["bronces"]
@@ -2874,7 +2457,6 @@ def consultar_medallas_pais_mayor(request):
             reverse=True
         )
     )
-
     
     return render(request, 'logs/major_country_olympic_search_results.html', {'medallero': resultado_ordenado, 'nacion': major_country, 'general': general_res})
 
@@ -3177,6 +2759,7 @@ def pagina_importar_campeones(request):
     deportes = Teamsports.objects.filter(team_sport_class__in = ['N'], team_sport_name__in = ['Naruto','Pro Cycling Manager','Copa de las Naciones'])
     return render(request, 'import/import_champions_page.html',{'deportes': deportes})
 
+@transaction.atomic
 def importar_campeones(request):
     deporte = request.GET.get('deporte')
     filepath = "media/resultados_"+str(deporte)+".xlsx"
@@ -3294,7 +2877,7 @@ def importar_campeones(request):
         "message": message
     })
 
-
+@transaction.atomic
 def importar_resultados(request):
     deporte = request.GET.get('deporte')
     filepath = "media/resultados_"+str(deporte)+".xlsx"
@@ -3746,6 +3329,7 @@ def pagina_liga_diamante(request):
     years = range(1880,3100,4*12)
     return render(request, 'logs/diamond_register_page.html',{'years': years})
 
+@transaction.atomic
 def importar_liga_diamante(request):
     valor_anio = request.GET.get('valoryear')
     filepath = "media/resultados_ligas_diamante_"+str(valor_anio)+".xlsx"
@@ -3917,11 +3501,11 @@ def pagina_exportar_word(request):
     years = range(1880,3100,4)
     return render(request, 'export/export_olympic_word.html',{'years': years})
 
+@transaction.atomic
 def exportar_word(request):
     year = request.GET.get('valoryear')
     print(year)
     all_tournaments = Teamsports.objects.all()
-    all_play_tournaments = Playertournamentsports.objects.all()
     all_sports_records = Sportsrecords.objects.all()
 
 
@@ -3930,7 +3514,9 @@ def exportar_word(request):
             "nombre_deporte": '',
             "torneos_deporte": [],
             "ligas_deporte": [],
-            "color_deporte": ''
+            "color_deporte": '',
+            "tablas_resultados": [],
+            "medallero_deporte":[]
         }
     )
 
@@ -3943,15 +3529,124 @@ def exportar_word(request):
             sports_dict[at.team_sport_name]["ligas_deporte"]=[atc for atc in at_curr_sports]
         except ObjectDoesNotExist:
             sports_dict[at.team_sport_name]["ligas_deporte"]=[]
-
-        try:
-            play_trn_curr_sports = all_play_tournaments.filter(team_sport_id = at.team_sport_id)
-            sports_dict[at.team_sport_name]["torneos_deporte"].extend([ptc for ptc in play_trn_curr_sports])
-        except ObjectDoesNotExist:
-            sports_dict[at.team_sport_name]["torneos_deporte"] = [at]
-
     for sd, itm in sports_dict.items():
-        print(itm)
+        final_table = []
+        for reg in itm['ligas_deporte']:
+            
+            medal_obj = Teammedalregister.objects.filter(sp_record_id = reg.sp_record_id, medal_year=str(year)).exclude(medal_label = 'D')
+            if medal_obj.exists():
+                temp_table = []
+                for mdo in medal_obj:
+                    tabla_element = ('N/M','Sin nombre participante','---')
+                    try:
+                        sim_values = Teamsimulationregister.objects.get(team_id = mdo.team.team_id, team_year = str(year), sp_record_id = reg.sp_record_id)
+                        value_reg = round(sim_values.team_result,3)
+                        tabla_element = (mdo.medal_label, mdo.team.team_name, mdo.team.ol_country.ol_country_name, value_reg)
+                    except ObjectDoesNotExist:
+                        value_reg = '---'
+                        tabla_element = (mdo.medal_label, mdo.team.team_name, mdo.team.ol_country.ol_country_name, value_reg)
+                    finally:
+                        temp_table.append(tabla_element)
+                final_table.append(temp_table)
+
+                
+            else:
+                medal_obj = Playermedalregister.objects.filter(sp_record_id = reg.sp_record_id, medal_year = str(year)).exclude(medal_label = 'D')
+                if medal_obj.exists():
+                    temp_table = []
+                    for mdo in medal_obj:
+                        tabla_element = ('N/M','Sin nombre participante','---')
+                        try:
+                            sim_values = Playersimulationregister.objects.get(ol_player_id = mdo.ol_player.ol_player_id, sp_record_id = reg.sp_record_id, ol_player_year = str(year))
+                            value_reg = round(sim_values.team_result,3)
+                            tabla_element = (mdo.medal_label, mdo.ol_player.ol_player_name, mdo.ol_player.ol_country.ol_country_name, value_reg)
+                        except ObjectDoesNotExist:
+                            value_reg = '---'
+                            tabla_element = (mdo.medal_label, mdo.ol_player.ol_player_name, mdo.ol_player.ol_country.ol_country_name, value_reg)
+                        finally:
+                            temp_table.append(tabla_element)
+                    final_table.append(temp_table)
+                else:
+                    medal_obj = Clubmedalregister.objects.filter(sp_record_id = reg.sp_record_id, medal_year = str(year)).exclude(medal_label = 'D')
+                    if medal_obj.exists():
+                        temp_table = [] 
+                        for mdo in medal_obj: 
+                            value_reg = '---'
+                            tabla_element = (mdo.medal_label, mdo.club.club_name, mdo.club.club_country.ol_country.ol_country_name, value_reg)
+                            temp_table.append(tabla_element)
+                        final_table.append(temp_table)
+                    else:
+                        medal_obj = Mlclubmedalregister.objects.filter(sp_record_id = reg.sp_record_id, medal_year = str(year)).exclude(medal_label = 'D')
+                        if medal_obj.exists():
+                            for mdo in medal_obj: 
+                                value_reg = '---'
+                                tabla_element = (mdo.medal_label, mdo.ml_club.ml_club_name, mdo.ml_club.ol_country.ol_country_name, value_reg)
+                                temp_table.append(tabla_element)
+                            final_table.append(temp_table)
+                        else:
+                            temp_table = []
+                            for mdo in range(3):
+                                tabla_element = ('N/M','N/A en '+reg.sp_record_name,'N/A en '+reg.sp_record_name,'---')
+                                temp_table.append(tabla_element)
+                            final_table.append(temp_table)
+        sports_dict[sd]["tablas_resultados"] = final_table
+            
+    for sd, itm in sports_dict.items():
+        print(sd)
+        medallero = defaultdict(lambda: {
+            "O": 0,
+            "P": 0,
+            "B": 0,
+            "Total": 0
+            }
+        )
+
+        for sports in itm['tablas_resultados']:
+            for table in sports:
+                try:
+                    nation = Playercountry.objects.get(ol_country_name = table[2])
+                    if table[0] == 'O':
+                        medallero[nation.ol_country_name]["O"] += 1
+                    elif table[0] == 'P':
+                        medallero[nation.ol_country_name]["P"] += 1
+                    elif table[0] == 'B':
+                        medallero[nation.ol_country_name]["B"] += 1
+                except Playercountry.DoesNotExist:
+                    pass
+                    #print('Sin resultados para esta disciplina...')
+
+        
+        for pais, datos in medallero.items():
+            datos["Total"] = datos["O"] + datos["P"] + datos["B"]
+
+
+        medallero_sorted = sorted(
+            medallero.items(),
+            key= lambda item:(
+                item[1]['O'],
+                item[1]['P'],
+                item[1]['B']
+            ),
+            reverse=True
+        )
+
+        resumen = {
+                "O": sum(datos["O"] for datos in medallero.values()),
+                "P": sum(datos["P"] for datos in medallero.values()),
+                "B": sum(datos["B"] for datos in medallero.values())
+            }
+
+        resumen["Total"] = (
+                resumen["O"] +
+                resumen["P"] +
+                resumen["B"]
+            )
+
+        medallero_sorted.append(("TOTAL", resumen))
+        #print(medallero_sorted)
+        print(medallero_sorted)
+        sports_dict[sd]["medallero_deporte"] = medallero_sorted
+
 
     
 

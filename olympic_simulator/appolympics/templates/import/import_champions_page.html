@@ -35,7 +35,8 @@
                         </div>
                         <div class="col-md-12 col-12">
                             <button class="esports-btn justify-content-center" hx-get="{% url 'importar_campeones' %}"
-                                hx-target="#importResults" hx-include="#sportsSelect">
+                                hx-target="#importResults" hx-include="#sportsSelect"
+                                hx-disabled-elt="this, #sportsSelect">
                                 <i class="bi bi-people"></i>Importar Resultados
                             </button>
                         </div>
