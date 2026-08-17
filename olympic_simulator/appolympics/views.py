@@ -15,7 +15,7 @@ from core_scripts.tournaments import tournament_group
 from core_scripts.tournaments import full_tournament, full_tournament_clubs, full_tournament_olympic
 from collections import Counter, defaultdict
 from core_scripts.clubs_leagues import club_league_season
-from core_scripts.import_tools import excel_importer
+from core_scripts.import_tools import excel_importer, word_exporter
 import itertools
 from openpyxl import Workbook
 import os
@@ -26,6 +26,7 @@ import re
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
+from pathlib import Path
 
 def pagina_principal(request):
     return render(request, 'main/simulator_page.html')
@@ -2752,11 +2753,11 @@ def consultar_rankings(request):
     return render(request, 'logs/rankings_page_results.html', {'deporte': deporte, 'tabla_ranking': sorted_ranking})
 
 def pagina_importar(request):
-    deportes = Teamsports.objects.filter(team_sport_class__in = ['N']).exclude(team_sport_name = 'Naruto').exclude(team_sport_name = 'Pro Cycling Manager')
+    deportes = Teamsports.objects.filter(team_sport_class__in = ['N']).exclude(team_sport_name = 'Naruto').exclude(team_sport_name = 'Pro Cycling Manager').exclude(team_sport_name ='Rocket League')
     return render(request, 'import/import_page.html',{'deportes': deportes})
 
 def pagina_importar_campeones(request):
-    deportes = Teamsports.objects.filter(team_sport_class__in = ['N'], team_sport_name__in = ['Naruto','Pro Cycling Manager','Copa de las Naciones'])
+    deportes = Teamsports.objects.filter(team_sport_class__in = ['N'], team_sport_name__in = ['Naruto','Pro Cycling Manager','Copa de las Naciones','Rocket League'])
     return render(request, 'import/import_champions_page.html',{'deportes': deportes})
 
 @transaction.atomic
@@ -2780,7 +2781,7 @@ def importar_campeones(request):
     #direct_medals = importer.medallas_directas(results)
     champions_by_year = []
 
-    if deporte in ['Naruto','Pro Cycling Manager']:
+    if deporte in ['Naruto','Pro Cycling Manager','Rocket League']:
         for bloque in results:
             direct_medals = importer.medallas_directas(bloque)
             champions_by_year.append(direct_medals)
@@ -3329,6 +3330,33 @@ def pagina_liga_diamante(request):
     years = range(1880,3100,4*12)
     return render(request, 'logs/diamond_register_page.html',{'years': years})
 
+def pagina_participantes_diamante(request):
+    sports = Sportsrecords.objects.all().order_by('sp_record_id')
+    years = range(1880,3100,4*12)
+    return render(request, 'logs/diamond_participants_page.html',{'years': years, 'deportes': sports})
+
+def consultar_participantes_diamante(request):
+    year = request.GET.get('valoryear')
+    deporte = request.GET.get('sport')
+    sport = Sportsrecords.objects.get(sp_record_name = deporte)
+    mayor_año = int(year)+(4*12)
+    max_year = str(mayor_año)
+    print(sport.sp_record_id, sport.sp_record_name)
+
+    participantes_diamante = Teammedalregister.objects.filter(sp_record_id = sport.sp_record_id, medal_label = 'O', medal_year__gte = str(year), medal_year__lte = str(max_year)).distinct('team__team_name')
+    flag = 1
+    if not participantes_diamante.exists():
+        participantes_diamante = Playermedalregister.objects.filter(sp_record_id = sport.sp_record_id, medal_label = 'O', medal_year__gte = str(year), medal_year__lte = str(max_year)).distinct('ol_player__ol_player_name')
+        flag = 2
+    elif not participantes_diamante.exists():
+        participantes_diamante = Clubmedalregister.objects.filter(sp_record_id = sport.sp_record_id, medal_label = 'O', medal_year__gte = str(year), medal_year__lte = str(max_year)).distinct('club__club_name')
+        flag = 3
+    elif not participantes_diamante.exists():
+        participantes_diamante = Mlclubmedalregister.objects.filter(sp_record_id = sport.sp_record_id,medal_label = 'O', medal_year__gte = str(year), medal_year__lte = str(max_year)).distinct('ml_club__ml_club_name')
+        flag = 4
+
+    return render(request, 'logs/search_diamond_participants.html',{'deporte': deporte, 'participantes_diamante': participantes_diamante , 'bandera' : flag, 'año': year, 'max_año': max_year})
+
 @transaction.atomic
 def importar_liga_diamante(request):
     valor_anio = request.GET.get('valoryear')
@@ -3505,8 +3533,8 @@ def pagina_exportar_word(request):
 def exportar_word(request):
     year = request.GET.get('valoryear')
     print(year)
-    all_tournaments = Teamsports.objects.all()
-    all_sports_records = Sportsrecords.objects.all()
+    all_tournaments = Teamsports.objects.all().order_by('team_sport_id')
+    all_sports_records = Sportsrecords.objects.all().order_by('team_sport_id')
 
 
     sports_dict = defaultdict(
@@ -3558,7 +3586,7 @@ def exportar_word(request):
                         tabla_element = ('N/M','Sin nombre participante','---')
                         try:
                             sim_values = Playersimulationregister.objects.get(ol_player_id = mdo.ol_player.ol_player_id, sp_record_id = reg.sp_record_id, ol_player_year = str(year))
-                            value_reg = round(sim_values.team_result,3)
+                            value_reg = round(sim_values.ol_player_result,3)
                             tabla_element = (mdo.medal_label, mdo.ol_player.ol_player_name, mdo.ol_player.ol_country.ol_country_name, value_reg)
                         except ObjectDoesNotExist:
                             value_reg = '---'
@@ -3644,12 +3672,83 @@ def exportar_word(request):
 
         medallero_sorted.append(("TOTAL", resumen))
         #print(medallero_sorted)
-        print(medallero_sorted)
-        sports_dict[sd]["medallero_deporte"] = medallero_sorted
+        sports_dict[sd]["medallero_deporte"] = dict(medallero_sorted)
 
+        medallero_general = defaultdict(lambda: {
+            "O": 0,
+            "P": 0,
+            "B": 0,
+            "Total": 0,
+        })
+
+    for deporte in sports_dict.values():
+        medalleros = deporte["medallero_deporte"]
+
+        if isinstance(medalleros, dict):
+            medalleros = [medalleros]
+
+        for medallero in medalleros:
+            for nacion, medallas in medallero.items():
+                if nacion == "TOTAL":
+                    continue
+
+                medallero_general[nacion]["O"] += medallas.get("O", 0)
+                medallero_general[nacion]["P"] += medallas.get("P", 0)
+                medallero_general[nacion]["B"] += medallas.get("B", 0)
+
+    for nacion, medallas in medallero_general.items():
+        medallas["Total"] = (
+            medallas["O"] +
+            medallas["P"] +
+            medallas["B"]
+        )
+
+    medallero_general_sorted = sorted(
+            medallero_general.items(),
+            key= lambda item:(
+                item[1]['O'],
+                item[1]['P'],
+                item[1]['B']
+            ),
+            reverse=True
+        )
+
+    print(medallero_general_sorted)
+
+    resumen = {
+            "O": sum(datos["O"] for datos in medallero_general.values()),
+            "P": sum(datos["P"] for datos in medallero_general.values()),
+            "B": sum(datos["B"] for datos in medallero_general.values())
+        }
+
+    resumen["Total"] = (
+            resumen["O"] +
+            resumen["P"] +
+            resumen["B"]
+        )
+
+    medallero_general_sorted.append(("TOTAL", resumen))
+
+    print(medallero_general_sorted)
+
+    exports_dir = Path(settings.MEDIA_ROOT) / "exports"
+    exports_dir.mkdir(parents=True, exist_ok=True)
+
+    file_name = f"resultados_olimpicos_{year}.docx"
+    file_path = exports_dir / file_name
 
     
+    word_exporter.exportar_word(
+            sports_dict,
+            year,
+            medallero_general_sorted,
+            output_path=file_path,
+        )
+    
+    download_url = f"{settings.MEDIA_URL}exports/{file_name}"
 
-    return HttpResponse("")
+    return render(request, "export/generate_download_word.html", {
+        "download_url": download_url
+    })
 
     

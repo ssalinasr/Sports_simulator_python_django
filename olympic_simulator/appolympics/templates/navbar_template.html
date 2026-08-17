@@ -217,6 +217,14 @@
                                 Importar Ligas de Diamante
                             </a>
                         </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '' %}active{% endif %}"
+                                href="{% url 'pagina_participantes_diamante' %}">
+                                <i class="bi bi-diamond"></i>
+                                Consultar Participantes Diamante
+                            </a>
+                        </li>
                     </ul>
                 </li>
 

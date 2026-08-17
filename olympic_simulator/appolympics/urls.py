@@ -9,7 +9,7 @@ from .views import pagina_registro_por_club, consultar_por_pais, consultar_por_j
 from .views import pagina_records, consultar_records, consultar_medallas_jugador, consultar_medallas_pais, consultar_medallas_pais_mayor, pagina_registro_por_torneo_olimpico, consultar_por_torneo_olimpico
 from .views import pagina_rankings, consultar_rankings, pagina_importar, importar_resultados, pagina_registro_por_torneo_olimpico_importado, consultar_por_torneo_olimpico_importado
 from .views import importar_campeones, pagina_importar_campeones, pagina_liga_diamante, importar_liga_diamante
-from .views import exportar_word, pagina_exportar_word
+from .views import exportar_word, pagina_exportar_word, pagina_participantes_diamante, consultar_participantes_diamante
 
 urlpatterns = [
     path('', pagina_principal , name='pagina_principal'),
@@ -77,6 +77,9 @@ urlpatterns = [
     path('import/results_import_champions/load', importar_campeones, name='importar_campeones'),
     path('import/results_import_diamonds/', pagina_liga_diamante,  name='pagina_liga_diamante'),
     path('import/results_import_diamonds/load', importar_liga_diamante, name='importar_liga_diamante'),
+    path('import/results_search_participants/', pagina_participantes_diamante,  name='pagina_participantes_diamante'),
+    path('import/results_search_participants/load', consultar_participantes_diamante, name='consultar_participantes_diamante'),
+    
 
     #URLs Exportación a Word#
     path('export/tournament_export/', pagina_exportar_word, name='pagina_exportar_word'),

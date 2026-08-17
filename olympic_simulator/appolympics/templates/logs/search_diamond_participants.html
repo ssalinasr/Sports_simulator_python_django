@@ -1,0 +1,47 @@
+<!-- 3️⃣ ORIGEN -->
+<div class="row league-row">
+    <div class="col-12 dashboard-item">
+        <div class="esports-card text-center">
+            <h5 class="card-title">Participantes liga diamante de {{ deporte }}</h5>
+        </div>
+    </div>
+</div>
+
+<div class="esports-card">
+    <div class="card-title">
+        <i class="bi bi-table"></i> Tabla
+    </div>
+
+    <div class="table-responsive">
+        <table class="table esports-table text-center" id="leagueTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Año</th>
+                    <th onclick="sortTable(1)">Participante</th>                  
+                </tr>
+            </thead>
+            <tbody>
+                {% for pd in participantes_diamante %}
+                <tr>
+                    <td>{{ pd.medal_year }}</td>
+                    {% if bandera == 1 %}
+                    <td>{{ pd.team.team_name }}</td>
+                    {% endif %}
+                    {% if bandera == 2 %}
+                    <td>{{ pd.ol_player.ol_player_name }}</td>
+                    {% endif %}
+                    {% if bandera == 3 %}
+                    <td>{{ pd.club.club_name }}</td>
+                    {% endif %}
+                    {% if bandera == 4 %}
+                    <td>{{ pd.ml_club.ml_club_name }}</td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <div class="col-md-12 col-12">
+                    <div class="score-part mt-2">No existen participantes de dilamante para el deporte {{ deporte }} en el periodo {{ año }} - {{ max_año }}</div>
+                </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
