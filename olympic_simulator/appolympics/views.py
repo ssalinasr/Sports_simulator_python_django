@@ -3014,7 +3014,6 @@ def importar_resultados(request):
                 for prueba in pruebas:
                     if prueba != 'Osu! Total Score':
                         sport = Sportsrecords.objects.get(sp_record_name = 'Osu! Song '+str(index))
-                        index += 1
                     else: 
                         sport = Sportsrecords.objects.get(sp_record_name = prueba)
                     if sport.sport_sort == 'D':
@@ -3058,16 +3057,22 @@ def importar_resultados(request):
                                 sp_record = sport
                             )
                             tournament_element.save()
+                    if prueba != 'Osu! Total Score': 
+                        index += 1
+                    else: 
+                        pass
             index = 1
             for r in todos_los_resultados:
-                if index > 175:
-                    index = 1
-                print(r)
-                if prueba != 'Osu! Total Score':
+                print(r['discipline'])
+                if r['discipline'] != 'Osu! Total Score':
+                    print('Index: ' + str(index))
                     sport = Sportsrecords.objects.get(sp_record_name = 'Osu! Song '+str(index))
-                    index += 1
                 else: 
                     sport = Sportsrecords.objects.get(sp_record_name = r['discipline'])
+                if r['discipline'] != 'Osu! Total Score': 
+                    index += 1
+                else: 
+                    index = 1
                 team_obj = Olympicplayers.objects.filter(ol_player_name = r['gold']['participant']).first()
                 try:
                     existing_log = Playermedalregister.objects.get(ol_player_id = team_obj.ol_player_id, sp_record_id = sport.sp_record_id, medal_year = str(r['year']))
@@ -3121,6 +3126,7 @@ def importar_resultados(request):
                         sp_record_id = sport.sp_record_id
                     )
                     title_element.save()
+
                
     else:
         for bloque in results:
