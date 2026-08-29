@@ -3333,19 +3333,19 @@ def consultar_por_torneo_olimpico_importado(request):
 
 
 def pagina_liga_diamante(request):
-    years = range(1880,3100,4*12)
+    years = range(1880,3100,4*16)
     return render(request, 'logs/diamond_register_page.html',{'years': years})
 
 def pagina_participantes_diamante(request):
     sports = Sportsrecords.objects.all().order_by('sp_record_id')
-    years = range(1880,3100,4*12)
+    years = range(1880,3100,4*16)
     return render(request, 'logs/diamond_participants_page.html',{'years': years, 'deportes': sports})
 
 def consultar_participantes_diamante(request):
     year = request.GET.get('valoryear')
     deporte = request.GET.get('sport')
     sport = Sportsrecords.objects.get(sp_record_name = deporte)
-    mayor_año = int(year)+(4*12)
+    mayor_año = int(year)+(4*16)
     max_year = str(mayor_año)
     print(sport.sp_record_id, sport.sp_record_name)
 
