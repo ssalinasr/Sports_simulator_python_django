@@ -3349,16 +3349,16 @@ def consultar_participantes_diamante(request):
     max_year = str(mayor_año)
     print(sport.sp_record_id, sport.sp_record_name)
 
-    participantes_diamante = Teammedalregister.objects.filter(sp_record_id = sport.sp_record_id, medal_label = 'O', medal_year__gte = str(year), medal_year__lte = str(max_year)).distinct('team__team_name')
+    participantes_diamante = Teammedalregister.objects.filter(sp_record_id = sport.sp_record_id, medal_label = 'O', medal_year__gte = str(year), medal_year__lt = str(max_year)).distinct('team__team_name')
     flag = 1
     if not participantes_diamante.exists():
-        participantes_diamante = Playermedalregister.objects.filter(sp_record_id = sport.sp_record_id, medal_label = 'O', medal_year__gte = str(year), medal_year__lte = str(max_year)).distinct('ol_player__ol_player_name')
+        participantes_diamante = Playermedalregister.objects.filter(sp_record_id = sport.sp_record_id, medal_label = 'O', medal_year__gte = str(year), medal_year__lt = str(max_year)).distinct('ol_player__ol_player_name')
         flag = 2
     elif not participantes_diamante.exists():
-        participantes_diamante = Clubmedalregister.objects.filter(sp_record_id = sport.sp_record_id, medal_label = 'O', medal_year__gte = str(year), medal_year__lte = str(max_year)).distinct('club__club_name')
+        participantes_diamante = Clubmedalregister.objects.filter(sp_record_id = sport.sp_record_id, medal_label = 'O', medal_year__gte = str(year), medal_year__lt = str(max_year)).distinct('club__club_name')
         flag = 3
     elif not participantes_diamante.exists():
-        participantes_diamante = Mlclubmedalregister.objects.filter(sp_record_id = sport.sp_record_id,medal_label = 'O', medal_year__gte = str(year), medal_year__lte = str(max_year)).distinct('ml_club__ml_club_name')
+        participantes_diamante = Mlclubmedalregister.objects.filter(sp_record_id = sport.sp_record_id,medal_label = 'O', medal_year__gte = str(year), medal_year__lt = str(max_year)).distinct('ml_club__ml_club_name')
         flag = 4
 
     return render(request, 'logs/search_diamond_participants.html',{'deporte': deporte, 'participantes_diamante': participantes_diamante , 'bandera' : flag, 'año': year, 'max_año': max_year})
