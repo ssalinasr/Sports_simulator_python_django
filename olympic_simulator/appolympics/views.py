@@ -191,6 +191,12 @@ def cargar_pruebas(request, match_class):
     page_sports = Sportsrecords.objects.filter(team_sport_id = sport.team_sport_id)
     return render(request, 'general/change_sports_template.html', {'deportes': page_sports})
 
+def cargar_años(request):
+    year_inicio = request.GET.get('valoryear')
+    years = range(int(year_inicio),3100,4)    
+    return render(request, 'general/change_years_template.html', {'year': years})
+
+
 def cargar_equipos(request, match_class):
     agrupacion = request.GET.get('agrupacion')
     name_mun = 'Munecos'
@@ -737,167 +743,171 @@ def generar_simulacion_completa(request, match_class):
     teams_by_cn = []
     full_trn = None
     valor_año = request.GET.get('valoryear')
+    valor_año_final = request.GET.get('valoryear_end')
+    lista_años = list(range(int(valor_año),int(valor_año_final)+4,4))
     hay_guardado = request.GET.get('registrarres')
     file_name = ''
 
-    if match_class == 1:
-        equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
-        continentes = Teamregion.objects.all()
-        deporte = Teamsports.objects.get(team_sport_name = request.GET.get('deporte'))
-        for eq in equipos:
-            rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = deporte.team_sport_id)
-            teams.append(eq.team_name)
-            rank_tuple = (eq.team_name, rank.team_rank)
-            ranks.append(rank_tuple)  
-        for cn in continentes:
-            temp_team_list = []
-            for eq in teams:
-                try:
-                    team = Nationalteams.objects.get(team_name = eq, team_region_id = cn.team_region_id)
-                    temp_team_list.append(team.team_name)
-                except:
-                    print('', end='')
 
-            teams_by_cn.append(temp_team_list)
-        full_trn = full_tournament.FullTournament(teams_by_cn, [cn.team_region_name for cn in continentes], ranks, deporte.team_sport_name, 8, match_class, valor_año, hay_guardado)
-        file_name = f"simulacion_{deporte.team_sport_name}_{valor_año}.xlsx"
-    elif match_class == 5:
-        equipos = Nationalteams.objects.filter(team_name__icontains='Fem')
-        continentes = Teamregion.objects.all()
-        deporte = Teamsports.objects.get(team_sport_name = request.GET.get('deporte'))
+    for ly in lista_años:
+        if match_class == 1:
+            equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
+            continentes = Teamregion.objects.all()
+            deporte = Teamsports.objects.get(team_sport_name = request.GET.get('deporte'))
+            for eq in equipos:
+                rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = deporte.team_sport_id)
+                teams.append(eq.team_name)
+                rank_tuple = (eq.team_name, rank.team_rank)
+                ranks.append(rank_tuple)  
+            for cn in continentes:
+                temp_team_list = []
+                for eq in teams:
+                    try:
+                        team = Nationalteams.objects.get(team_name = eq, team_region_id = cn.team_region_id)
+                        temp_team_list.append(team.team_name)
+                    except:
+                        print('', end='')
 
-        for eq in equipos:
-            rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = deporte.team_sport_id)
-            teams.append(eq.team_name)
-            rank_tuple = (eq.team_name, rank.team_rank)
-            ranks.append(rank_tuple)        
+                teams_by_cn.append(temp_team_list)
+            full_trn = full_tournament.FullTournament(teams_by_cn, [cn.team_region_name for cn in continentes], ranks, deporte.team_sport_name, 8, match_class, str(ly), hay_guardado)
+            file_name = f"simulacion_{deporte.team_sport_name}_{ly}.xlsx"
+        elif match_class == 5:
+            equipos = Nationalteams.objects.filter(team_name__icontains='Fem')
+            continentes = Teamregion.objects.all()
+            deporte = Teamsports.objects.get(team_sport_name = request.GET.get('deporte'))
 
-        for cn in continentes:
-            temp_team_list = []
-            for eq in teams:
-                try:
-                    team = Nationalteams.objects.get(team_name = eq, team_region_id = cn.team_region_id)
-                    temp_team_list.append(team.team_name)
-                except:
-                    print('', end='')
+            for eq in equipos:
+                rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = deporte.team_sport_id)
+                teams.append(eq.team_name)
+                rank_tuple = (eq.team_name, rank.team_rank)
+                ranks.append(rank_tuple)        
 
-            teams_by_cn.append(temp_team_list)
+            for cn in continentes:
+                temp_team_list = []
+                for eq in teams:
+                    try:
+                        team = Nationalteams.objects.get(team_name = eq, team_region_id = cn.team_region_id)
+                        temp_team_list.append(team.team_name)
+                    except:
+                        print('', end='')
 
-        full_trn = full_tournament.FullTournament(teams_by_cn, [cn.team_region_name for cn in continentes], ranks, deporte.team_sport_name, 8, match_class,valor_año,hay_guardado)
-        file_name = f"simulacion_{deporte.team_sport_name}_{valor_año}.xlsx"
-    elif match_class == 2 or match_class == 4:      
-        deporte = Playertournamentsports.objects.get(player_trn_sport_name = request.GET.get('deporte'))
-        equipos = Olympicplayers.objects.all()
-        list_games = ['Super Smash', 'Goldeneye', 'Mario Kart', 'Mario Tenis', 'Mario Party','Pokemon Stadium']
-        name_mun = 'Munecos'
-        id_munecos = Teamsports.objects.get(team_sport_name = name_mun).team_sport_id
+                teams_by_cn.append(temp_team_list)
 
-        if "Goldeneye" in deporte.player_trn_sport_name:
-            id_games_query = Teamsports.objects.get(team_sport_name = list_games[1])
-            equipos = equipos.filter(team_sport_id = id_games_query)
-            num_groups = 2
-        elif "Super Smash" in deporte.player_trn_sport_name:
-            id_games_query = Teamsports.objects.get(team_sport_name = list_games[0])
-            equipos = equipos.filter(team_sport_id = id_games_query)
-            num_groups = 8
-        elif "Mario Kart" in deporte.player_trn_sport_name:
-            id_games_query = Teamsports.objects.get(team_sport_name = list_games[2])
-            equipos = equipos.filter(team_sport_id = id_games_query)
-            num_groups = 1
-        elif "Mario Tenis" in deporte.player_trn_sport_name:
-            id_games_query = Teamsports.objects.get(team_sport_name = list_games[3])
-            equipos = equipos.filter(team_sport_id = id_games_query)
-            num_groups = 1
-        elif "Mario Party" in deporte.player_trn_sport_name:
-            id_games_query = Teamsports.objects.get(team_sport_name = list_games[4])
-            equipos = equipos.filter(team_sport_id = id_games_query)
-            num_groups = 1
-        elif "Pokemon Stadium" in deporte.player_trn_sport_name:
-            id_games_query = Teamsports.objects.get(team_sport_name = list_games[5])
-            equipos = equipos.filter(team_sport_id = id_games_query)
-            num_groups = 1
-        else:
-            if deporte.player_trn_sport_name not in ['Munecos - Futbol', 'Munecos - Baloncesto', 'Munecos - Hockey en Piso']:
-                countries = Playercountry.objects.all()
-                selected_players = []
-                temp_equipos = None
-                for c in countries:
-                    temp_equipos = equipos.filter(ol_country = c.ol_country_id, team_sport = id_munecos)
-                    player_list = []
-                    for e in temp_equipos:
-                        if not '_MN' in e.ol_player_name:
-                            player_list.append(e.ol_player_name)
-                    rand = random.randint(0, len(player_list))
-                    if rand == len(player_list):
-                        rand -= 1
-                    selected_players.append(player_list[rand])
-                equipos = equipos.filter(ol_player_name__in = selected_players)
+            full_trn = full_tournament.FullTournament(teams_by_cn, [cn.team_region_name for cn in continentes], ranks, deporte.team_sport_name, 8, match_class,str(ly),hay_guardado)
+            file_name = f"simulacion_{deporte.team_sport_name}_{ly}.xlsx"
+        elif match_class == 2 or match_class == 4:      
+            deporte = Playertournamentsports.objects.get(player_trn_sport_name = request.GET.get('deporte'))
+            equipos = Olympicplayers.objects.all()
+            list_games = ['Super Smash', 'Goldeneye', 'Mario Kart', 'Mario Tenis', 'Mario Party','Pokemon Stadium']
+            name_mun = 'Munecos'
+            id_munecos = Teamsports.objects.get(team_sport_name = name_mun).team_sport_id
+
+            if "Goldeneye" in deporte.player_trn_sport_name:
+                id_games_query = Teamsports.objects.get(team_sport_name = list_games[1])
+                equipos = equipos.filter(team_sport_id = id_games_query)
+                num_groups = 2
+            elif "Super Smash" in deporte.player_trn_sport_name:
+                id_games_query = Teamsports.objects.get(team_sport_name = list_games[0])
+                equipos = equipos.filter(team_sport_id = id_games_query)
+                num_groups = 8
+            elif "Mario Kart" in deporte.player_trn_sport_name:
+                id_games_query = Teamsports.objects.get(team_sport_name = list_games[2])
+                equipos = equipos.filter(team_sport_id = id_games_query)
+                num_groups = 1
+            elif "Mario Tenis" in deporte.player_trn_sport_name:
+                id_games_query = Teamsports.objects.get(team_sport_name = list_games[3])
+                equipos = equipos.filter(team_sport_id = id_games_query)
+                num_groups = 1
+            elif "Mario Party" in deporte.player_trn_sport_name:
+                id_games_query = Teamsports.objects.get(team_sport_name = list_games[4])
+                equipos = equipos.filter(team_sport_id = id_games_query)
+                num_groups = 1
+            elif "Pokemon Stadium" in deporte.player_trn_sport_name:
+                id_games_query = Teamsports.objects.get(team_sport_name = list_games[5])
+                equipos = equipos.filter(team_sport_id = id_games_query)
                 num_groups = 1
             else:
-                equipos = equipos.filter(ol_player_name__contains = '_MN')
-                num_groups = 1
+                if deporte.player_trn_sport_name not in ['Munecos - Futbol', 'Munecos - Baloncesto', 'Munecos - Hockey en Piso']:
+                    countries = Playercountry.objects.all()
+                    selected_players = []
+                    temp_equipos = None
+                    for c in countries:
+                        temp_equipos = equipos.filter(ol_country = c.ol_country_id, team_sport = id_munecos)
+                        player_list = []
+                        for e in temp_equipos:
+                            if not '_MN' in e.ol_player_name:
+                                player_list.append(e.ol_player_name)
+                        rand = random.randint(0, len(player_list))
+                        if rand == len(player_list):
+                            rand -= 1
+                        selected_players.append(player_list[rand])
+                    equipos = equipos.filter(ol_player_name__in = selected_players)
+                    num_groups = 1
+                else:
+                    equipos = equipos.filter(ol_player_name__contains = '_MN')
+                    num_groups = 1
 
-        for eq in equipos:
-            rank = eq.ol_player_value
-            teams.append(eq.ol_player_name)
-            rank_tuple = (eq.ol_player_name, rank)
-            ranks.append(rank_tuple)
-            
+            for eq in equipos:
+                rank = eq.ol_player_value
+                teams.append(eq.ol_player_name)
+                rank_tuple = (eq.ol_player_name, rank)
+                ranks.append(rank_tuple)
+                
 
-        full_trn = full_tournament.FullTournament(teams, deporte.player_trn_sport_name, ranks, deporte.player_trn_sport_name, num_groups, match_class, valor_año, hay_guardado)
-        file_name = f"simulacion_{deporte.player_trn_sport_name}_{valor_año}.xlsx"
+            full_trn = full_tournament.FullTournament(teams, deporte.player_trn_sport_name, ranks, deporte.player_trn_sport_name, num_groups, match_class, str(ly), hay_guardado)
+            file_name = f"simulacion_{deporte.player_trn_sport_name}_{ly}.xlsx"
 
-    elif match_class == 6:
-        tipo_liga = ''      
-        deporte = Teamsports.objects.get(team_sport_name = request.GET.get('deporte'))
-        if deporte.team_sport_name == 'Basketball Masculino':
-            equipos = Mlclubs.objects.filter(ml_club_type = 'NBA')
-            tipo_liga = 'NBA'
+        elif match_class == 6:
+            tipo_liga = ''      
+            deporte = Teamsports.objects.get(team_sport_name = request.GET.get('deporte'))
+            if deporte.team_sport_name == 'Basketball Masculino':
+                equipos = Mlclubs.objects.filter(ml_club_type = 'NBA')
+                tipo_liga = 'NBA'
+            else:
+                equipos = Mlclubs.objects.filter(ml_club_type = 'MLB')
+                tipo_liga = 'MLB'
+
+            num_groups = 8
+
+            for eq in equipos:
+                rank = random.randint(1,3)
+                teams.append(eq.ml_club_name)
+                rank_tuple = (eq.ml_club_name, rank)
+                ranks.append(rank_tuple)
+                
+            full_trn = full_tournament.FullTournament(teams, deporte.team_sport_name, ranks, deporte.team_sport_name, num_groups, match_class, str(ly), hay_guardado)
+            file_name = f"simulacion_{tipo_liga}_{ly}.xlsx"
+
+
         else:
-            equipos = Mlclubs.objects.filter(ml_club_type = 'MLB')
-            tipo_liga = 'MLB'
+            equipos = Nationalteams.objects.all()
+            deporte = Teamsports.objects.get(team_sport_name = request.GET.get('deporte'))
+            file_name = f"simulacion_{deporte.team_sport_name}_{ly}.xlsx"
+            for eq in equipos:
+                rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = deporte.team_sport_id)
+                teams.append(eq.team_name)
+                rank_tuple = (eq.team_name, rank.team_rank)
+                ranks.append(rank_tuple)
 
-        num_groups = 8
-
-        for eq in equipos:
-            rank = random.randint(1,3)
-            teams.append(eq.ml_club_name)
-            rank_tuple = (eq.ml_club_name, rank)
-            ranks.append(rank_tuple)
-            
-        full_trn = full_tournament.FullTournament(teams, deporte.team_sport_name, ranks, deporte.team_sport_name, num_groups, match_class, valor_año, hay_guardado)
-        file_name = f"simulacion_{tipo_liga}_{valor_año}.xlsx"
-
-
-    else:
-        equipos = Nationalteams.objects.all()
-        deporte = Teamsports.objects.get(team_sport_name = request.GET.get('deporte'))
-        file_name = f"simulacion_{deporte.team_sport_name}_{valor_año}.xlsx"
-        for eq in equipos:
-            rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = deporte.team_sport_id)
-            teams.append(eq.team_name)
-            rank_tuple = (eq.team_name, rank.team_rank)
-            ranks.append(rank_tuple)
-
-    # Carpeta del año dentro de MEDIA
-    folder_path = os.path.join(settings.MEDIA_ROOT, str(valor_año))
-    # Crear la carpeta si no existe
-    os.makedirs(folder_path, exist_ok=True)
-    full_trn.simulate_tournament()
-    
+        # Carpeta del año dentro de MEDIA
+        folder_path = os.path.join(settings.MEDIA_ROOT, str(ly))
+        # Crear la carpeta si no existe
+        os.makedirs(folder_path, exist_ok=True)
+        full_trn.simulate_tournament()
+        
 
 
-    # Ruta completa del archivo
-    file_path = os.path.join(folder_path, file_name)
+        # Ruta completa del archivo
+        file_path = os.path.join(folder_path, file_name)
 
-    # Guardar el Excel
-    full_trn.generate_tournament_excel(file_path)
+        # Guardar el Excel
+        full_trn.generate_tournament_excel(file_path)
 
-    # URL de descarga
-    download_url = f"{settings.MEDIA_URL}{valor_año}/{file_name}"
+        # URL de descarga
+        download_url = f"{settings.MEDIA_URL}{ly}/{file_name}"
 
     return render(request, "general/generate_download_excel.html", {
-        "download_url": download_url
+        "lista_años": lista_años
     })
 
 def pagina_simulacion_completa_clubes(request, match_class):
@@ -915,273 +925,275 @@ def pagina_simulacion_completa_clubes(request, match_class):
                   {'equipos': page_teams, 'agrupaciones': page_groups, 'deportes': page_sports, 'clase': match_class, 'years': years})
 
 def generar_simulacion_completa_clubes(request, match_class):
-    ranks = []
-    teams = []
-    teams_by_lg = []
+
     full_trn = None
     valor_año = request.GET.get('valoryear')
+    valor_año_final = request.GET.get('valoryear_end')
+    lista_años = list(range(int(valor_año),int(valor_año_final)+4,4))
     hay_guardado = request.GET.get('registrarres')
     file_name = ''
-    download_links = []
+    for ly in lista_años:
+        ranks = []
+        teams = []
+        teams_by_lg = []
+        download_links = []
+        Clubmatchesregister.objects.filter(match_year = str(ly)).delete()
+        equipos = Clubs.objects.all()
+        ligas = Clubleague.objects.all()
+        deporte = Teamsports.objects.get(team_sport_name = 'Futbol Masculino')
+        continentes = Teamregion.objects.all()
+        lista_continentes = [cont.team_region_name for cont in continentes]
 
+        for eq in equipos:
+            rank = eq.club_value
+            teams.append(eq.club_name)
+            rank_tuple = (eq.club_name, rank)
+            ranks.append(rank_tuple)
+        
+        for lg in ligas:
+            temp_team_list = []
+            lg_country = Nationalteams.objects.get(team_id = lg.club_country.team_id)
+            lg_region = Teamregion.objects.get(team_region_id = lg.team_region_id)
+            lg_teams = Clubs.objects.filter(club_league = lg)
+            for eq in lg_teams:
+                temp_team_list.append(eq.club_name)
+            new_tuple = (temp_team_list, lg_country.team_name, lg.club_league_name, lg.club_division,
+                        lg.club_first_qual, lg.club_second_qual, lg.club_third_qual, lg.clas_direct, lg_region.team_region_name)  
+            print(new_tuple[1], new_tuple[2])
+            teams_by_lg.append(new_tuple)
+        
+        from collections import defaultdict
 
-    Clubmatchesregister.objects.filter(match_year = str(valor_año)).delete()
-    equipos = Clubs.objects.all()
-    ligas = Clubleague.objects.all()
-    deporte = Teamsports.objects.get(team_sport_name = 'Futbol Masculino')
-    continentes = Teamregion.objects.all()
-    lista_continentes = [cont.team_region_name for cont in continentes]
+        agrupado = defaultdict(list)
 
-    for eq in equipos:
-        rank = eq.club_value
-        teams.append(eq.club_name)
-        rank_tuple = (eq.club_name, rank)
-        ranks.append(rank_tuple)
-    
-    for lg in ligas:
-        temp_team_list = []
-        lg_country = Nationalteams.objects.get(team_id = lg.club_country.team_id)
-        lg_region = Teamregion.objects.get(team_region_id = lg.team_region_id)
-        lg_teams = Clubs.objects.filter(club_league = lg)
-        for eq in lg_teams:
-            temp_team_list.append(eq.club_name)
-        new_tuple = (temp_team_list, lg_country.team_name, lg.club_league_name, lg.club_division,
-                      lg.club_first_qual, lg.club_second_qual, lg.club_third_qual, lg.clas_direct, lg_region.team_region_name)  
-        print(new_tuple[1], new_tuple[2])
-        teams_by_lg.append(new_tuple)
-    
-    from collections import defaultdict
+        for t in teams_by_lg:
+            agrupado[t[1]].append(t)
 
-    agrupado = defaultdict(list)
-
-    for t in teams_by_lg:
-        agrupado[t[1]].append(t)
-
-    resultado = dict(agrupado)
-    total_results = []
-    archivos = []
-    rutas = []
-    
-    for pais,tuplas in resultado.items():
-        print(pais)    
-        for tp in tuplas:
-            qualifier_list = [tp[4], tp[5], tp[6]]  
-            if tp[1] == 'Inglaterra':
-                print('Este es Inglaterra')
-            has_promotion = False
-            promotions = 0
-            if len(tuplas) >= 2:
-                has_promotion = True
-                promotions = 2
-            else:
+        resultado = dict(agrupado)
+        total_results = []
+        archivos = []
+        rutas = []
+        
+        for pais,tuplas in resultado.items():
+            print(pais)    
+            for tp in tuplas:
+                qualifier_list = [tp[4], tp[5], tp[6]]  
+                if tp[1] == 'Inglaterra':
+                    print('Este es Inglaterra')
                 has_promotion = False
                 promotions = 0
-            season = club_league_season.ClubLeagueSeason(tp, tp[1], has_promotion, valor_año, promotions, qualifier_list, tp[8], hay_guardado, ranks)
-            season.simulate_league()
-            file_name = f"simulacion_liga_{tp[2]}_{valor_año}.xlsx"
-            archivos.append(file_name)       
-            file_path = os.path.join(settings.MEDIA_ROOT, file_name)
-            rutas.append(file_path)
-                    # Crear carpeta media si no existe
-            os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
-            season.generate_tournament_excel(file_path)
-            if tp[3] == '1D': 
-                results = season.get_full_results()
-                total_results.append(results)
+                if len(tuplas) >= 2:
+                    has_promotion = True
+                    promotions = 2
+                else:
+                    has_promotion = False
+                    promotions = 0
+                season = club_league_season.ClubLeagueSeason(tp, tp[1], has_promotion, str(ly), promotions, qualifier_list, tp[8], hay_guardado, ranks)
+                season.simulate_league()
+                file_name = f"simulacion_liga_{tp[2]}_{ly}.xlsx"
+                archivos.append(file_name)       
+                file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+                rutas.append(file_path)
+                        # Crear carpeta media si no existe
+                os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+                season.generate_tournament_excel(file_path)
+                if tp[3] == '1D': 
+                    results = season.get_full_results()
+                    total_results.append(results)
 
-    exito = True
-    try:
-        with pd.ExcelWriter("media/"+valor_año+"/fase_ligas_"+valor_año+".xlsx") as writer:
+        exito = True
+        try:
+            with pd.ExcelWriter("media/"+str(ly)+"/fase_ligas_"+str(ly)+".xlsx") as writer:
+                for f in rutas:
+                    hojas = pd.read_excel(f, sheet_name=None)
+                    f = os.path.basename(f)
+                    f = f.replace("simulacion_liga_", "").replace(".xlsx","")       
+                    for nombre_hoja, df in hojas.items():
+                        nombre_final = limpiar_nombre(f"{f}_{nombre_hoja}")[:31]
+                        df.to_excel(writer, sheet_name=nombre_final[:31], index=False)
+        except Exception as e:
+            exito = False
+            print("Error:", e)
+
+        if exito:
             for f in rutas:
-                hojas = pd.read_excel(f, sheet_name=None)
-                f = os.path.basename(f)
-                f = f.replace("simulacion_liga_", "").replace(".xlsx","")       
-                for nombre_hoja, df in hojas.items():
-                    nombre_final = limpiar_nombre(f"{f}_{nombre_hoja}")[:31]
-                    df.to_excel(writer, sheet_name=nombre_final[:31], index=False)
-    except Exception as e:
-        exito = False
-        print("Error:", e)
+                os.remove(f)
 
-    if exito:
-        for f in rutas:
-            os.remove(f)
+        # Carpeta del año dentro de MEDIA
+        folder_path = os.path.join(settings.MEDIA_ROOT, str(ly))
 
-    # Carpeta del año dentro de MEDIA
-    folder_path = os.path.join(settings.MEDIA_ROOT, str(valor_año))
+        # Crear la carpeta si no existe
+        os.makedirs(folder_path, exist_ok=True)
 
-    # Crear la carpeta si no existe
-    os.makedirs(folder_path, exist_ok=True)
+        # Ruta completa del archivo
+        file_path = os.path.join(folder_path, file_name)
 
-    # Ruta completa del archivo
-    file_path = os.path.join(folder_path, file_name)
+        # URL de descarga
+        file_name_lg = "fase_ligas_"+str(ly)+".xlsx"
+        download_url = f"{settings.MEDIA_URL}{ly}/{file_name_lg}"
+        download_links.append(download_url)   
+        # inicializar 6 listas por continente
+        agrupado = {
+            c: [[] for _ in range(6)]
+            for c in lista_continentes
+        }
 
-    # URL de descarga
-    file_name_lg = "fase_ligas_"+valor_año+".xlsx"
-    download_url = f"{settings.MEDIA_URL}{valor_año}/{file_name_lg}"
-    download_links.append(download_url)   
-    # inicializar 6 listas por continente
-    agrupado = {
-        c: [[] for _ in range(6)]
-        for c in lista_continentes
-    }
+        for t in total_results:
+            continente = t[1]
 
-    for t in total_results:
-        continente = t[1]
+            if continente in agrupado:
+                for i, bloque in enumerate(t[0]):   # i = posición (0 a 5)
+                    for sub in bloque:
+                        agrupado[continente][i].extend(sub)
 
-        if continente in agrupado:
-            for i, bloque in enumerate(t[0]):   # i = posición (0 a 5)
-                for sub in bloque:
-                    agrupado[continente][i].extend(sub)
-
-    ultimos = {
-    continente: listas[-3:]
-    for continente, listas in agrupado.items()
-    }
-
-    temp_qual_list = []
-    for cont, lists in ultimos.items():
-        for el in range(len(lists)):
-            if len(lists[el]) > 0:
-                groups = league_group.Group('Grupo Liga ', lists[el], True, 'Futbol Masculino', 
-                                    match_class, ranks)
-                groups.generate_calendar()
-                groups.simulate_league()
-                if cont == 'Europa':
-                    if el == 0:
-                        temp_qual_list.append(groups.get_qualified_teams(6))
-                    else:
-                        temp_qual_list.append(groups.get_qualified_teams(8))
-                elif cont == 'America':
-                    if el == 0:
-                        temp_qual_list.append(groups.get_qualified_teams(2))
-                    else:
-                        temp_qual_list.append(groups.get_qualified_teams(2)) 
-                table = groups.get_league_table()
-                matches = groups.get_league_matches()
-    
-
-    print('Clasificados: ', temp_qual_list)
-    print("")
-
-    for cont, lists in agrupado.items():
-        for el in range(len(lists)):
-            if cont == 'America':
-                if el == 0:
-                    lists[el].extend(temp_qual_list[0])
-                elif el == 1:
-                    lists[el].extend(temp_qual_list[1])
-                else:
-                    pass
-            elif cont == 'Europa':
-                if el == 0:
-                    lists[el].extend(temp_qual_list[2])
-                elif el == 1:
-                    lists[el].extend(temp_qual_list[3])
-                elif el == 2:
-                    lists[el].extend(temp_qual_list[4])
-                else:
-                    pass
-
-        
-    for k, l in agrupado.items():
-        print(k, l)
-        for i in l:
-            print(len(i))      
-
-    equipos_copas = {
-        continente: listas[:3]
+        ultimos = {
+        continente: listas[-3:]
         for continente, listas in agrupado.items()
-    }
+        }
 
-    sublista_nombres = ['UEFA Champions League', 'UEFA Europa League', 'UEFA Conference League', 'Copa Libertadores', 'Copa Sudamericana',
-                        'AFC Champions League Elite','AFC Champions League Two', 'AFC Challenge League', 'CAF Champions League', 'CAF Conference League']
-    nombre_liga = ""
-    num_grupos = 0
-    world_qualified_total = []
-    for cont, listas in equipos_copas.items():
-        for el in range(len(listas)):
-            if len(listas[el])> 0:
-                if cont == 'Europa':
-                    num_grupos = 1
+        temp_qual_list = []
+        for cont, lists in ultimos.items():
+            for el in range(len(lists)):
+                if len(lists[el]) > 0:
+                    groups = league_group.Group('Grupo Liga ', lists[el], True, 'Futbol Masculino', 
+                                        match_class, ranks)
+                    groups.generate_calendar()
+                    groups.simulate_league()
+                    if cont == 'Europa':
+                        if el == 0:
+                            temp_qual_list.append(groups.get_qualified_teams(6))
+                        else:
+                            temp_qual_list.append(groups.get_qualified_teams(8))
+                    elif cont == 'America':
+                        if el == 0:
+                            temp_qual_list.append(groups.get_qualified_teams(2))
+                        else:
+                            temp_qual_list.append(groups.get_qualified_teams(2)) 
+                    table = groups.get_league_table()
+                    matches = groups.get_league_matches()
+        
+
+        print('Clasificados: ', temp_qual_list)
+        print("")
+
+        for cont, lists in agrupado.items():
+            for el in range(len(lists)):
+                if cont == 'America':
                     if el == 0:
-                        nombre_liga = sublista_nombres[0]
+                        lists[el].extend(temp_qual_list[0])
                     elif el == 1:
-                        nombre_liga = sublista_nombres[1]
+                        lists[el].extend(temp_qual_list[1])
+                    else:
+                        pass
+                elif cont == 'Europa':
+                    if el == 0:
+                        lists[el].extend(temp_qual_list[2])
+                    elif el == 1:
+                        lists[el].extend(temp_qual_list[3])
                     elif el == 2:
-                        nombre_liga = sublista_nombres[2]
-                elif cont == 'America':
-                    num_grupos = 8
-                    if el == 0:
-                        nombre_liga = sublista_nombres[3]
-                    elif el == 1:
-                        nombre_liga = sublista_nombres[4]
-                elif cont == 'Asia/Oceania':
-                    if el == 0:
+                        lists[el].extend(temp_qual_list[4])
+                    else:
+                        pass
+
+            
+        for k, l in agrupado.items():
+            print(k, l)
+            for i in l:
+                print(len(i))      
+
+        equipos_copas = {
+            continente: listas[:3]
+            for continente, listas in agrupado.items()
+        }
+
+        sublista_nombres = ['UEFA Champions League', 'UEFA Europa League', 'UEFA Conference League', 'Copa Libertadores', 'Copa Sudamericana',
+                            'AFC Champions League Elite','AFC Champions League Two', 'AFC Challenge League', 'CAF Champions League', 'CAF Conference League']
+        nombre_liga = ""
+        num_grupos = 0
+        world_qualified_total = []
+        for cont, listas in equipos_copas.items():
+            for el in range(len(listas)):
+                if len(listas[el])> 0:
+                    if cont == 'Europa':
+                        num_grupos = 1
+                        if el == 0:
+                            nombre_liga = sublista_nombres[0]
+                        elif el == 1:
+                            nombre_liga = sublista_nombres[1]
+                        elif el == 2:
+                            nombre_liga = sublista_nombres[2]
+                    elif cont == 'America':
                         num_grupos = 8
-                        nombre_liga = sublista_nombres[5]
-                    elif el == 1:
+                        if el == 0:
+                            nombre_liga = sublista_nombres[3]
+                        elif el == 1:
+                            nombre_liga = sublista_nombres[4]
+                    elif cont == 'Asia/Oceania':
+                        if el == 0:
+                            num_grupos = 8
+                            nombre_liga = sublista_nombres[5]
+                        elif el == 1:
+                            num_grupos = 8
+                            nombre_liga = sublista_nombres[6]
+                        elif el == 2:
+                            num_grupos = 4
+                            nombre_liga = sublista_nombres[7]
+                    elif cont == 'Africa':
                         num_grupos = 8
-                        nombre_liga = sublista_nombres[6]
-                    elif el == 2:
-                        num_grupos = 4
-                        nombre_liga = sublista_nombres[7]
-                elif cont == 'Africa':
-                    num_grupos = 8
-                    if el == 0:
-                        nombre_liga = sublista_nombres[8]
-                    elif el == 1:
-                        nombre_liga = sublista_nombres[9]
+                        if el == 0:
+                            nombre_liga = sublista_nombres[8]
+                        elif el == 1:
+                            nombre_liga = sublista_nombres[9]
 
-                full_trn = full_tournament_clubs.FullTournamentClubs(listas[el], nombre_liga, ranks, 'Futbol Masculino', num_grupos, match_class, valor_año, hay_guardado)
-                full_trn.simulate_tournament()
-                world_qualified_total.extend(full_trn.get_world_qualified())
-                file_name = f"simulacion_{nombre_liga}_{valor_año}.xlsx"       
-                # Carpeta del año dentro de MEDIA
-                folder_path = os.path.join(settings.MEDIA_ROOT, str(valor_año))
+                    full_trn = full_tournament_clubs.FullTournamentClubs(listas[el], nombre_liga, ranks, 'Futbol Masculino', num_grupos, match_class, str(ly), hay_guardado)
+                    full_trn.simulate_tournament()
+                    world_qualified_total.extend(full_trn.get_world_qualified())
+                    file_name = f"simulacion_{nombre_liga}_{ly}.xlsx"       
+                    # Carpeta del año dentro de MEDIA
+                    folder_path = os.path.join(settings.MEDIA_ROOT, str(ly))
 
-                # Crear la carpeta si no existe
-                os.makedirs(folder_path, exist_ok=True)
+                    # Crear la carpeta si no existe
+                    os.makedirs(folder_path, exist_ok=True)
 
-                # Ruta completa del archivo
-                file_path = os.path.join(folder_path, file_name)
+                    # Ruta completa del archivo
+                    file_path = os.path.join(folder_path, file_name)
 
-                # Guardar el Excel
-                full_trn.generate_tournament_excel(file_path)
+                    # Guardar el Excel
+                    full_trn.generate_tournament_excel(file_path)
 
-                # URL de descarga
-                download_url = f"{settings.MEDIA_URL}{valor_año}/{file_name}"
-                download_links.append(download_url)
-                full_trn.generate_tournament_excel(file_path)  
+                    # URL de descarga
+                    download_url = f"{settings.MEDIA_URL}{ly}/{file_name}"
+                    download_links.append(download_url)
+                    full_trn.generate_tournament_excel(file_path)  
 
-            else:
-                pass
-    world_qualified_total = list(itertools.chain.from_iterable(world_qualified_total))
-    print('Clasificados mundial de clubes')
-    print(world_qualified_total)
-    full_trn = full_tournament_clubs.FullTournamentClubs(world_qualified_total, 'Mundial de Clubes', ranks, 'Futbol Masculino', 8, match_class, valor_año, hay_guardado)
-    full_trn.simulate_tournament()
-    file_name = f"simulacion_Mundial de Clubes_{valor_año}.xlsx"       
-    # Carpeta del año dentro de MEDIA
-    folder_path = os.path.join(settings.MEDIA_ROOT, str(valor_año))
+                else:
+                    pass
+        world_qualified_total = list(itertools.chain.from_iterable(world_qualified_total))
+        print('Clasificados mundial de clubes')
+        print(world_qualified_total)
+        full_trn = full_tournament_clubs.FullTournamentClubs(world_qualified_total, 'Mundial de Clubes', ranks, 'Futbol Masculino', 8, match_class, str(ly), hay_guardado)
+        full_trn.simulate_tournament()
+        file_name = f"simulacion_Mundial de Clubes_{ly}.xlsx"       
+        # Carpeta del año dentro de MEDIA
+        folder_path = os.path.join(settings.MEDIA_ROOT, str(ly))
 
-    # Crear la carpeta si no existe
-    os.makedirs(folder_path, exist_ok=True)
+        # Crear la carpeta si no existe
+        os.makedirs(folder_path, exist_ok=True)
 
-    # Ruta completa del archivo
-    file_path = os.path.join(folder_path, file_name)
+        # Ruta completa del archivo
+        file_path = os.path.join(folder_path, file_name)
 
-    # Guardar el Excel
-    full_trn.generate_tournament_excel(file_path)
+        # Guardar el Excel
+        full_trn.generate_tournament_excel(file_path)
 
-    # URL de descarga
-    download_url = f"{settings.MEDIA_URL}{valor_año}/{file_name}"
-    download_links.append(download_url)
+        # URL de descarga
+        download_url = f"{settings.MEDIA_URL}{ly}/{file_name}"
+        download_links.append(download_url)
 
-    download_links = [s.replace("/media/","") for s in download_links]
+        download_links = [s.replace("/media/","") for s in download_links]
 
     return render(request, "general/generate_download_excel_clubs.html", {
-        "download_links": download_links
+        "lista_años" : lista_años
     })
     
 def limpiar_nombre(nombre):
@@ -1979,6 +1991,8 @@ def generar_simulacion_completa_olimpica(request, match_class):
     full_trn = None
     categoria = request.GET.get('categoria')
     valor_año = request.GET.get('valoryear')
+    valor_año_final = request.GET.get('valoryear_end')
+    lista_años = list(range(int(valor_año),int(valor_año_final)+4,4))
     hay_guardado = request.GET.get('registrarres')
     file_name = ''
 
@@ -1986,99 +2000,105 @@ def generar_simulacion_completa_olimpica(request, match_class):
     teams = []
     groups = []
     simulation_pairs = []
-
-    if match_class == 1:
-        if str(categoria) == 'jo_verano':
-            sport = Teamsports.objects.filter(team_sport_id__gte = 1, team_sport_id__lt = 21)
-            print(sport)
-        elif str(categoria) == 'jo_invierno':
-            sp_first = Teamsports.objects.filter(team_sport_id__gte = 61, team_sport_id__lt = 69)
-            sp_second = Teamsports.objects.filter(team_sport_id__gte = 72, team_sport_id__lt = 75)
-            sport = sp_first.union(sp_second)
-        pass
-    elif match_class in [2,4]:
-        sport = Teamsports.objects.filter(team_sport_name = str(categoria))
-        pass
-
-    for sp in sport:
-        ranks = []
-        disc = Sportsrecords.objects.filter(team_sport = sp)
-        if sp.team_sport_name == 'Gimnasia Artistica' or sp.team_sport_name == 'Gimnasia Ritmica':
-            disc_list = []
-            for d in disc:
-                if 'Concurso' in d.sp_record_name:
-                    disc_list.append(d)
-        
-        if sp.team_sport_name == 'Halterofilia':
-            disc_list = []
-            for d in disc:
-                if 'completo' in d.sp_record_name:
-                    disc_list.append(d)
-        else:
-            disc_list = [d for d in disc]
-
-        if match_class == 1 or match_class == 5:
-            equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
-            for eq in equipos:
-                rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = sp.team_sport_id)
-                teams.append(eq.team_name)
-                rank_tuple = (eq.team_name, rank.team_rank)
-                ranks.append(rank_tuple)
-
+    for ly in lista_años:
+        if match_class == 1:
+            if str(categoria) == 'jo_verano':
+                sport = Teamsports.objects.filter(team_sport_id__gte = 1, team_sport_id__lt = 21)
+                print(sport)
+            elif str(categoria) == 'jo_invierno':
+                sp_first = Teamsports.objects.filter(team_sport_id__gte = 61, team_sport_id__lt = 69)
+                sp_second = Teamsports.objects.filter(team_sport_id__gte = 72, team_sport_id__lt = 75)
+                sport = sp_first.union(sp_second)
+            pass
         elif match_class in [2,4]:
-            if sp.team_sport_name == 'Tokyo':
-                equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
-            elif sp.team_sport_name != 'Goldeneye':
-                equipos = Olympicplayers.objects.filter(~Q(ol_player_name__contains='/'),~Q(ol_player_name__contains='_MN'), team_sport_id = sp.team_sport_id)
+            sport = Teamsports.objects.filter(team_sport_name = str(categoria))
+            pass
+
+        for sp in sport:
+            ranks = []
+            disc = Sportsrecords.objects.filter(team_sport = sp)
+            if sp.team_sport_name == 'Gimnasia Artistica' or sp.team_sport_name == 'Gimnasia Ritmica':
+                disc_list = []
+                for d in disc:
+                    if 'Concurso' in d.sp_record_name:
+                        disc_list.append(d)
+
+            if sp.team_sport_name == 'Halterofilia':
+                disc_list = []
+                for d in disc:
+                    if 'completo' in d.sp_record_name:
+                        disc_list.append(d)
+            
+            if sp.team_sport_name in ['Super Smash','Goldeneye','Mario Kart','Pokemon Stadium','Munecos']:
+                disc_list = []
+                for d in disc:
+                    if d.sp_record_name.find(sp.team_sport_name) == -1:
+                        disc_list.append(d)
             else:
-                equipos = Olympicplayers.objects.filter(ol_player_name__contains='_GE')
+                disc_list = [d for d in disc]
 
-            for eq in equipos:
-                rank = random.randint(1,7)
-                if sp.team_sport_name != 'Tokyo':
-                    teams.append(eq.ol_player_name)
-                    rank_tuple = (eq.ol_player_name, rank)
-                    ranks.append(rank_tuple)
-                else:
+            if match_class == 1 or match_class == 5:
+                equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
+                for eq in equipos:
+                    rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = sp.team_sport_id)
                     teams.append(eq.team_name)
-                    rank_tuple = (eq.team_name, rank)
+                    rank_tuple = (eq.team_name, rank.team_rank)
                     ranks.append(rank_tuple)
+
+            elif match_class in [2,4]:
+                if sp.team_sport_name == 'Tokyo':
+                    equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
+                elif sp.team_sport_name != 'Goldeneye':
+                    equipos = Olympicplayers.objects.filter(~Q(ol_player_name__contains='/'),~Q(ol_player_name__contains='_MN'), team_sport_id = sp.team_sport_id)
+                else:
+                    equipos = Olympicplayers.objects.filter(ol_player_name__contains='_GE')
+
+                for eq in equipos:
+                    rank = random.randint(1,7)
+                    if sp.team_sport_name != 'Tokyo':
+                        teams.append(eq.ol_player_name)
+                        rank_tuple = (eq.ol_player_name, rank)
+                        ranks.append(rank_tuple)
+                    else:
+                        teams.append(eq.team_name)
+                        rank_tuple = (eq.team_name, rank)
+                        ranks.append(rank_tuple)
+            else:
+                equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
+                for eq in equipos:
+                    rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = sp.team_sport_id)
+                    teams.append(eq.team_name)
+                    rank_tuple = (eq.team_name, rank.team_rank)
+                    ranks.append(rank_tuple)
+        
+            simulation_pairs.append([sp, disc_list, ranks])
+        
+        print(simulation_pairs)
+        full_trn = full_tournament_olympic.FullTournament(simulation_pairs, str(categoria), 1, match_class, str(ly), hay_guardado)
+        full_trn.simulate_tournament()
+        if categoria == 'jo_verano':
+            file_name = 'simulacion_Juegos_Olimpicos_Verano_'+str(ly)+'.xlsx'
+        elif categoria == 'jo_invierno':
+            file_name = 'simulacion_Juegos_Olimpicos_Invierno_'+str(ly)+'.xlsx'
         else:
-            equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
-            for eq in equipos:
-                rank = Teamranks.objects.get(team_id = eq.team_id, team_sport_id = sp.team_sport_id)
-                teams.append(eq.team_name)
-                rank_tuple = (eq.team_name, rank.team_rank)
-                ranks.append(rank_tuple)
-    
-        simulation_pairs.append([sp, disc_list, ranks])
-    
-    print(simulation_pairs)
-    full_trn = full_tournament_olympic.FullTournament(simulation_pairs, str(categoria), 1, match_class, valor_año, hay_guardado)
-    full_trn.simulate_tournament()
-    if categoria == 'jo_verano':
-        file_name = 'simulacion_Juegos_Olimpicos_Verano_'+str(valor_año)+'.xlsx'
-    elif categoria == 'jo_invierno':
-        file_name = 'simulacion_Juegos_Olimpicos_Invierno_'+str(valor_año)+'.xlsx'
-    else:
-        file_name = 'simulacion_'+str(categoria)+'_'+str(valor_año)+'.xlsx'
-    # Carpeta del año dentro de MEDIA
-    folder_path = os.path.join(settings.MEDIA_ROOT, str(valor_año))
+            file_name = 'simulacion_'+str(categoria)+'_'+str(ly)+'.xlsx'
+        # Carpeta del año dentro de MEDIA
+        folder_path = os.path.join(settings.MEDIA_ROOT, str(ly))
 
-    # Crear la carpeta si no existe
-    os.makedirs(folder_path, exist_ok=True)
+        # Crear la carpeta si no existe
+        os.makedirs(folder_path, exist_ok=True)
 
-    # Ruta completa del archivo
-    file_path = os.path.join(folder_path, file_name)
+        # Ruta completa del archivo
+        file_path = os.path.join(folder_path, file_name)
 
-    # Guardar el Excel
-    full_trn.generate_tournament_excel(file_path)
+        # Guardar el Excel
+        full_trn.generate_tournament_excel(file_path)
 
-    # URL de descarga
-    download_url = f"{settings.MEDIA_URL}{valor_año}/{file_name}"
+        # URL de descarga
+        download_url = f"{settings.MEDIA_URL}{ly}/{file_name}"
 
     return render(request, "general/generate_download_excel.html", {
-        "download_url": download_url
+        "lista_años": lista_años
     })
 
 

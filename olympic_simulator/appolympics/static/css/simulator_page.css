@@ -1,8 +1,8 @@
       /* Shameimaru Sans */
         @font-face {
             font-family: 'Shameimaru Sans';
-            src: url('/fonts/ShameimaruSansAlternatives.ttf') format('truetype'),
-                 url('/fonts/ShameimaruSans.ttf') format('truetype');
+            src: url('../fonts/ShameimaruSansAlternatives.ttf') format('truetype'),
+                 url('../fonts/ShameimaruSans.ttf') format('truetype');
         }
 
         :root {

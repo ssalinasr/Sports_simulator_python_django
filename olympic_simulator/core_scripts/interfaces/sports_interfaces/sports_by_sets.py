@@ -46,7 +46,6 @@ class SetsSport(SportsInterface):
                 if self.sport_name in ['Volleyball','Voley Playa','Badminton']:
                     if sets_1 == 2 and sets_2 == 2:
                         results = self.do_tiebreaker(sets_1, sets_2, rank1, rank2, marker_1, marker_2, self.probs)
-                        print(results)
                         sets_1 = results[0]
                         sets_2 = results[1]
                         marker_1 = results[2]

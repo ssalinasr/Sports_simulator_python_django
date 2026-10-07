@@ -9,7 +9,7 @@ from .views import pagina_registro_por_club, consultar_por_pais, consultar_por_j
 from .views import pagina_records, consultar_records, consultar_medallas_jugador, consultar_medallas_pais, consultar_medallas_pais_mayor, pagina_registro_por_torneo_olimpico, consultar_por_torneo_olimpico
 from .views import pagina_rankings, consultar_rankings, pagina_importar, importar_resultados, pagina_registro_por_torneo_olimpico_importado, consultar_por_torneo_olimpico_importado
 from .views import importar_campeones, pagina_importar_campeones, pagina_liga_diamante, importar_liga_diamante
-from .views import exportar_word, pagina_exportar_word, pagina_participantes_diamante, consultar_participantes_diamante
+from .views import exportar_word, pagina_exportar_word, pagina_participantes_diamante, consultar_participantes_diamante, cargar_años
 
 urlpatterns = [
     path('', pagina_principal , name='pagina_principal'),
@@ -33,6 +33,7 @@ urlpatterns = [
     path('functions/simulated_olympic/simulate_sport/<int:match_class>/', generar_simulacion, name='generar_simulacion'),
     #URLS Simulación Completa#
     path('functions/full_simulation/<int:match_class>/', pagina_simulacion_completa, name='pagina_simulacion_completa'),
+    path('functions/full_simulation/load_years/', cargar_años , name='cargar_años'),
     path('functions/full_simulation_olympic/<int:match_class>/', pagina_simulacion_completa_olimpica, name='pagina_simulacion_completa_olimpica'),
     path('functions/full_simulation_clubs/<int:match_class>/', pagina_simulacion_completa_clubes, name='pagina_simulacion_completa_clubes'),
     path('functions/full_simulation/simulate_tournament/<int:match_class>/', generar_simulacion_completa, name='generar_simulacion_completa'),

@@ -1595,6 +1595,8 @@ class SimulatedSports():
                 results = (r[0] ,r[1] ,olympic_sim.select_type_game(r[1], 1, 0))
                 self.table_results.append(results)
 
+        print(self.deporte.sp_record_name)
+        print(self.table_results)
 
         if float(self.deporte.sp_record_best) < float(self.deporte.sp_record_last):
             if 'Madison' in self.deporte.sp_record_name:

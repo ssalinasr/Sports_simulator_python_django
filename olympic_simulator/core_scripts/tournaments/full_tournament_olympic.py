@@ -103,7 +103,6 @@ class FullTournament():
                 for dep in sp[1]:
                     sim_sport = simulated_sports.SimulatedSports(sp[0],dep,[],sp[2], self.match_class)
                     sim_sport.simulate_olympic_sport()
-                    #print('Este es el deporte ', dep.sp_record_name)
                     table_res = sim_sport.get_table_results()
                     new_table = defaultdict(lambda: {
                         "ranking": 0,

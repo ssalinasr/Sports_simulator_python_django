@@ -1,0 +1,102 @@
+INFO:waitress:Serving on http://0.0.0.0:8000
+Internal Server Error: /functions/full_simulation/simulate_tournament/1/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 223, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 725, in save_results
+    replaced_text = title[1].replace(self.year, '').replace(self.sport,'').replace('Final ','').rstrip()
+TypeError: replace() argument 1 must be str, not int
+ERROR:django.request:Internal Server Error: /functions/full_simulation/simulate_tournament/1/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 223, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 725, in save_results
+    replaced_text = title[1].replace(self.year, '').replace(self.sport,'').replace('Final ','').rstrip()
+TypeError: replace() argument 1 must be str, not int
+INFO:waitress:Serving on http://0.0.0.0:8000
+INFO:waitress:Serving on http://0.0.0.0:8000
+Internal Server Error: /functions/full_simulation/simulate_tournament/1/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 79, in simulate_tournament
+    group.simulate_league()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\leagues\league_group.py", line 142, in simulate_league
+    results = sport_object.simulate_match(tools.get_team_rank_by_list(local, self.ranks), tools.get_team_rank_by_list(away, self.ranks))
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\interfaces\sports_interfaces\sports_by_sets.py", line 49, in simulate_match
+    print(results)
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2b24' in position 9: character maps to <undefined>
+ERROR:django.request:Internal Server Error: /functions/full_simulation/simulate_tournament/1/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 79, in simulate_tournament
+    group.simulate_league()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\leagues\league_group.py", line 142, in simulate_league
+    results = sport_object.simulate_match(tools.get_team_rank_by_list(local, self.ranks), tools.get_team_rank_by_list(away, self.ranks))
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\interfaces\sports_interfaces\sports_by_sets.py", line 49, in simulate_match
+    print(results)
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2b24' in position 9: character maps to <undefined>
+Internal Server Error: /functions/full_simulation/simulate_tournament/1/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 79, in simulate_tournament
+    group.simulate_league()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\leagues\league_group.py", line 142, in simulate_league
+    results = sport_object.simulate_match(tools.get_team_rank_by_list(local, self.ranks), tools.get_team_rank_by_list(away, self.ranks))
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\interfaces\sports_interfaces\sports_by_sets.py", line 49, in simulate_match
+    print(results)
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2b24' in position 9: character maps to <undefined>
+ERROR:django.request:Internal Server Error: /functions/full_simulation/simulate_tournament/1/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 79, in simulate_tournament
+    group.simulate_league()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\leagues\league_group.py", line 142, in simulate_league
+    results = sport_object.simulate_match(tools.get_team_rank_by_list(local, self.ranks), tools.get_team_rank_by_list(away, self.ranks))
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\interfaces\sports_interfaces\sports_by_sets.py", line 49, in simulate_match
+    print(results)
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2b24' in position 9: character maps to <undefined>
+INFO:waitress:Serving on http://0.0.0.0:8000

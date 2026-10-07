@@ -48,13 +48,27 @@
                             </select>
                         </div>
 
-                        <div class="col-md-6 col-12">
-                            <label class="score-label mb-2">Prueba</label>
-                            <select class="form-select esports-select" id="tournamentYear" name="valoryear">
+
+                        <!-- Selector Año -->
+                        <div class="col-md-3 col-12">
+                            <label class="score-label">Año Inicio</label>
+                            <select class="form-select esports-select" name="valoryear" id="tournamentYear"
+                                class="form-select hud-select"
+                                hx-get="{% url 'cargar_años' %}"
+                                hx-target="#tournamentYearEnd"
+                                hx-trigger="change">
                                 <option selected>Seleccionar año</option>
                                 {% for year in años %}
                                 <option value="{{ year }}">{{ year }}</option>
                                 {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Selector Año -->
+                        <div class="col-md-3 col-12">
+                            <label class="score-label">Año Fin</label>
+                            <select class="form-select esports-select" name="valoryear_end" id="tournamentYearEnd">
+
                             </select>
                         </div>
                     </div>
@@ -64,8 +78,8 @@
                         <div class="col-md-12 col-12 mb-3 mb-md-0 text-center text-md-start">
                             <button class="esports-btn" hx-get="{% url 'generar_simulacion_completa_olimpica' clase %}"
                                 hx-target="#resultsSimulation"
-                                hx-include="#categoriasSelect, #tournamentYear, #selectSave"
-                                hx-disabled-elt="this, #categoriasSelect, #tournamentYear, #selectSave"
+                                hx-include="#categoriasSelect, #tournamentYear, #tournamentYearEnd, #selectSave"
+                                hx-disabled-elt="this, #categoriasSelect, #tournamentYear, #tournamentYearEnd, #selectSave"
                                 >
                                 <i class="bi bi-play-fill"></i>
                                 Simular

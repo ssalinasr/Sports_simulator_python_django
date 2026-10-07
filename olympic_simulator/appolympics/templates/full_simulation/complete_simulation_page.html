@@ -52,13 +52,25 @@
                         </div>
 
                         <!-- Selector Año -->
-                        <div class="col-md-6">
-                            <label class="score-label">Año</label>
-                            <select class="form-select esports-select" name="valoryear" id="tournamentYear">
+                        <div class="col-md-3">
+                            <label class="score-label">Año Inicio</label>
+                            <select class="form-select esports-select" name="valoryear" id="tournamentYear"
+                                class="form-select hud-select"
+                                hx-get="{% url 'cargar_años' %}"
+                                hx-target="#tournamentYearEnd"
+                                hx-trigger="change">
                                 <option selected>Seleccionar año</option>
                                 {% for year in years %}
                                 <option value="{{ year }}">{{ year }}</option>
                                 {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Selector Año -->
+                        <div class="col-md-3">
+                            <label class="score-label">Año Fin</label>
+                            <select class="form-select esports-select" name="valoryear_end" id="tournamentYearEnd">
+
                             </select>
                         </div>
 
@@ -67,16 +79,16 @@
                             {% if clase != 3 %}
                             <button class="esports-btn justify-content-center"
                                 hx-get="{% url 'generar_simulacion_completa' clase %}" hx-target="#resultsTournament"
-                                hx-include="#deporteSelect, #tournamentYear, #selectSave"
-                                hx-disabled-elt="this, #deporteSelect, #tournamentYear, #selectSave"
+                                hx-include="#deporteSelect, #tournamentYear, #tournamentYearEnd, #selectSave"
+                                hx-disabled-elt="this, #deporteSelect, #tournamentYear, #selectSave, #tournamentYearEnd"
                                 >>
                                 Generar competencia
                             </button>
                             {% else %}
                             <button class="esports-btn justify-content-center"
                                 hx-get="{% url 'generar_simulacion_completa_clubes' clase %}" hx-target="#resultsTournament"
-                                hx-include="#deporteSelect, #tournamentYear, #selectSave"
-                                hx-disabled-elt="this, #deporteSelect, #tournamentYear, #selectSave">>
+                                hx-include="#deporteSelect, #tournamentYear, #tournamentYearEnd, #selectSave"
+                                hx-disabled-elt="this, #deporteSelect, #tournamentYear, #selectSave, #tournamentYearEnd">>
                                 Generar competencia
                             </button>
                             {% endif %}

@@ -39,7 +39,6 @@ class TimeSport(SportsInterface):
                 goals2 += self.generate_goal(self.get_team_probability(rank2, rank1, self.probs))       
 
             if self.has_extra_time and goals1 == goals2:
-                print('Aqui hubo un empate...')
                 return self.do_tiebreaker(goals1, goals2, rank1, rank2)
             else:
                 return [goals1, goals2]

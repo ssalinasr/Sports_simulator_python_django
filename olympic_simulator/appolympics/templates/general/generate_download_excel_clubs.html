@@ -1,23 +1,18 @@
-                <div class="esports-card text-center">
+<div class="esports-card text-center">
 
-                    <div class="card-title">Estado</div>
+    <div class="card-title">Estado</div>
 
-                    <div style="padding: 2rem 0;">
-                        <h3 style="
+    <div style="padding: 2rem 0;">
+        {% for ly in lista_años %}
+        <h3 style="
                         color: var(--neon-blue);
                         text-transform: uppercase;
                         letter-spacing: 2px;
                         font-weight: 700;
                         animation: fadeUp 0.6s ease;
                     ">
-                            Generación completada
-                            {% for link in download_links %}
-                            <div>
-                            <a href="{{ link }}" download>
-                                Descargar archivo Excel: {{ link }} 
-                            </a>    
-                            </div>
-                            {% endfor %}
-                        </h3>
-                    </div>
-                </div>
+            Simulación generada para el año {{ ly }} .
+        </h3>
+        {% endfor %}
+    </div>
+</div>
