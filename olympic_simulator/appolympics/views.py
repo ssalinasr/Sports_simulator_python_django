@@ -738,9 +738,6 @@ def pagina_simulacion_completa(request, match_class):
                   {'equipos': page_teams, 'agrupaciones': page_groups, 'deportes': page_sports, 'clase': match_class, 'years': years})
 
 def generar_simulacion_completa(request, match_class):
-    ranks = []
-    teams = []
-    teams_by_cn = []
     full_trn = None
     valor_año = request.GET.get('valoryear')
     valor_año_final = request.GET.get('valoryear_end')
@@ -750,6 +747,9 @@ def generar_simulacion_completa(request, match_class):
 
 
     for ly in lista_años:
+        ranks = []
+        teams = []
+        teams_by_cn = []
         if match_class == 1:
             equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
             continentes = Teamregion.objects.all()
@@ -1996,11 +1996,11 @@ def generar_simulacion_completa_olimpica(request, match_class):
     hay_guardado = request.GET.get('registrarres')
     file_name = ''
 
-    ranks = []
-    teams = []
-    groups = []
-    simulation_pairs = []
     for ly in lista_años:
+        ranks = []
+        teams = []
+        groups = []
+        simulation_pairs = []
         if match_class == 1:
             if str(categoria) == 'jo_verano':
                 sport = Teamsports.objects.filter(team_sport_id__gte = 1, team_sport_id__lt = 21)
