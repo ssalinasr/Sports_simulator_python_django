@@ -243,3 +243,330 @@ WARNING:django.security.csrf:Forbidden (CSRF token missing.): /functions/full_si
 Forbidden (CSRF token missing.): /functions/full_simulation/2/
 WARNING:django.security.csrf:Forbidden (CSRF token missing.): /functions/full_simulation/2/
 INFO:waitress:Serving on http://0.0.0.0:8000
+Not Found: /favicon.ico
+WARNING:django.request:Not Found: /favicon.ico
+Internal Server Error: /functions/full_simulation/simulate_tournament/2/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 565, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 821, in save_results
+    player_obj = Olympicplayers.objects.get(ol_player_name = eq[0])
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\query.py", line 635, in get
+    raise self.model.DoesNotExist(
+appolympics.models.Olympicplayers.DoesNotExist: Olympicplayers matching query does not exist.
+ERROR:django.request:Internal Server Error: /functions/full_simulation/simulate_tournament/2/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 565, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 821, in save_results
+    player_obj = Olympicplayers.objects.get(ol_player_name = eq[0])
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\query.py", line 635, in get
+    raise self.model.DoesNotExist(
+appolympics.models.Olympicplayers.DoesNotExist: Olympicplayers matching query does not exist.
+Not Found: /favicon.ico
+WARNING:django.request:Not Found: /favicon.ico
+Internal Server Error: /functions/full_simulation/simulate_tournament/4/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 647, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 821, in save_results
+    player_obj = Olympicplayers.objects.get(ol_player_name = eq[0])
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\query.py", line 635, in get
+    raise self.model.DoesNotExist(
+appolympics.models.Olympicplayers.DoesNotExist: Olympicplayers matching query does not exist.
+ERROR:django.request:Internal Server Error: /functions/full_simulation/simulate_tournament/4/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 647, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 821, in save_results
+    player_obj = Olympicplayers.objects.get(ol_player_name = eq[0])
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\query.py", line 635, in get
+    raise self.model.DoesNotExist(
+appolympics.models.Olympicplayers.DoesNotExist: Olympicplayers matching query does not exist.
+Internal Server Error: /functions/full_simulation/simulate_tournament/4/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 647, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 821, in save_results
+    player_obj = Olympicplayers.objects.get(ol_player_name = eq[0])
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\query.py", line 635, in get
+    raise self.model.DoesNotExist(
+appolympics.models.Olympicplayers.DoesNotExist: Olympicplayers matching query does not exist.
+ERROR:django.request:Internal Server Error: /functions/full_simulation/simulate_tournament/4/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 647, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 821, in save_results
+    player_obj = Olympicplayers.objects.get(ol_player_name = eq[0])
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\query.py", line 635, in get
+    raise self.model.DoesNotExist(
+appolympics.models.Olympicplayers.DoesNotExist: Olympicplayers matching query does not exist.
+Internal Server Error: /functions/full_simulation/simulate_tournament/4/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 647, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 821, in save_results
+    player_obj = Olympicplayers.objects.get(ol_player_name = eq[0])
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\query.py", line 635, in get
+    raise self.model.DoesNotExist(
+appolympics.models.Olympicplayers.DoesNotExist: Olympicplayers matching query does not exist.
+ERROR:django.request:Internal Server Error: /functions/full_simulation/simulate_tournament/4/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 647, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 821, in save_results
+    player_obj = Olympicplayers.objects.get(ol_player_name = eq[0])
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\query.py", line 635, in get
+    raise self.model.DoesNotExist(
+appolympics.models.Olympicplayers.DoesNotExist: Olympicplayers matching query does not exist.
+Not Found: /favicon.ico
+WARNING:django.request:Not Found: /favicon.ico
+Not Found: /static/css/fonts/ShameimaruSansAlternatives.ttf
+WARNING:django.request:Not Found: /static/css/fonts/ShameimaruSansAlternatives.ttf
+Not Found: /static/css/fonts/ShameimaruSans.ttf
+WARNING:django.request:Not Found: /static/css/fonts/ShameimaruSans.ttf
+Not Found: /fifa/fifalive/gen4title/data/disabledregion.json
+WARNING:django.request:Not Found: /fifa/fifalive/gen4title/data/disabledregion.json
+Not Found: /fifa/fifalive/gen4title/data/disabledregion.json
+WARNING:django.request:Not Found: /fifa/fifalive/gen4title/data/disabledregion.json
+Not Found: /fifa/fifalive/gen4title/data/disabledregion.json
+WARNING:django.request:Not Found: /fifa/fifalive/gen4title/data/disabledregion.json
+Not Found: /favicon.ico
+WARNING:django.request:Not Found: /favicon.ico
+INFO:waitress:Serving on http://0.0.0.0:8000
+Not Found: /favicon.ico
+WARNING:django.request:Not Found: /favicon.ico
+Not Found: /favicon.ico
+WARNING:django.request:Not Found: /favicon.ico
+Not Found: /favicon.ico
+WARNING:django.request:Not Found: /favicon.ico
+Not Found: /favicon.ico
+WARNING:django.request:Not Found: /favicon.ico
+Internal Server Error: /functions/full_simulation/simulate_tournament/2/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 618, in simulate_tournament
+    trn_result = tournament.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\tournament_group.py", line 276, in simulate_tournament
+    w, match = self.simulate_tournament_match(teams[i], teams[i+1])
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\tournament_group.py", line 231, in simulate_tournament_match
+    results = sport_object.simulate_game(sport_object.game_type)
+UnboundLocalError: local variable 'sport_object' referenced before assignment
+ERROR:django.request:Internal Server Error: /functions/full_simulation/simulate_tournament/2/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 618, in simulate_tournament
+    trn_result = tournament.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\tournament_group.py", line 276, in simulate_tournament
+    w, match = self.simulate_tournament_match(teams[i], teams[i+1])
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\tournament_group.py", line 231, in simulate_tournament_match
+    results = sport_object.simulate_game(sport_object.game_type)
+UnboundLocalError: local variable 'sport_object' referenced before assignment
+Not Found: /favicon.ico
+WARNING:django.request:Not Found: /favicon.ico
+INFO:waitress:Serving on http://0.0.0.0:8000
+Not Found: /favicon.ico
+WARNING:django.request:Not Found: /favicon.ico
+Internal Server Error: /functions/full_simulation/simulate_tournament/1/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 223, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 732, in save_results
+    sport = Sportsrecords.objects.get(sp_record_name = name_sp)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\query.py", line 635, in get
+    raise self.model.DoesNotExist(
+appolympics.models.Sportsrecords.DoesNotExist: Sportsrecords matching query does not exist.
+ERROR:django.request:Internal Server Error: /functions/full_simulation/simulate_tournament/1/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 223, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 732, in save_results
+    sport = Sportsrecords.objects.get(sp_record_name = name_sp)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\db\models\query.py", line 635, in get
+    raise self.model.DoesNotExist(
+appolympics.models.Sportsrecords.DoesNotExist: Sportsrecords matching query does not exist.
+Not Found: /favicon.ico
+WARNING:django.request:Not Found: /favicon.ico
+Not Found: /favicon.ico
+WARNING:django.request:Not Found: /favicon.ico
+Internal Server Error: /functions/full_simulation/simulate_tournament/1/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 223, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 716, in save_results
+    print(element)
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u25ef' in position 75: character maps to <undefined>
+ERROR:django.request:Internal Server Error: /functions/full_simulation/simulate_tournament/1/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 896, in generar_simulacion_completa
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 223, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament.py", line 716, in save_results
+    print(element)
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u25ef' in position 75: character maps to <undefined>
+Internal Server Error: /functions/full_simulation/simulate_tournament_olympic/2/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 2078, in generar_simulacion_completa_olimpica
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament_olympic.py", line 132, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament_olympic.py", line 213, in save_results
+    existing_log = Playersimulationregister.objects.get(ol_player_id = team_obj.ol_player_id, ol_player_year = str(self.year), sp_record = sport.sp_record_id)
+AttributeError: 'NoneType' object has no attribute 'ol_player_id'
+ERROR:django.request:Internal Server Error: /functions/full_simulation/simulate_tournament_olympic/2/
+Traceback (most recent call last):
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\Olympics Simulator v3\virtual_env\lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\Olympics Simulator v3\olympic_simulator\appolympics\views.py", line 2078, in generar_simulacion_completa_olimpica
+    full_trn.simulate_tournament()
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament_olympic.py", line 132, in simulate_tournament
+    self.save_results()
+  File "C:\Users\Salinas\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "E:\Olympics Simulator v3\olympic_simulator\core_scripts\tournaments\full_tournament_olympic.py", line 213, in save_results
+    existing_log = Playersimulationregister.objects.get(ol_player_id = team_obj.ol_player_id, ol_player_year = str(self.year), sp_record = sport.sp_record_id)
+AttributeError: 'NoneType' object has no attribute 'ol_player_id'
+INFO:waitress:Serving on http://0.0.0.0:8000
+Not Found: /favicon.ico
+WARNING:django.request:Not Found: /favicon.ico
+Not Found: /favicon.ico
+WARNING:django.request:Not Found: /favicon.ico
+Not Found: /favicon.ico
+WARNING:django.request:Not Found: /favicon.ico

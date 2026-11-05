@@ -135,7 +135,7 @@ class FullTournament():
 
     @transaction.atomic
     def save_results(self):
-        if self.match_class in [1,5]:
+        if self.match_class in [1,5] or self.competence == 'Tokyo':
             for mt in self.save_gen_tables:
                 for eq in mt[2]:
                     team_obj = Nationalteams.objects.get(team_name = eq[0])
@@ -203,10 +203,9 @@ class FullTournament():
                 pass
             
     
-        elif self.match_class in [2,4]:
+        elif self.match_class in [2,4] and self.competence != 'Tokyo':
             for mt in self.save_gen_tables:
                 for eq in mt[2]:
-                    print(eq[0])
                     team_obj = Olympicplayers.objects.filter(ol_player_name = eq[0]).first()
                     sport = Sportsrecords.objects.get(sp_record_name = mt[0], team_sport_id = mt[1])
                     try:

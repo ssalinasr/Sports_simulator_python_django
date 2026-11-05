@@ -181,7 +181,6 @@ def pagina_competencia(request, match_class):
     for sp in sports_elements:
         sports.append(sp.sp_record_name)
 
-    print(sports_categories)
 
     return render(request, 'olympic/sports_simulation_page.html', {'categorias': sports_categories, 'deportes': sports, 'clase': match_class})
 
@@ -217,7 +216,6 @@ def cargar_equipos(request, match_class):
     else:
         page_teams = Nationalteams.objects.filter(team_region_id = agrupacion)
 
-    print(page_teams.count())
 
     return render(request, 'general/change_teams_template.html', {'equipos': page_teams, 'clase': match_class})
 
@@ -266,9 +264,6 @@ def generar_partido(request, match_class):
     sport_class = ''
     results = None
 
-    print(valor_local)
-    print(valor_visitante)
-
     if match_class == 1 or match_class == 5:
         equipo_local = Nationalteams.objects.get(team_name = valor_local)
         equipo_visitante = Nationalteams.objects.get(team_name = valor_visitante)
@@ -315,13 +310,7 @@ def generar_partido(request, match_class):
         rank_visitante = Teamranks.objects.get(team_id = equipo_visitante.team_id, team_sport_id = deporte.team_sport_id)
         rank_visitante = rank_visitante.team_rank
 
-    #print(deporte.team_sport_name)
-    print(hay_doble_ronda)
-    print(hay_tiempo_extra)
-    print(rank_local, rank_visitante)
-
     if match_class in [1,3,5,6]:
-        print('sport')
         if deporte.team_sport_name in ['Futbol Masculino', 'Futbol Femenino']:
             sport_object = sports_by_time.TimeSport(deporte.team_sport_name, 2, 45, hay_tiempo_extra, hay_doble_ronda)
             sport_class = 'tiempo'
@@ -438,27 +427,21 @@ def generar_partido(request, match_class):
         elif deporte.player_trn_sport_name in ['Jenga','Ajedrez','Domino','Parques','Horripicasa','Lucha']:
             sport_object = muns_interface.MunsInterface(deporte.player_trn_sport_name, 'Vidas Reversa', 0, 3)
 
-        print(sport_object.game_type)
         results = sport_object.simulate_game(sport_object.game_type)
-        print(results)
     
     return render(request, 'match/match_results_template.html',{'resultado': results, 'clase_deporte': sport_class})
 
 def insertar_equipo(request, match_class):
     equipo_id = request.GET.get('equipo_id')
-    print('este es el equipo_id: ' + equipo_id)
     if "equipos_actuales" not in request.session:
-        print('sesion vacia')
         request.session["equipos_actuales"] = []
     
     if equipo_id in request.session["equipos_actuales"]:
-        print('duplicado')
         return HttpResponse("")
 
     request.session["equipos_actuales"].append(equipo_id)
     request.session.modified = True
 
-    print(request.session["equipos_actuales"])
 
     if equipo_id == '':
         return HttpResponse("")
@@ -580,19 +563,10 @@ def generar_liga(request, match_class):
         reverse=True
     )
 
-    print(sorted_table)
-    print(matches)
-
-    for m in matches:
-        print(type(m), m)
-        for k in m:
-            print(k)
-
     return render(request, 'league/league_table_template.html',{'table': sorted_table, 'clase': match_class, 'matches': matches})
     
 def generar_torneo(request, match_class):
     equipos_seleccionados = request.GET.getlist("equipos")
-    print(equipos_seleccionados)
     valor_ida_vuelta = request.GET.get('idayvuelta')
     valor_tercer_lugar = request.GET.get('tercerlugar')
     ranks = []
@@ -656,7 +630,6 @@ def generar_torneo(request, match_class):
         tournament = tournament_group.Tournament('Torneo de '+ deporte.player_trn_sport_name, deporte.player_trn_sport_name, teams, ranks,
                                                   valor_ida_vuelta, valor_tercer_lugar, match_class)
     
-    print(tournament)
     trn_result = tournament.simulate_tournament()
     table = tournament.get_tournament_table()
     matches = tournament.get_tournament_matches()
@@ -664,8 +637,6 @@ def generar_torneo(request, match_class):
     table_names = []
     table_values = []
     info_trn = trn_result['bracket'].get('Third Place')
-    print(info_trn)
-    print(trn_result)
     trn_result['bracket'].pop("Third Place")
 
     for k in table.items():
@@ -682,10 +653,6 @@ def generar_torneo(request, match_class):
         ),
         reverse=True
     )
-    for m in matches:
-        print(type(m), m)
-        for k in m:
-            print(k)
 
     return render(request, 'tournament/tournament_results_template.html',{'table': sorted_table, 'clase': match_class, 'matches': matches,
                                                         "bracket": trn_result["bracket"],
@@ -766,7 +733,7 @@ def generar_simulacion_completa(request, match_class):
                         team = Nationalteams.objects.get(team_name = eq, team_region_id = cn.team_region_id)
                         temp_team_list.append(team.team_name)
                     except:
-                        print('', end='')
+                        pass
 
                 teams_by_cn.append(temp_team_list)
             full_trn = full_tournament.FullTournament(teams_by_cn, [cn.team_region_name for cn in continentes], ranks, deporte.team_sport_name, 8, match_class, str(ly), hay_guardado)
@@ -789,7 +756,7 @@ def generar_simulacion_completa(request, match_class):
                         team = Nationalteams.objects.get(team_name = eq, team_region_id = cn.team_region_id)
                         temp_team_list.append(team.team_name)
                     except:
-                        print('', end='')
+                        pass
 
                 teams_by_cn.append(temp_team_list)
 
@@ -959,7 +926,6 @@ def generar_simulacion_completa_clubes(request, match_class):
                 temp_team_list.append(eq.club_name)
             new_tuple = (temp_team_list, lg_country.team_name, lg.club_league_name, lg.club_division,
                         lg.club_first_qual, lg.club_second_qual, lg.club_third_qual, lg.clas_direct, lg_region.team_region_name)  
-            print(new_tuple[1], new_tuple[2])
             teams_by_lg.append(new_tuple)
         
         from collections import defaultdict
@@ -975,11 +941,10 @@ def generar_simulacion_completa_clubes(request, match_class):
         rutas = []
         
         for pais,tuplas in resultado.items():
-            print(pais)    
             for tp in tuplas:
                 qualifier_list = [tp[4], tp[5], tp[6]]  
                 if tp[1] == 'Inglaterra':
-                    print('Este es Inglaterra')
+                    pass
                 has_promotion = False
                 promotions = 0
                 if len(tuplas) >= 2:
@@ -1013,7 +978,6 @@ def generar_simulacion_completa_clubes(request, match_class):
                         df.to_excel(writer, sheet_name=nombre_final[:31], index=False)
         except Exception as e:
             exito = False
-            print("Error:", e)
 
         if exito:
             for f in rutas:
@@ -1071,10 +1035,6 @@ def generar_simulacion_completa_clubes(request, match_class):
                             temp_qual_list.append(groups.get_qualified_teams(2)) 
                     table = groups.get_league_table()
                     matches = groups.get_league_matches()
-        
-
-        print('Clasificados: ', temp_qual_list)
-        print("")
 
         for cont, lists in agrupado.items():
             for el in range(len(lists)):
@@ -1094,13 +1054,6 @@ def generar_simulacion_completa_clubes(request, match_class):
                         lists[el].extend(temp_qual_list[4])
                     else:
                         pass
-
-            
-        for k, l in agrupado.items():
-            print(k, l)
-            for i in l:
-                print(len(i))      
-
         equipos_copas = {
             continente: listas[:3]
             for continente, listas in agrupado.items()
@@ -1169,8 +1122,6 @@ def generar_simulacion_completa_clubes(request, match_class):
                 else:
                     pass
         world_qualified_total = list(itertools.chain.from_iterable(world_qualified_total))
-        print('Clasificados mundial de clubes')
-        print(world_qualified_total)
         full_trn = full_tournament_clubs.FullTournamentClubs(world_qualified_total, 'Mundial de Clubes', ranks, 'Futbol Masculino', 8, match_class, str(ly), hay_guardado)
         full_trn.simulate_tournament()
         file_name = f"simulacion_Mundial de Clubes_{ly}.xlsx"       
@@ -1207,7 +1158,6 @@ def generar_simulacion(request, match_class):
     sport = Teamsports.objects.get(team_sport_name = request.GET.get('categoria'))
     contest = request.GET.get('prueba')
     num_heats = 0
-    print(sport.team_sport_name, contest) 
     if match_class == 1 or match_class == 5:
         equipos = Nationalteams.objects.exclude(team_name__icontains='Fem')
         deporte = Sportsrecords.objects.get(sp_record_name = contest, team_sport_id = sport.team_sport_id)
@@ -1304,7 +1254,6 @@ def consultar_por_pais(request):
     pais = request.GET.get('pais')
     deporte = request.GET.get('deporte')
 
-    print(deporte, pais)
     sport = Teamsports.objects.get(team_sport_name = deporte)
     country = Nationalteams.objects.get(team_name = pais)
 
@@ -1370,11 +1319,6 @@ def consultar_por_pais(request):
             titulos = Teamtitleregister.objects.filter(team_id = country.team_id, team_sport_id = sport.team_sport_id)
     except Teamtitleregister.DoesNotExist:
         titulos = []
-
-    print(titulos)
-
-
-
     return render(request, 'logs/country_search_results.html', {'pais_mayor': major_country, 'continente': major_region, 
                                                                 'valores_historicos': historic_values, 'mejor_partido': mejor,
                                                                 'peor_partido': peor, 'rival_mejor': rival_mejor, 'rival_peor': rival_peor,
@@ -1385,7 +1329,6 @@ def consultar_por_jugador(request):
     deporte = request.GET.get('deporte')
     jugador = request.GET.get('jugador')
 
-    print(deporte, jugador)
 
     sport = Playertournamentsports.objects.get(player_trn_sport_name = deporte)
     player = Olympicplayers.objects.get(ol_player_name = jugador)
@@ -1410,9 +1353,6 @@ def consultar_por_jugador(request):
         titulos = Playertitleregister.objects.filter(ol_player_id = player.ol_player_id, player_trn_sport_id = sport.player_trn_sport_id)
     except Playertitleregister.DoesNotExist:
         titulos = []
-
-    print(titulos)
-
     return render(request, 'logs/player_search_results.html', {'pais_mayor': major_country, 
                                                                 'valores_historicos': historic_values,
                                                                 'titulos':titulos})
@@ -1479,11 +1419,6 @@ def consultar_por_clubes(request):
         titulos = Clubtitleregister.objects.filter(club_id = clubs.club_id)
     except Clubtitleregister.DoesNotExist:
         titulos = []
-
-    print(titulos)
-
-
-
     return render(request, 'logs/club_search_results.html', {'pais_mayor': major_country, 'liga': club_league, 'pais': country, 
                                                                 'valores_historicos': historic_values, 'mejor_partido': mejor,
                                                                 'peor_partido': peor, 'rival_mejor': rival_mejor, 'rival_peor': rival_peor,
@@ -1549,11 +1484,6 @@ def consultar_por_ml_clubes(request):
         titulos = Mlclubtitleregister.objects.filter(ml_club_id = clubs.ml_club_id)
     except Mlclubtitleregister.DoesNotExist:
         titulos = []
-
-    print(titulos)
-
-
-
     return render(request, 'logs/ml_club_search_results.html', {'pais_mayor': major_country, 'liga': club_league,
                                                                 'valores_historicos': historic_values, 'mejor_partido': mejor,
                                                                 'peor_partido': peor, 'rival_mejor': rival_mejor, 'rival_peor': rival_peor,
@@ -1563,7 +1493,6 @@ def consultar_por_pais_mayor(request):
 
     pais = request.GET.get('pais')
 
-    print(pais)
     sports = Teamsports.objects.filter(~Q(team_sport_name__icontains = 'Mario'), team_sport_class = 'T')
     sports_players = Playertournamentsports.objects.all()
 
@@ -1588,7 +1517,6 @@ def consultar_por_pais_mayor(request):
     ml_clubs = Mlclubs.objects.filter(ol_country = major_country.ol_country_id)
     id_ml_clubs = [ml_club.ml_club_id for ml_club in ml_clubs]
 
-    print(id_ml_clubs)
 
     #Victorias, derrotas y empates históricos por países
     for sport in sports:
@@ -1657,10 +1585,6 @@ def consultar_por_pais_mayor(request):
     except Teamtitleregister.DoesNotExist:
         titulos_paises = []
 
-    print(titulos_paises)
-    for p in titulos_paises:
-        print(p.country_name)
-
     #titulos por jugador
     titulos_jugadores = None
     try:
@@ -1701,7 +1625,6 @@ def consultar_por_pais_mayor(request):
 def consultar_por_torneo(request):
     deporte = request.GET.get('deporte')
     año = request.GET.get('valoryear')
-    print(deporte, año)
     tournament_data = []
     tournament_teams = []
 
@@ -1714,7 +1637,6 @@ def consultar_por_torneo(request):
             sheet_name=None
             )
             for elementos, df in hojas.items():
-                print("Hoja: ", elementos)
                 # Buscar inicio de partidos
                 fila_partidos = df[
                     df.iloc[:,0] == "Partidos"
@@ -1749,7 +1671,6 @@ def consultar_por_torneo(request):
 
                 tournament_data.append((elementos, tabla.columns.to_list(), tabla.to_dict(orient="records"), partidos.columns.to_list(), partidos.to_dict(orient="records")))
 
-            #print(tournament_data)
             tourament_info = None
             #Imagen y bracket del torneo#
             try:
@@ -1759,7 +1680,6 @@ def consultar_por_torneo(request):
                     champion = ''
                     not_champion = ''
                     element = ti.title_bracket['Final'][0]
-                    print(element)
                     if element['winner'] == element['team1']:
                         champion = element['team1']
                         not_champion = element['team2']
@@ -1776,7 +1696,6 @@ def consultar_por_torneo(request):
                         champion = ''
                         not_champion = ''
                         element = ti.title_bracket['Final'][0]
-                        print(element)
                         if element['winner'] == element['team1']:
                             champion = element['team1']
                             not_champion = element['team2']
@@ -1791,7 +1710,6 @@ def consultar_por_torneo(request):
                         champion = ''
                         not_champion = ''
                         element = ti.title_bracket['Final'][0]
-                        print(element)
                         if element['winner'] == element['team1']:
                             champion = element['team1']
                             not_champion = element['team2']
@@ -1802,14 +1720,13 @@ def consultar_por_torneo(request):
                         tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image))
 
         except FileNotFoundError as e:
-            print(e)
+            pass
     else:
         sublista_nombres = ['fase_ligas', 'UEFA Champions League', 'UEFA Europa League', 'UEFA Conference League', 'Copa Libertadores', 'Copa Sudamericana',
                 'AFC Champions League Elite','AFC Champions League Two', 'AFC Challenge League', 'CAF Champions League', 'CAF Conference League', 'Mundial de Clubes']
         lista_excel = []
         try:
             for sub in sublista_nombres:
-                print(sub)
                 hojas = None
                 if sub == 'fase_ligas':
                     hojas = pd.read_excel(
@@ -1823,7 +1740,6 @@ def consultar_por_torneo(request):
                     )
                 lista_excel.append(hojas)
                 for elementos, df in hojas.items():
-                    print("Hoja: ", elementos)
                     # Buscar inicio de partidos
                     fila_partidos = df[
                         df.iloc[:,0] == "Partidos"
@@ -1874,7 +1790,7 @@ def consultar_por_torneo(request):
                 third_place = ti.title_bracket['Third Place'][0]['winner']
                 tournament_teams.append((ti.title_label, champion, not_champion, third_place, ti.title_image))
         except FileNotFoundError as e:
-            print(e)
+            pass
 
     medallero = defaultdict(lambda: {
         "O": 0,
@@ -1883,8 +1799,6 @@ def consultar_por_torneo(request):
         "Total": 0
         }
     )
-
-    print(tournament_teams)
 
     for champions in tournament_teams:
         if deporte != 'Clubes':
@@ -1935,8 +1849,6 @@ def consultar_por_torneo(request):
     for pais, datos in medallero.items():
         datos["Total"] = datos["O"] + datos["P"] + datos["B"]
 
-    print(medallero)
-
     medallero_sorted = sorted(
         medallero.items(),
         key= lambda item:(
@@ -1960,7 +1872,6 @@ def consultar_por_torneo(request):
         )
 
     medallero_sorted.append(("TOTAL", resumen))
-    print(medallero_sorted)
     
     return render(request, 'logs/tournament_search_results.html', {'resultados_torneo': tournament_data, 'campeones_torneo': tournament_teams, 'medallero': medallero_sorted})
 
@@ -2004,7 +1915,6 @@ def generar_simulacion_completa_olimpica(request, match_class):
         if match_class == 1:
             if str(categoria) == 'jo_verano':
                 sport = Teamsports.objects.filter(team_sport_id__gte = 1, team_sport_id__lt = 21)
-                print(sport)
             elif str(categoria) == 'jo_invierno':
                 sp_first = Teamsports.objects.filter(team_sport_id__gte = 61, team_sport_id__lt = 69)
                 sp_second = Teamsports.objects.filter(team_sport_id__gte = 72, team_sport_id__lt = 75)
@@ -2073,7 +1983,6 @@ def generar_simulacion_completa_olimpica(request, match_class):
         
             simulation_pairs.append([sp, disc_list, ranks])
         
-        print(simulation_pairs)
         full_trn = full_tournament_olympic.FullTournament(simulation_pairs, str(categoria), 1, match_class, str(ly), hay_guardado)
         full_trn.simulate_tournament()
         if categoria == 'jo_verano':
@@ -2120,14 +2029,12 @@ def pagina_records(request, match_class):
     for sp in sports_elements:
         sports.append(sp.sp_record_name)
 
-    print(sports_categories)
 
     return render(request, 'logs/sports_records_page.html', {'categorias': sports_categories, 'deportes': sports, 'clase': match_class})
 
 def consultar_records(request, match_class):
     categoria = request.GET.get('categoria')
     deporte = request.GET.get('prueba')
-    print(categoria, deporte)
     flag = ''
     nacion = None
 
@@ -2149,8 +2056,6 @@ def consultar_records(request, match_class):
         
         if 'TN +' in discipline.sp_record_name or 'TG +' in discipline.sp_record_name:
             flag = 'MIN'
-
-    print(discipline.sp_record_id, discipline.sp_record_best, discipline.sp_record_last)
 
     if match_class == 1:
         if flag == 'MIN':
@@ -2174,7 +2079,7 @@ def consultar_records(request, match_class):
         try:
             nacion = resultado.team.ol_country
         except:
-            print('No hay record...')
+            pass
 
     elif match_class in [2,4]: 
         if flag == 'MIN':
@@ -2198,9 +2103,8 @@ def consultar_records(request, match_class):
         try:
             nacion = resultado.ol_player.ol_country
         except:
-            print('No hay record...')
+            pass
        
-        print(resultado)
     
     return render(request, 'logs/sports_records_results.html', {'resultado': resultado, 'deporte': sport, 'disciplina': discipline,
                                                                  'clase': match_class, 'nacion': nacion})
@@ -2484,7 +2388,6 @@ def consultar_medallas_pais_mayor(request):
 def consultar_por_torneo_olimpico(request):
     deporte = request.GET.get('deporte')
     año = request.GET.get('valoryear')
-    print(deporte, año)
     tournament_data = []
     tournament_teams = []
     tournament_disciplines = []
@@ -2561,7 +2464,6 @@ def consultar_por_torneo_olimpico(request):
             }
         )
 
-        print(tournament_teams)
 
         for sports in tournament_teams:
             for medals in sports[0]:
@@ -2575,7 +2477,6 @@ def consultar_por_torneo_olimpico(request):
                     elif medals[1] == 'B':
                         medallero[nation.ol_country_name]["B"] += 1
                 else:
-                    print(medals[0])
                     country = Olympicplayers.objects.get(ol_player_name = medals[0])
                     nation = Playercountry.objects.get(ol_country_id = country.ol_country.ol_country_id)
                     if medals[1] == 'O':
@@ -2588,7 +2489,6 @@ def consultar_por_torneo_olimpico(request):
         for pais, datos in medallero.items():
             datos["Total"] = datos["O"] + datos["P"] + datos["B"]
 
-        print(medallero)
 
         medallero_sorted = sorted(
             medallero.items(),
@@ -2613,10 +2513,9 @@ def consultar_por_torneo_olimpico(request):
             )
 
         medallero_sorted.append(("TOTAL", resumen))
-        print(medallero_sorted)
         
     except FileNotFoundError as e:
-        print(e)
+        pass
     
     return render(request, 'logs/tournament_olympic_search_results.html', {'tablas_torneo': tournament_data, 'disciplinas_torneo': tournament_disciplines, 
                                                                            'medallas_torneo': tournament_teams, 'cant_equipos': range(len(tournament_disciplines)),
@@ -2769,7 +2668,6 @@ def consultar_rankings(request):
     for s in sorted_ranking:
         s[0] = pos_counter
         pos_counter += 1
-    print(sorted_ranking)
     return render(request, 'logs/rankings_page_results.html', {'deporte': deporte, 'tabla_ranking': sorted_ranking})
 
 def pagina_importar(request):
@@ -2784,7 +2682,6 @@ def pagina_importar_campeones(request):
 def importar_campeones(request):
     deporte = request.GET.get('deporte')
     filepath = "media/resultados_"+str(deporte)+".xlsx"
-    print(deporte)
     importer = None
     try:
         sport_check = Teamsports.objects.get(team_sport_name = deporte)
@@ -2808,7 +2705,6 @@ def importar_campeones(request):
         
         for cy in champions_by_year:
                 for individual_trn in cy:
-                    print(individual_trn)
                     team_obj = Olympicplayers.objects.get(ol_player_name = individual_trn['gold'])
                     sport = Sportsrecords.objects.get(sp_record_name = individual_trn['discipline'])
                     try:
@@ -2866,14 +2762,12 @@ def importar_campeones(request):
                         )
                         title_element.save()
     else:
-        print('HERE')
         for bloque in results:
             direct_champions = importer.campeones_directos(bloque)
             champions_by_year.append(direct_champions)
 
         for cy in champions_by_year:
                 for individual_trn in cy:
-                    print(individual_trn)
                     team_obj = Nationalteams.objects.get(team_name = individual_trn['champion'])
                     sport = Teamsports.objects.get(team_sport_name = str(deporte))
                     try:
@@ -2968,7 +2862,6 @@ def importar_resultados(request):
 
 
             for r in todos_los_resultados:
-                print(r)
                 sport = Sportsrecords.objects.get(sp_record_name = r['discipline'])
                 team_obj = Olympicplayers.objects.filter(ol_player_name = r['gold']['participant']).first()
                 try:
@@ -3083,9 +2976,7 @@ def importar_resultados(request):
                         pass
             index = 1
             for r in todos_los_resultados:
-                print(r['discipline'])
                 if r['discipline'] != 'Osu! Total Score':
-                    print('Index: ' + str(index))
                     sport = Sportsrecords.objects.get(sp_record_name = 'Osu! Song '+str(index))
                 else: 
                     sport = Sportsrecords.objects.get(sp_record_name = r['discipline'])
@@ -3196,7 +3087,6 @@ def importar_resultados(request):
 
 
         for r in todos_los_resultados:
-            print(r)
             sport = Sportsrecords.objects.get(sp_record_name = r['discipline'])
             team_obj = Nationalteams.objects.filter(team_name = r['gold']['participant']).first()
             try:
@@ -3275,8 +3165,6 @@ def consultar_por_torneo_olimpico_importado(request):
     results = Playersimulationregister.objects.filter(sp_record_id__in = tournament_ids, ol_player_year=str(valor_anio)).order_by('sp_record_id')
     if deporte in ['Naruto','Pro Cycling Manager']:
         results = Playermedalregister.objects.filter(sp_record_id__in = tournament_ids, medal_year=str(valor_anio)).order_by('sp_record_id')
-    print(results)
-
     for d in disciplines:
         tournament_disc = []
         if d.sport_sort == 'D':
@@ -3294,7 +3182,6 @@ def consultar_por_torneo_olimpico_importado(request):
             key=lambda x: x[1],
             reverse= rule
         )
-        print(tournament_disc)
         tournament_data.append((tournament_disc, d.sp_record_name))
 
     
@@ -3344,8 +3231,6 @@ def consultar_por_torneo_olimpico_importado(request):
         )
 
     medallero_sorted.append(("TOTAL", resumen))
-    print(medallero_sorted)
-
         
     return render(request, 'logs/tournament_olympic_imported_search_results.html', {'tablas_torneo': tournament_data, 'disciplinas_torneo': tournament_disciplines, 
                                                                            'cant_equipos': range(len(tournament_disciplines)),
@@ -3367,7 +3252,6 @@ def consultar_participantes_diamante(request):
     sport = Sportsrecords.objects.get(sp_record_name = deporte)
     mayor_año = int(year)+(4*16)
     max_year = str(mayor_año)
-    print(sport.sp_record_id, sport.sp_record_name)
 
     participantes_diamante = Teammedalregister.objects.filter(sp_record_id = sport.sp_record_id, medal_label = 'O', medal_year__gte = str(year), medal_year__lt = str(max_year)).distinct('team__team_name')
     flag = 1
@@ -3405,13 +3289,9 @@ def importar_liga_diamante(request):
 
     sport_flag = 'T' #T:Torneo, L:Liga
     player_flag = 'P' #P:Paises, J:Jugadores, C:CLubes, M:NBA/MLB
-
-    print(champions_by_year)
-
-    
+ 
     for cy in champions_by_year:
             for individual_trn in cy:
-                print(individual_trn)
                 try:
                     team_obj = Nationalteams.objects.get(team_name = individual_trn['champion'])
                     player_flag = 'P'
@@ -3558,7 +3438,6 @@ def pagina_exportar_word(request):
 @transaction.atomic
 def exportar_word(request):
     year = request.GET.get('valoryear')
-    print(year)
     all_tournaments = Teamsports.objects.all().order_by('team_sport_id')
     all_sports_records = Sportsrecords.objects.all().order_by('team_sport_id')
 
@@ -3646,7 +3525,6 @@ def exportar_word(request):
         sports_dict[sd]["tablas_resultados"] = final_table
             
     for sd, itm in sports_dict.items():
-        print(sd)
         medallero = defaultdict(lambda: {
             "O": 0,
             "P": 0,
@@ -3667,7 +3545,6 @@ def exportar_word(request):
                         medallero[nation.ol_country_name]["B"] += 1
                 except Playercountry.DoesNotExist:
                     pass
-                    #print('Sin resultados para esta disciplina...')
 
         
         for pais, datos in medallero.items():
@@ -3697,7 +3574,6 @@ def exportar_word(request):
             )
 
         medallero_sorted.append(("TOTAL", resumen))
-        #print(medallero_sorted)
         sports_dict[sd]["medallero_deporte"] = dict(medallero_sorted)
 
         medallero_general = defaultdict(lambda: {
@@ -3739,8 +3615,6 @@ def exportar_word(request):
             reverse=True
         )
 
-    print(medallero_general_sorted)
-
     resumen = {
             "O": sum(datos["O"] for datos in medallero_general.values()),
             "P": sum(datos["P"] for datos in medallero_general.values()),
@@ -3754,8 +3628,6 @@ def exportar_word(request):
         )
 
     medallero_general_sorted.append(("TOTAL", resumen))
-
-    print(medallero_general_sorted)
 
     exports_dir = Path(settings.MEDIA_ROOT) / "exports"
     exports_dir.mkdir(parents=True, exist_ok=True)

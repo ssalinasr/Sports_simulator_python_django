@@ -187,7 +187,7 @@ class Tournament():
             elif self.sport_name == 'Goldeneye - Teams':
                 sport_object = goldeneye_interface.GoldeneyeInterface(self.sport_name,'Vidas', 0, 15)
                 sport_class = 'sets'
-            elif self.sport_name == 'MK-Battles':
+            elif 'Mario Kart' in self.sport_name:
                 sport_object = mariokart_interface.MarioKartInterface(self.sport_name,'Vidas Reversa', 0, 3)
                 sport_class = 'sets'
             elif self.sport_name == 'Super Smash - Time':
